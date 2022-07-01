@@ -10,7 +10,7 @@ class CrossEntropyLoss2d(_WeightedLoss):
     Standard pytorch weighted nn.CrossEntropyLoss
     """
 
-    def __init__(self, weight=None, ignore_label=0, reduction='mean'):
+    def __init__(self, weight=None, ignore_label=255, reduction='mean'):
         super(CrossEntropyLoss2d, self).__init__()
 
         self.nll_loss = nn.CrossEntropyLoss(weight, ignore_index=ignore_label, reduction=reduction)

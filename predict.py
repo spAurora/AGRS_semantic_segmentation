@@ -189,10 +189,10 @@ if __name__ == '__main__':
 
     predictImgPath = r'D:\AGRS\results_why\test_GIDTest'
     numclass = 6
-    model = DinkNet101
+    model = DinkNet34
 
-    solver = TTAFrame(net = model(num_classes=numclass), name='dlink101w')  # 根据批次识别类 
-    solver.load(r'D:\AGRS/weights/DinkNet101-GIDTest.th')
+    solver = TTAFrame(net = model(num_classes=numclass), name='dlink34')  # 根据批次识别类 
+    solver.load(r'D:\AGRS/weights/DinkNet34-GIDTest.th')
     target = r'D:\AGRS\results_why\predict_result_GIDTest'  #w 输出文件位置
     if not os.path.exists(target):
         os.mkdir(target)

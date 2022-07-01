@@ -19,19 +19,13 @@ SHAPE = (256,256) #数据维度
 
 trainListRoot = r'E:\GID_test\2-trainlist\trainlist_0701_small.txt' #训练样本列表
 save_model_path = r'D:\AGRS\weights' #训练模型保存路径
-save_model_name = 'DinkNet101-GIDTest.th' #训练模型保存名     
-model = DinkNet101 #选择的训练模型
+save_model_name = 'DinkNet34-GIDTest.th' #训练模型保存名     
+model = DinkNet34 #选择的训练模型
 loss = CrossEntropyLoss2d #损失函数
 numclass = 6 #样本类别
 batchsize = 8 #计算批次大小
 init_lr = 1e-4 #初始学习率
 total_epoch = 300 #训练次数
-
-solver = MyFrame(net=model(num_classes=numclass), loss=loss, lr=init_lr) #网络，损失函数，以及学习率
-save_model_full_path = save_model_path + '/' + save_model_name
-if os.path.exists(save_model_full_path):
-    solver.load(save_model_full_path)
-    print('继续训练')
 
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') #日志文件
 
@@ -48,6 +42,19 @@ print('data mean:', data_dict['mean'])
 print('data std: ', data_dict['std'])
 print('label weight: ', data_dict['classWeights']) 
 
+weight = torch.from_numpy(data_dict['classWeights']).cuda()
+weight[0] = 0.3
+weight[1] = 1.0
+weight[2] = 1.0
+weight[5] = 5
+print(weight)
+loss = loss(weight=weight) #loss实例化
+
+solver = MyFrame(net=model(num_classes=numclass), loss=loss, lr=init_lr) #网络，损失函数，以及学习率
+save_model_full_path = save_model_path + '/' + save_model_name
+if os.path.exists(save_model_full_path):
+    solver.load(save_model_full_path)
+    print('继续训练')
 
 dataset = DataLoader(root = trainListRoot, normalized_Label=False) #读取训练集
 
@@ -61,19 +68,20 @@ no_optim = 0
 tic = time()
 
 for epoch in tqdm(range(1, total_epoch + 1)):
+    
     data_loader_iter = iter(data_loader) #迭代器
     train_epoch_loss = 0
     for img, mask in tqdm(data_loader_iter):
         solver.set_input(img, mask)
         train_loss = solver.optimize() #优化器
         train_epoch_loss += train_loss
-        
     train_epoch_loss /= len(data_loader_iter)
 
     print('********')
     print('epoch:',epoch,'    time:',int(time()-tic))
     print('train_loss:',train_epoch_loss)
     print('SHAPE:',SHAPE)
+    print(solver.optimizer.state_dict()['param_groups'][0]['lr'])
     
     if train_epoch_loss >= train_epoch_best_loss:#保留最好的loss
         no_optim += 1
@@ -85,7 +93,7 @@ for epoch in tqdm(range(1, total_epoch + 1)):
         print(mylog, 'early stop at %d epoch' % epoch)
         print('early stop at %d epoch' % epoch)
         break
-    if no_optim > 5:
+    if no_optim > 0:
         if solver.old_lr < 5e-7:
             break
         solver.load(save_model_full_path)

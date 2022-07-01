@@ -16,7 +16,7 @@ class MyFrame():
         self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
         self.optimizer = torch.optim.Adam(params=self.net.parameters(), lr=lr)#优化器
 
-        self.loss = loss()
+        self.loss = loss
         self.old_lr = lr
         if evalmode:
             for i in self.net.modules():
