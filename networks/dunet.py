@@ -33,7 +33,7 @@ class Dblock(nn.Module):
         return out
     
 class Dunet(nn.Module):
-    def __init__(self):
+    def __init__(self, num_classes = 3):
         super(Dunet, self).__init__()
         
         vgg13 = models.vgg13(pretrained=False)
@@ -56,7 +56,7 @@ class Dunet(nn.Module):
         self.trans1 = self.upsample(128, 64)
         
         self.conv_last = nn.Sequential(
-            nn.Conv2d(64, 1, 3, 1, 1),
+            nn.Conv2d(64, num_classes, 3, 1, 1),
             nn.Sigmoid()
         )
         

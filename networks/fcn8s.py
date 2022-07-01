@@ -5,7 +5,7 @@ import torch
 
 
 class FCN8S(nn.Module):
-    def __init__(self):
+    def __init__(self, num_classes = 3):
         super().__init__()
 
         mode_vgg19 = vgg19(pretrained=True).cuda()
@@ -21,7 +21,7 @@ class FCN8S(nn.Module):
         self.bn4 =nn.BatchNorm2d(64)  # 归一化，网络结构稳
         self.deconv5= nn.ConvTranspose2d(64,32,3,2,1,1,1)  # 256
         self.bn5 =nn.BatchNorm2d(32)  # 归一化，网络结构稳定
-        self.classifier = nn.Conv2d(32,1,1)
+        self.classifier = nn.Conv2d(32,num_classes,1)
         self.layer = {
             '4' :'maxpool_1' ,'9' :'maxpool_2' ,'18' :'maxpool_3',
             '27' :'maxpool_4' ,'36' :'maxpool_5'

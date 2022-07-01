@@ -17,6 +17,7 @@ from PIL import Image
 import cv2
 import fnmatch
 from PIL import Image
+from data import DataTrainInform
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
@@ -28,19 +29,35 @@ forest = [0, 255, 255]
 meadow = [255, 255, 0]
 water = [0, 0, 255]
 COLOR_DICT = np.array([background, built_up, farmland, forest, meadow, water]) 
+
+farmland = [255, 255, 255]
+non_farmland = [0, 0, 0]
+COLOR_DICT = np.array([non_farmland, farmland])
+
 one_size = 256
 
 
 # 在下文改了一下归一化！predict_x 与训练时一致 改了一下可以选择每个预测切片的大小
 class TTAFrame():
-    def __init__(self, net, name='d34'):
+    def __init__(self, net,data_dict, name='d34'):
         self.net = net.cuda()
         self.name = name
+        self.img_mean = data_dict['mean']
+        self.std = data_dict['std']
+
+
         self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
 
     def predict_x(self, img):
         self.net.eval()
-        img = img / 255.0 * 3.2 - 1.6
+
+        img[:,:,0] -= self.img_mean[0]
+        img[:,:,1] -= self.img_mean[1]
+        img[:,:,2] -= self.img_mean[2]
+        img = img / self.std
+
+        img = np.expand_dims(img, 0)
+        img = img.transpose(0, 3, 1, 2)
         img = V(torch.Tensor(img).cuda())
         maska = self.net.forward(img).squeeze().cpu().data.numpy()  # .squeeze(1)
 
@@ -52,6 +69,7 @@ class TTAFrame():
 class P():
     def __init__(self, number):
         self.number = number
+
 
     def stretch(self, img):  # %2線性拉伸
         n = img.shape[2]
@@ -101,8 +119,7 @@ class P():
         for i in tqdm(range(0, x.shape[0] - target_size, space)):
             for j in range(0, x.shape[1] - target_size, space):
                 img_one = x[i:i + target_size, j:j + target_size, :]
-                img_one = np.expand_dims(img_one, 0)
-                pre_one = predict(img_one.transpose(0, 3, 1, 2))
+                pre_one = predict(img_one)
                 pre_one = pre_one.transpose(1,2,0)
                 weight = weights[i:i + target_size, j:j + target_size]
                 pre_current = pad_y[i:i + target_size, j:j + target_size]
@@ -113,8 +130,6 @@ class P():
         col_begin = x.shape[1] - target_size
         for i in tqdm(range(0, x.shape[0] - target_size, target_size)):
             img_one = x[i:i + target_size, col_begin:x.shape[1], :]
-            img_one = np.expand_dims(img_one, 0)
-            img_one = img_one.transpose(0, 3, 1, 2)
             pre_one = predict(img_one)
             pre_one = pre_one.transpose(1, 2, 0)
             weight = weights[i:i + target_size, col_begin:x.shape[1]]
@@ -127,8 +142,6 @@ class P():
         row_begin = x.shape[0] - target_size
         for i in tqdm(range(0, x.shape[1] - target_size, target_size)):
             img_one = x[row_begin:x.shape[0], i:i + target_size, :]
-            img_one = np.expand_dims(img_one, 0)
-            img_one = img_one.transpose(0, 3, 1, 2)
             pre_one = predict(img_one)
             pre_one = pre_one.transpose(1, 2, 0)
             weight = weights[row_begin:x.shape[0], i:i + target_size]
@@ -139,8 +152,6 @@ class P():
         
         # 处理右下角数据
         img_one = x[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1], :]
-        img_one = np.expand_dims(img_one, 0)
-        img_one = img_one.transpose(0, 3, 1, 2)
         pre_one = predict(img_one)
         pre_one = pre_one.transpose(1, 2, 0)
         weight = weights[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1]]
@@ -169,7 +180,7 @@ class P():
                 self.CreatTf(one_path.replace('jpg','TIF'), y_ori, outpath, type=0)
             else:
                 save_file = os.path.join(outpath,'/', n[:-4] + '_init' + '.png')
-                skimage.io.imsave(save_file, y_probs)
+                skimage.io.imsave(save_file, y_ori)
                 os.startfile(outpath)
 
 
@@ -187,26 +198,30 @@ class P():
 if __name__ == '__main__':
 
 
-    predictImgPath = r'D:\AGRS\results_why\test_GIDTest'
-    numclass = 6
+    predictImgPath = r'D:\AGRS\results_why\test_image'
+    trainListRoot = r'E:\FarmLandDataset\2-trainlist\trainlist_0701_small.txt'
+    numclass = 2
     model = DinkNet34
 
-    solver = TTAFrame(net = model(num_classes=numclass), name='dlink34')  # 根据批次识别类 
-    solver.load(r'D:\AGRS/weights/DinkNet34-GIDTest.th')
-    target = r'D:\AGRS\results_why\predict_result_GIDTest'  #w 输出文件位置
+    dataCollect = DataTrainInform(classes_num=numclass, trainlistPath=trainListRoot) #计算数据集信息
+    data_dict = dataCollect.collectDataAndSave()
+
+    solver = TTAFrame(net = model(num_classes=numclass), name='dlink34', data_dict=data_dict)  # 根据批次识别类 
+    solver.load(r'D:\AGRS/weights/DinkNet34-FarmLandTest.th')
+    target = r'D:\AGRS\results_why\predict_result_farmlandTest'  #w 输出文件位置
     if not os.path.exists(target):
         os.mkdir(target)
 
-    listpic = fnmatch.filter(os.listdir(predictImgPath), '*.tif')
+    listpic = fnmatch.filter(os.listdir(predictImgPath), '*.jpg')
     for i in range(len(listpic)):
         listpic[i] = os.path.join(predictImgPath + '/' + listpic[i])
     
     print(listpic)
 
     listmask = ['dataset/53.png', ]
-    
-    a = P(numclass)
-    a.main_p(listpic, listmask, target, solver, rate = 0.5, loss_cal = 0, changes = False, totif = True, class_num = numclass) #w rate是二值化的比例
+
+    a = P(number = numclass)
+    a.main_p(listpic, listmask, target, solver, rate = 0.5, loss_cal = 0, changes = False, totif = False, class_num = numclass) #w rate是二值化的比例
 
 
 

@@ -1,6 +1,7 @@
 """
 
 """
+from cv2 import mean
 import torch
 import torch.utils.data as data
 from torch.autograd import Variable as V
@@ -12,10 +13,11 @@ import numpy as np
 import os
 
 class DataLoader(data.Dataset):
-    def __init__(self, root='', normalized_Label = False):
+    def __init__(self,data_dict, root='', normalized_Label = False):
         self.root = root
         self.normalized_Label = normalized_Label
-
+        self.img_mean = data_dict['mean']
+        self.std = data_dict['std']
         self.filelist = self.root
 
         with open(self.filelist, 'r') as f:
@@ -35,7 +37,12 @@ class DataLoader(data.Dataset):
 
         label = np.expand_dims(label, axis=2) #标签增加一个维度 (H W C)
 
-        img = img.transpose(2,0,1)/255.0 * 3.2 - 1.6 #影像归一化
+        img[:,:,0] -= self.img_mean[0]
+        img[:,:,1] -= self.img_mean[1]
+        img[:,:,2] -= self.img_mean[2]
+        img = img / self.std
+
+        img = img.transpose(2,0,1)
         if (self.normalized_Label == True): #标签根据需要做归一化
             label = label.transpose(2,0,1)/255.0
         else:
@@ -77,7 +84,7 @@ class DataTrainInform:
         for i in range(self.classes):
             self.classWeights[i] = 1 / (np.log(self.normVal + normHist[i]))
 
-    def readWholeTrainSet(self, trainlistPath='', train_flag=True):
+    def readWholeTrainSet(self, trainlistPath, train_flag=True):
         """to read the whole train set of current dataset.
         Args:
         fileName: train set file that stores the image locations
