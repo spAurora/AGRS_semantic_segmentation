@@ -36,33 +36,13 @@ class TTAFrame():
     def __init__(self, net, name='d34'):
         self.net = net.cuda()
         self.name = name
-        if not name == 'resnet101':
-            self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
-
-
-    def preimg_res101(self, img, guiyi=0, up=0):
-        width = img.shape[1]
-        if up == 1:
-            img = cv2.resize(img, dsize=(1024, 1024), interpolation=cv2.INTER_LINEAR)
-        img = np.transpose(img, (2, 0, 1))  # (H x W x C) to (C x H x W)
-        if guiyi==1:
-            img = img/255*3.2-1.6
-        img = np.expand_dims(img, axis=0)
-        img = V(torch.Tensor(img).cuda())
-        return img, width
-
+        self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
 
     def predict_x(self, img):
         self.net.eval()
-        if self.name == 'resnet101_w':
-            img,width = self.preimg_res101(img,guiyi=0,up=0)
-            outs = self.net(img,(width, width))
-            maska = outs[-1].squeeze().detach().cpu().numpy()
-        else:
-            img = img / 255.0 * 3.2 - 1.6
-            img = V(torch.Tensor(img).cuda())
-            maska = self.net.forward(img).squeeze().cpu().data.numpy()  # .squeeze(1)
-            #print('maksa: ', np.count_nonzero(maska > 0.5), np.count_nonzero(maska < 0.5))
+        img = img / 255.0 * 3.2 - 1.6
+        img = V(torch.Tensor(img).cuda())
+        maska = self.net.forward(img).squeeze().cpu().data.numpy()  # .squeeze(1)
 
         return maska
 
@@ -107,62 +87,6 @@ class P():
         dst_ds.SetProjection(projinfo)  # 坐标
         dst_ds.GetRasterBand(1).WriteArray(data)
         dst_ds.FlushCache()
-
-
-    def make_prediction_img_res(self, x, target_size, overlap, predict):
-        weights = np.zeros((x.shape[0], x.shape[1]), dtype=np.float32)
-        space = int(target_size * overlap)
-        pad_y = np.zeros(
-            (x.shape[0], x.shape[1]),
-            dtype=np.float32)
-
-        for i in tqdm(range(0, x.shape[0] - target_size, space)):
-            for j in range(0, x.shape[1] - target_size, space):
-                img_one = x[i:i + target_size, j:j + target_size, :]
-                pre_one = predict(img_one)
-                weight = weights[i:i + target_size, j:j + target_size]
-                pre_current = pad_y[i:i + target_size, j:j + target_size]
-                result = (weight * pre_current + pre_one) * (1 / (weight + 1))
-                pad_y[i:i + target_size, j:j + target_size] = result
-                weights[i:i + target_size, j:j + target_size] += 1
-        print('main part finished!')
-        col_begin = x.shape[1] - target_size
-        for i in tqdm(range(0, x.shape[0] - target_size, target_size)):
-            img_one = x[i:i + target_size, col_begin:x.shape[1], :]
-            pre_one = predict(img_one)
-            weight = weights[i:i + target_size, col_begin:x.shape[1]]
-            pre_current = pad_y[i:i + target_size, col_begin:x.shape[1]]
-            result = (weight * pre_current + pre_one) * (1 / (weight + 1))
-            pad_y[i:i + target_size, col_begin:x.shape[1]] = result
-            weights[i:i + target_size, col_begin:x.shape[1]] += 1
-        print('right edge finished!')
-
-        # 处理下方边缘数据
-        row_begin = x.shape[0] - target_size
-        for i in tqdm(range(0, x.shape[1] - target_size, target_size)):
-            img_one = x[row_begin:x.shape[0], i:i + target_size, :]
-            pre_one = predict(img_one)
-            weight = weights[row_begin:x.shape[0], i:i + target_size]
-            pre_current = pad_y[row_begin:x.shape[0], i:i + target_size]
-            result = (weight * pre_current + pre_one) * (1 / (weight + 1))
-            pad_y[row_begin:x.shape[0], i:i + target_size] = result
-            weights[row_begin:x.shape[0], i:i + target_size] += 1
-        print('down edge finished!')
-
-        # 处理右下角数据
-        img_one = x[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1], :]
-        pre_one = predict(img_one)
-        row = x.shape[0] - (x.shape[0] // target_size) * target_size
-        col = x.shape[1] - (x.shape[1] // target_size) * target_size
-        weight = weights[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1]]
-        pre_current = pad_y[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1]]
-        result = (weight * pre_current + pre_one) * (1 / (weight + 1))
-        pad_y[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1]] = result
-        weights[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1]] += 1
-        print('whole image finished!')
-
-        return pad_y
-
     
     def make_prediction_wHy(self, x, target_size, overlap, predict, class_num):
         weights = np.zeros((x.shape[0], x.shape[1], class_num), dtype=np.float32)
@@ -228,21 +152,6 @@ class P():
         return pad_y
 
 
-    def loss_cal(self, dir_mask, y_probs):
-        mask_img = np.array(Image.open(dir_mask), dtype=np.float32)
-        mask_img[mask_img < 100] = 0.0
-        mask_img[mask_img > 100] = 1.0
-        plus = mask_img + y_probs
-        minus = mask_img - y_probs
-        TP = plus[plus == 2.0].size
-        TN = plus[plus == 0.0].size
-        FP = minus[minus == -1.0].size
-        FN = minus[minus == 1.0].size
-        precision = TP / (TP + FP)
-        recall = TP / (TP + FN)
-        accuracy = (TP + TN) / (TP + FP + TN + FN)
-        return (precision, recall, accuracy)
-
     def main_p(self, allpath, maskpath, outpath, fun, rate=0.5, loss_cal=0, changes=False, totif=False, class_num=0):  # 模型，所有图片路径列表，输出图片路径
         print('执行预测...')
         num = 0
@@ -256,8 +165,6 @@ class P():
             y_ori = np.argmax(y_probs, axis=2)
             d, n = os.path.split(one_path)
 
-            if (loss_cal == 1):
-                print(self.loss_cal(maskpath[num], y_probs))
             if totif:
                 self.CreatTf(one_path.replace('jpg','TIF'), y_ori, outpath, type=0)
             else:
@@ -280,13 +187,13 @@ class P():
 if __name__ == '__main__':
 
 
-    predictImgPath = r'D:\TextureNets\results_why\test_GIDTest'
+    predictImgPath = r'D:\AGRS\results_why\test_GIDTest'
     numclass = 6
     model = DinkNet101
 
-    solver = TTAFrame(net = model(num_classes=numclass), name='dlink101')  # 根据批次识别类 
-    solver.load('D:/TextureNets/weights/DinkNet101-GIDTest.th')
-    target = r'D:\TextureNets\results_why\predict_result_GIDTest'  #w 输出文件位置
+    solver = TTAFrame(net = model(num_classes=numclass), name='dlink101w')  # 根据批次识别类 
+    solver.load(r'D:\AGRS/weights/DinkNet101-GIDTest.th')
+    target = r'D:\AGRS\results_why\predict_result_GIDTest'  #w 输出文件位置
     if not os.path.exists(target):
         os.mkdir(target)
 
@@ -298,7 +205,7 @@ if __name__ == '__main__':
 
     listmask = ['dataset/53.png', ]
     
-    a = P(5)
+    a = P(numclass)
     a.main_p(listpic, listmask, target, solver, rate = 0.5, loss_cal = 0, changes = False, totif = True, class_num = numclass) #w rate是二值化的比例
 
 

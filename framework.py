@@ -15,10 +15,6 @@ class MyFrame():
         self.net = net.cuda()
         self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
         self.optimizer = torch.optim.Adam(params=self.net.parameters(), lr=lr)#优化器
-        #self.optimizer = torch.optim.RMSprop(params=self.net.parameters(), lr=lr)
-
-        #self.old_lr = lr
-        #self.loss = loss
 
         self.loss = loss()
         self.old_lr = lr
@@ -31,50 +27,19 @@ class MyFrame():
         self.img = img_batch
         self.mask = mask_batch
         self.img_id = img_id
-        
-    def test_one_img(self, img):
-        pred = self.net.forward(img)
-        
-        pred[pred>0.5] = 1
-        pred[pred<=0.5] = 0
-
-        mask = pred.squeeze().cpu().data.numpy()
-        return mask
     
-    def test_batch(self):
-        self.forward(volatile=True)
-        mask =  self.net.forward(self.img).cpu().data.numpy().squeeze(1)
-        mask[mask>0.5] = 1
-        mask[mask<=0.5] = 0
-        
-        return mask, self.img_id
-    
-    def test_one_img_from_path(self, path):
-        img = cv2.imread(path)
-        img = np.array(img, np.float32)/255.0 * 3.2 - 1.6
-        img = V(torch.Tensor(img).cuda())
-        
-        mask = self.net.forward(img).squeeze().cpu().data.numpy()#.squeeze(1)
-        mask[mask>0.5] = 1
-        mask[mask<=0.5] = 0
-        
-        return mask
         
     def forward(self, volatile=False):#添加变量
         self.img = V(self.img.cuda(), volatile=volatile)
         if self.mask is not None:
             self.mask = V(self.mask.long().cuda(), volatile=volatile)
         
-    def optimize(self):#这里将图片中的
+    def optimize(self):
         self.forward()
         self.optimizer.zero_grad()
         pred = self.net.forward(self.img)#网络中输入数据
-        #pred = F.log_softmax(pred, dim=1)
-        #print('shape check: ', np.shape(np.array(pred.detach().cpu())), np.shape(np.array(self.mask.cpu().squeeze())))
-        #loss = self.loss(self.mask, pred)#计算误差
         label = self.mask.cpu().squeeze().cuda()
         loss = self.loss(output = pred, target = label)
-        #print(loss)
         loss.backward()
         self.optimizer.step()
         return loss.item()
@@ -84,15 +49,6 @@ class MyFrame():
         
     def load(self, path):
         self.net.load_state_dict(torch.load(path))
-
-    def undate_lr2(self, init_lr, now_it, total_it):
-        power = 0.9
-        lr = init_lr * (1 - float(now_it) / total_it) ** power
-        for param_group in self.optimizer.param_groups:
-            param_group['lr'] = lr
-        print('update learning rate: %f -> %f' % (self.old_lr, lr))
-
-        self.old_lr = lr
 
     def update_lr(self, new_lr, mylog, factor=False):
         if factor:
