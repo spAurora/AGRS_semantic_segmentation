@@ -30,10 +30,6 @@ meadow = [255, 255, 0]
 water = [0, 0, 255]
 COLOR_DICT = np.array([background, built_up, farmland, forest, meadow, water]) 
 
-farmland = [255, 255, 255]
-non_farmland = [0, 0, 0]
-COLOR_DICT = np.array([non_farmland, farmland])
-
 one_size = 256
 
 
@@ -180,8 +176,8 @@ class P():
                 self.CreatTf(one_path.replace('jpg','TIF'), y_ori, outpath, type=0)
             else:
                 save_file = os.path.join(outpath,'/', n[:-4] + '_init' + '.png')
-                skimage.io.imsave(save_file, y_ori)
-                os.startfile(outpath)
+                #skimage.io.imsave(save_file, y_ori)
+                #os.startfile(outpath)
 
 
             img_out = np.zeros(y_ori.shape + (3,))
@@ -198,21 +194,21 @@ class P():
 if __name__ == '__main__':
 
 
-    predictImgPath = r'D:\AGRS\results_why\test_image'
-    trainListRoot = r'E:\FarmLandDataset\2-trainlist\trainlist_0701_small.txt'
-    numclass = 2
-    model = DinkNet34
+    predictImgPath = r'D:\AGRS\results_why\test_GIDTest' 
+    trainListRoot = r'E:\GID_test\2-trainlist\trainlist_0702_small.txt'
+    numclass = 6
+    model = DinkNet101
 
     dataCollect = DataTrainInform(classes_num=numclass, trainlistPath=trainListRoot) #计算数据集信息
     data_dict = dataCollect.collectDataAndSave()
 
     solver = TTAFrame(net = model(num_classes=numclass), name='dlink34', data_dict=data_dict)  # 根据批次识别类 
-    solver.load(r'D:\AGRS/weights/DinkNet34-FarmLandTest.th')
-    target = r'D:\AGRS\results_why\predict_result_farmlandTest'  #w 输出文件位置
+    solver.load(r'D:\AGRS\weights/DinkNet101-GIDTest.th')
+    target = r'D:\AGRS\results_why\predict_result_GIDTest'  #w 输出文件位置
     if not os.path.exists(target):
         os.mkdir(target)
 
-    listpic = fnmatch.filter(os.listdir(predictImgPath), '*.jpg')
+    listpic = fnmatch.filter(os.listdir(predictImgPath), '*.tif')
     for i in range(len(listpic)):
         listpic[i] = os.path.join(predictImgPath + '/' + listpic[i])
     
