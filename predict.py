@@ -30,9 +30,6 @@ meadow = [255, 255, 0]
 water = [0, 0, 255]
 COLOR_DICT = np.array([background, built_up, farmland, forest, meadow, water]) 
 
-one_size = 256
-
-
 # 在下文改了一下归一化！predict_x 与训练时一致 改了一下可以选择每个预测切片的大小
 class TTAFrame():
     def __init__(self, net,data_dict, name='d34'):
@@ -65,20 +62,6 @@ class TTAFrame():
 class P():
     def __init__(self, number):
         self.number = number
-
-
-    def stretch(self, img):  # %2線性拉伸
-        n = img.shape[2]
-        for i in range(n):
-            c1 = img[:, :, i]
-            c = np.percentile(c1[c1 > 0], 2)  # 只拉伸大于零的值
-            d = np.percentile(c1[c1 > 0], 98)
-            t = (img[:, :, i] - c) / (d - c)
-            t *= 65535
-            t[t < 0] = 0
-            t[t > 65535] = 65535
-            img[:, :, i] = t
-        return img
 
     def CreatTf(self, file_path_img, data, outpath, type=1):  # 原始文件，识别后的文件数组形式，新保存文件 1type为二值化 0为原始 区别在于文件名
         print(file_path_img)
@@ -167,7 +150,7 @@ class P():
             pic = skimage.io.imread(one_path)
             pic = pic.astype(np.float32)
 
-            y_probs = self.make_prediction_wHy(pic, 256, 0.1, lambda xx: fun.predict_x(xx), class_num=class_num) # 数据，目标大小，重叠度 预测函数 预测类别数，返回每次识别的
+            y_probs = self.make_prediction_wHy(pic, 256, 0, lambda xx: fun.predict_x(xx), class_num=class_num) # 数据，目标大小，重叠度 预测函数 预测类别数，返回每次识别的
 
             y_ori = np.argmax(y_probs, axis=2)
             d, n = os.path.split(one_path)
@@ -201,6 +184,9 @@ if __name__ == '__main__':
 
     dataCollect = DataTrainInform(classes_num=numclass, trainlistPath=trainListRoot) #计算数据集信息
     data_dict = dataCollect.collectDataAndSave()
+
+    #data_dict['mean'] = [92.663475, 97.823914, 90.74943] #自定义
+    #data_dict['std'] = [44.311825, 41.875866, 38.67438] #自定义
 
     solver = TTAFrame(net = model(num_classes=numclass), name='dlink34', data_dict=data_dict)  # 根据批次识别类 
     solver.load(r'D:\AGRS\weights/DinkNet101-GIDTest.th')
