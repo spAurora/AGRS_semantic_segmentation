@@ -92,7 +92,7 @@ for epoch in tqdm(range(1, total_epoch + 1)):
         print(mylog, 'early stop at %d epoch' % epoch)
         print('early stop at %d epoch' % epoch)
         break
-    if no_optim > 3:
+    if no_optim > 0:
         if solver.old_lr < 5e-7:
             break
         solver.load(save_model_full_path)

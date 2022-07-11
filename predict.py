@@ -18,6 +18,7 @@ import cv2
 import fnmatch
 from PIL import Image
 from data import DataTrainInform
+import sys
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
@@ -147,7 +148,12 @@ class P():
         num = 0
         for one_path in allpath:
             t0 = time.time()
-            pic = skimage.io.imread(one_path)
+            dataset = gdal.Open(one_path)
+            if dataset == None:
+                print("open img false")
+                sys.exit(1)
+            pic = dataset.ReadAsArray()
+            pic = pic.transpose(1,2,0)
             pic = pic.astype(np.float32)
 
             y_probs = self.make_prediction_wHy(pic, 256, 0, lambda xx: fun.predict_x(xx), class_num=class_num) # 数据，目标大小，重叠度 预测函数 预测类别数，返回每次识别的
@@ -156,7 +162,7 @@ class P():
             d, n = os.path.split(one_path)
 
             if totif:
-                self.CreatTf(one_path.replace('jpg','TIF'), y_ori, outpath, type=0)
+                self.CreatTf(one_path, y_ori, outpath, type=0)
             else:
                 save_file = os.path.join(outpath,'/', n[:-4] + '_init' + '.png')
                 #skimage.io.imsave(save_file, y_ori)
@@ -177,30 +183,37 @@ class P():
 if __name__ == '__main__':
 
 
-    predictImgPath = r'D:\AGRS\results_why\test_GIDTest' # 待预测影像的文件夹路径
-    trainListRoot = r'E:\GID_test\2-trainlist\trainlist_0707.txt' #与模型训练相同的trainlist
-    numclass = 6 # 样本类别数
-    model = DinkNet101 #模型
-    model_path = r'D:\AGRS\weights/DinkNet101-GIDTest.th' # 模型文件路径
-    output_path = r'D:\AGRS\results_why\predict_result_GIDTest' # 输出的预测结果路径
+    predictImgPath = r'E:\xinjiang\water\0-srimg' # 待预测影像的文件夹路径
+    Img_type = '*.dat' # 待预测影像的类型
+    trainListRoot = r'E:\xinjiang\water\2-train_list\trainlist_0710.txt' #与模型训练相同的trainlist
+    numclass = 2 # 样本类别数
+    model = DinkNet34 #模型
+    model_path = r'D:\AGRS\weights/DinkNet34-WaterFourBand.th' # 模型文件路径
+    output_path = r'E:\xinjiang\water\3-predict_result' # 输出的预测结果路径
+    band_num = 4 #影像的波段数 训练与预测应一致
+    label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
 
-    dataCollect = DataTrainInform(classes_num=numclass, trainlistPath=trainListRoot) #计算数据集信息
+    dataCollect = DataTrainInform(classes_num=numclass, trainlistPath=trainListRoot, band_num=band_num, label_norm=label_norm) #计算数据集信息
     data_dict = dataCollect.collectDataAndSave()
 
-    data_dict['mean'] = [92.663475, 97.823914, 90.74943] #自定义
-    data_dict['std'] = [44.311825, 41.875866, 38.67438] #自定义
+    #data_dict['mean'] = [92.663475, 97.823914, 90.74943] #自定义
+    #data_dict['std'] = [44.311825, 41.875866, 38.67438] #自定义
 
-    solver = TTAFrame(net = model(num_classes=numclass), name='dlink34', data_dict=data_dict) 
+    solver = TTAFrame(net = model(num_classes=numclass, band_num = band_num), name='dlink34', data_dict=data_dict) 
     solver.load(model_path)
     target = output_path
     if not os.path.exists(target):
         os.mkdir(target)
 
-    listpic = fnmatch.filter(os.listdir(predictImgPath), '*.tif')
+    listpic = fnmatch.filter(os.listdir(predictImgPath), Img_type)
     for i in range(len(listpic)):
         listpic[i] = os.path.join(predictImgPath + '/' + listpic[i])
     
-    print(listpic)
+    if not listpic:
+        print('listpic is none')
+        exit(1)
+    else:
+        print(listpic)
 
     listmask = ['dataset/53.png', ]
 

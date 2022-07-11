@@ -142,7 +142,7 @@ class DinkNet34(nn.Module):
         super(DinkNet34, self).__init__()
 
         filters = [64, 128, 256, 512]
-        resnet = models.resnet34(pretrained=False)
+        resnet = models.resnet34(pretrained=True)
         self.firstconv = nn.Conv2d(band_num, 64, kernel_size=7, stride=2, padding=3,
                                bias=False)
         self.firstbn = resnet.bn1
