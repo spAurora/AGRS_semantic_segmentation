@@ -19,8 +19,8 @@ SHAPE = (256,256) #数据维度
 
 trainListRoot = r'E:\xinjiang\water\2-train_list\trainlist_0710.txt' #训练样本列表
 save_model_path = r'D:\AGRS\weights' #训练模型保存路径  
-model = DLinkNet50 #选择的训练模型
-save_model_name = 'DinkNet50-WaterFourBand.th' #训练模型保存名   
+model = DLinkNet34 #选择的训练模型
+save_model_name = 'DinkNet34-WaterFourBand.th' #训练模型保存名   
 loss = FocalLoss2d #损失函数
 numclass = 2 #样本类别数
 batchsize = 8 #计算批次大小
@@ -44,8 +44,6 @@ print('data mean:', data_dict['mean'])
 print('data std: ', data_dict['std'])
 print('label weight: ', data_dict['classWeights']) 
 
-mean = data_dict['mean']
-
 weight = torch.from_numpy(data_dict['classWeights']).cuda()
 loss = loss(weight=weight) #loss实例化
 
@@ -55,7 +53,7 @@ if os.path.exists(save_model_full_path):
     solver.load(save_model_full_path)
     print('继续训练')
 
-dataset = DataLoader(root = trainListRoot, normalized_Label=label_norm, data_dict=data_dict) #读取训练集
+dataset = DataLoader(root = trainListRoot, normalized_Label=label_norm, data_dict=data_dict, band_num=band_num) #读取训练集
 
 data_loader = torch.utils.data.DataLoader(dataset, batch_size=batchsize, shuffle=True, num_workers=0) #定义训练数据装载器
 

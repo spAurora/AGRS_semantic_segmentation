@@ -197,10 +197,13 @@ if __name__ == '__main__':
     dataCollect = DataTrainInform(classes_num=numclass, trainlistPath=trainListRoot, band_num=band_num, label_norm=label_norm) #计算数据集信息
     data_dict = dataCollect.collectDataAndSave()
 
+    print('data mean: ', data_dict['mean'])
+    print('data std: ', data_dict['std'])
+
     #data_dict['mean'] = [92.663475, 97.823914, 90.74943] #自定义
     #data_dict['std'] = [44.311825, 41.875866, 38.67438] #自定义
 
-    solver = TTAFrame(net = model(num_classes=numclass, band_num = band_num), name='dlink34', data_dict=data_dict) 
+    solver = TTAFrame(net = model(num_classes=numclass, band_num = band_num), name='dlink34', data_dict=data_dict, band_num=band_num) 
     solver.load(model_path)
     target = output_path
     if not os.path.exists(target):
