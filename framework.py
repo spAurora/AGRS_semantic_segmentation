@@ -11,7 +11,7 @@ class MyFrame():
     """
     一些参数函数
     """
-    def __init__(self, net, loss, lr=2e-4, evalmode = False):#loss是一个函数
+    def __init__(self, net, loss, lr=2e-4, evalmode = False):
         self.net = net.cuda()
         self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
         self.optimizer = torch.optim.Adam(params=self.net.parameters(), lr=lr)#优化器
@@ -23,7 +23,7 @@ class MyFrame():
                 if isinstance(i, nn.BatchNorm2d):
                     i.eval()
         
-    def set_input(self, img_batch, mask_batch=None, img_id=None):#喂数据
+    def set_input(self, img_batch, mask_batch=None, img_id=None):
         self.img = img_batch
         self.mask = mask_batch
         self.img_id = img_id

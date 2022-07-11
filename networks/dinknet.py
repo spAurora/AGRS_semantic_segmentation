@@ -138,12 +138,13 @@ class DinkNet34_less_pool(nn.Module):
         return torch.sigmoid(out)
     
 class DinkNet34(nn.Module):
-    def __init__(self, num_classes=1, num_channels=3):
+    def __init__(self, num_classes=1, band_num=3):
         super(DinkNet34, self).__init__()
 
         filters = [64, 128, 256, 512]
-        resnet = models.resnet34(pretrained=True)
-        self.firstconv = resnet.conv1
+        resnet = models.resnet34(pretrained=False)
+        self.firstconv = nn.Conv2d(band_num, 64, kernel_size=7, stride=2, padding=3,
+                               bias=False)
         self.firstbn = resnet.bn1
         self.firstrelu = resnet.relu
         self.firstmaxpool = resnet.maxpool
@@ -304,7 +305,7 @@ class DinkNet101(nn.Module):
         return torch.sigmoid(out)
 
 class LinkNet34(nn.Module):
-    def __init__(self, num_classes=1):
+    def __init__(self, num_classes=1, band_num = 3):
         super(LinkNet34, self).__init__()
 
         filters = [64, 128, 256, 512]

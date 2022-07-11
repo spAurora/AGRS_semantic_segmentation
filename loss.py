@@ -26,7 +26,7 @@ class CrossEntropyLoss2d(_WeightedLoss):
 
 
 class FocalLoss2d(nn.Module):
-    def __init__(self, alpha=0.5, gamma=2, weight=None, ignore_index=0, size_average=True):
+    def __init__(self, alpha=0.5, gamma=2, weight=None, ignore_index=255, size_average=True):
         super().__init__()
         self.alpha = alpha
         self.gamma = gamma

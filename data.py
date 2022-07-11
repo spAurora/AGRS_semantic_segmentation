@@ -1,6 +1,7 @@
 """
 
 """
+from cProfile import label
 from cv2 import mean
 import torch
 import torch.utils.data as data
@@ -13,12 +14,13 @@ import numpy as np
 import os
 
 class DataLoader(data.Dataset):
-    def __init__(self,data_dict, root='', normalized_Label = False):
+    def __init__(self,data_dict, root='', normalized_Label = False, band_num = 3):
         self.root = root
         self.normalized_Label = normalized_Label
         self.img_mean = data_dict['mean']
         self.std = data_dict['std']
         self.filelist = self.root
+        self.band_num = band_num
 
         with open(self.filelist, 'r') as f:
             self.filelist = f.readlines() # 返回一个列表，其中包含文件中的每一行作为列表项
@@ -36,10 +38,9 @@ class DataLoader(data.Dataset):
         label = np.array(label, np.float32)
 
         label = np.expand_dims(label, axis=2) #标签增加一个维度 (H W C)
-
-        img[:,:,0] -= self.img_mean[0]
-        img[:,:,1] -= self.img_mean[1]
-        img[:,:,2] -= self.img_mean[2]
+        
+        for i in range(self.band_num):
+            img[:,:,i] -= self.img_mean[i]
         img = img / self.std
 
         img = img.transpose(2,0,1)
@@ -52,28 +53,32 @@ class DataLoader(data.Dataset):
         label = torch.Tensor(label)
         
         return img, label
-            
+
+
 class DataTrainInform:
     """ To get statistical information about the train set, such as mean, std, class distribution.
         The class is employed for tackle class imbalance.
     """
 
     def __init__(self, classes_num = 6, trainlistPath="",
-                 inform_data_file="", normVal=1.10):
+                 inform_data_file="", normVal=1.10, band_num = 3, label_norm = False):
         """
         Args:
            data_dir: directory where the dataset is kept
            classes: number of classes in the dataset
            inform_data_file: location where cached file has to be stored
            normVal: normalization value, as defined in ERFNet paper
+           band_num: The number of bands of the image
         """
         self.trainlistPath = trainlistPath
         self.classes = classes_num
+        self.band_num = band_num
         self.classWeights = np.ones(self.classes, dtype=np.float32)
         self.normVal = normVal
-        self.mean = np.zeros(3, dtype=np.float32)
-        self.std = np.zeros(3, dtype=np.float32)
+        self.mean = np.zeros(band_num, dtype=np.float32)
+        self.std = np.zeros(band_num, dtype=np.float32)
         self.inform_data_file = inform_data_file
+        self.label_norm = label_norm
 
     def compute_class_weights(self, histogram):
         """to compute the class weights
@@ -103,6 +108,9 @@ class DataTrainInform:
                 img_data = skimage.io.imread(img_file)
                 label_data = skimage.io.imread(label_file, as_gray=True)
                 
+                if self.label_norm == True:
+                    label_data = label_data/255
+
                 unique_values = np.unique(label_data)
 
                 max_unique_value = max(unique_values)
@@ -112,13 +120,9 @@ class DataTrainInform:
                     hist = np.histogram(label_data, self.classes, [0, self.classes - 1])
                     global_hist += hist[0]
 
-                    self.mean[0] += np.mean(img_data[:, :, 0])
-                    self.mean[1] += np.mean(img_data[:, :, 1])
-                    self.mean[2] += np.mean(img_data[:, :, 2])
-
-                    self.std[0] += np.std(img_data[:, :, 0])
-                    self.std[1] += np.std(img_data[:, :, 1])
-                    self.std[2] += np.std(img_data[:, :, 2])
+                    for i in range(self.band_num):
+                        self.mean[i] += np.mean(img_data[:, :, i])
+                        self.std[i] += np.std(img_data[:, :, i])
 
                 if max_unique_value > (self.classes - 1) or min_unique_value < 0:
                     print('Labels can take value between 0 and number of classes.')

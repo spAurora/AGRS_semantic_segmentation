@@ -17,15 +17,17 @@ import numpy as np
 
 SHAPE = (256,256) #数据维度
 
-trainListRoot = r'E:\GID_test\2-trainlist\trainlist_0702_small.txt' #训练样本列表
+trainListRoot = r'E:\xinjiang\water\2-train_list\trainlist_0710.txt' #训练样本列表
 save_model_path = r'D:\AGRS\weights' #训练模型保存路径  
-model = DinkNet101 #选择的训练模型
-save_model_name = 'DinkNet101-GIDTest.th' #训练模型保存名   
+model = DinkNet34 #选择的训练模型
+save_model_name = 'DinkNet34-WaterFourBand.th' #训练模型保存名   
 loss = FocalLoss2d #损失函数
-numclass = 6 #样本类别
+numclass = 2 #样本类别数
 batchsize = 8 #计算批次大小
 init_lr = 1e-3 #初始学习率
-total_epoch = 1200 #训练次数
+total_epoch = 300 #训练次数
+band_num = 4 #影像的波段数
+label_norm = True # 是否对标签进行归一化 针对0/255二分类标签
 
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') #日志文件
 
@@ -33,7 +35,7 @@ print('Is cuda availabel: ', torch.cuda.is_available())
 print('Cuda device count: ', torch.cuda.device_count())
 print('Current device: ', torch.cuda.current_device())
 
-dataCollect = DataTrainInform(classes_num=numclass, trainlistPath=trainListRoot) #计算数据集信息
+dataCollect = DataTrainInform(classes_num=numclass, trainlistPath=trainListRoot, band_num=band_num, label_norm=label_norm) #计算数据集信息
 data_dict = dataCollect.collectDataAndSave()
 if data_dict is None:
     print("error while pickling data. Please check.")
@@ -47,13 +49,13 @@ mean = data_dict['mean']
 weight = torch.from_numpy(data_dict['classWeights']).cuda()
 loss = loss(weight=weight) #loss实例化
 
-solver = MyFrame(net=model(num_classes=numclass), loss=loss, lr=init_lr) #网络，损失函数，以及学习率
+solver = MyFrame(net=model(num_classes=numclass, band_num = band_num), loss=loss, lr=init_lr) #网络，损失函数，以及学习率
 save_model_full_path = save_model_path + '/' + save_model_name
 if os.path.exists(save_model_full_path):
     solver.load(save_model_full_path)
     print('继续训练')
 
-dataset = DataLoader(root = trainListRoot, normalized_Label=False, data_dict=data_dict) #读取训练集
+dataset = DataLoader(root = trainListRoot, normalized_Label=label_norm, data_dict=data_dict) #读取训练集
 
 data_loader = torch.utils.data.DataLoader(dataset, batch_size=batchsize, shuffle=True, num_workers=0) #定义训练数据装载器
 

@@ -177,20 +177,22 @@ class P():
 if __name__ == '__main__':
 
 
-    predictImgPath = r'D:\AGRS\results_why\test_GIDTest' 
-    trainListRoot = r'E:\GID_test\2-trainlist\trainlist_0702_small.txt'
-    numclass = 6
-    model = DinkNet101
+    predictImgPath = r'D:\AGRS\results_why\test_GIDTest' # 待预测影像的文件夹路径
+    trainListRoot = r'E:\GID_test\2-trainlist\trainlist_0707.txt' #与模型训练相同的trainlist
+    numclass = 6 # 样本类别数
+    model = DinkNet101 #模型
+    model_path = r'D:\AGRS\weights/DinkNet101-GIDTest.th' # 模型文件路径
+    output_path = r'D:\AGRS\results_why\predict_result_GIDTest' # 输出的预测结果路径
 
     dataCollect = DataTrainInform(classes_num=numclass, trainlistPath=trainListRoot) #计算数据集信息
     data_dict = dataCollect.collectDataAndSave()
 
-    #data_dict['mean'] = [92.663475, 97.823914, 90.74943] #自定义
-    #data_dict['std'] = [44.311825, 41.875866, 38.67438] #自定义
+    data_dict['mean'] = [92.663475, 97.823914, 90.74943] #自定义
+    data_dict['std'] = [44.311825, 41.875866, 38.67438] #自定义
 
-    solver = TTAFrame(net = model(num_classes=numclass), name='dlink34', data_dict=data_dict)  # 根据批次识别类 
-    solver.load(r'D:\AGRS\weights/DinkNet101-GIDTest.th')
-    target = r'D:\AGRS\results_why\predict_result_GIDTest'  #w 输出文件位置
+    solver = TTAFrame(net = model(num_classes=numclass), name='dlink34', data_dict=data_dict) 
+    solver.load(model_path)
+    target = output_path
     if not os.path.exists(target):
         os.mkdir(target)
 
