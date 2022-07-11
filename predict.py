@@ -7,7 +7,7 @@ from tqdm import tqdm
 import time
 import glob
 import torch
-from networks.dinknet import DinkNet34, DinkNet101
+from networks.dinknet import DLinkNet34, DLinkNet50, DLinkNet101
 from networks.unet import Unet
 from networks.dunet import Dunet
 from networks.deeplabv3 import DeepLabv3_plus
@@ -33,11 +33,12 @@ COLOR_DICT = np.array([background, built_up, farmland, forest, meadow, water])
 
 # 在下文改了一下归一化！predict_x 与训练时一致 改了一下可以选择每个预测切片的大小
 class TTAFrame():
-    def __init__(self, net,data_dict, name='d34'):
+    def __init__(self, net, data_dict, name='d34', band_num = 3):
         self.net = net.cuda()
         self.name = name
         self.img_mean = data_dict['mean']
         self.std = data_dict['std']
+        self.band_num = band_num
 
 
         self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
@@ -45,9 +46,8 @@ class TTAFrame():
     def predict_x(self, img):
         self.net.eval()
 
-        img[:,:,0] -= self.img_mean[0]
-        img[:,:,1] -= self.img_mean[1]
-        img[:,:,2] -= self.img_mean[2]
+        for i in range(self.band_num):
+            img[:,:,i] -= self.img_mean[i]
         img = img / self.std
 
         img = np.expand_dims(img, 0)
@@ -64,7 +64,7 @@ class P():
     def __init__(self, number):
         self.number = number
 
-    def CreatTf(self, file_path_img, data, outpath, type=1):  # 原始文件，识别后的文件数组形式，新保存文件 1type为二值化 0为原始 区别在于文件名
+    def CreatTf(self, file_path_img, data, outpath):  # 原始文件，识别后的文件数组形式，新保存文件 1type为二值化 0为原始 区别在于文件名
         print(file_path_img)
         d, n = os.path.split(file_path_img)
         dataset = gdal.Open(file_path_img, GA_ReadOnly)  # 打开图片只读
@@ -74,10 +74,8 @@ class P():
 
         format = "GTiff"
         driver = gdal.GetDriverByName(format)  # 数据格式
-        if type == 1:
-            name = n[:-4] + '_result' + '.tif'  # 输出文件名字
-        else:
-            name = n[:-4] + '_ori_result' + '.tif'
+        name = n[:-4] + '_result' + '.tif'  # 输出文件名字
+
 
         dst_ds = driver.Create(os.path.join(outpath, name), dataset.RasterXSize, dataset.RasterYSize,
                                1, gdal.GDT_Byte)  # 创建一个新的文件
@@ -143,7 +141,7 @@ class P():
         return pad_y
 
 
-    def main_p(self, allpath, maskpath, outpath, fun, rate=0.5, loss_cal=0, changes=False, totif=False, class_num=0):  # 模型，所有图片路径列表，输出图片路径
+    def main_p(self, allpath, outpath, fun, rate=0.5, loss_cal=0, changes=False, totif=False, class_num=0):  # 模型，所有图片路径列表，输出图片路径
         print('执行预测...')
         num = 0
         for one_path in allpath:
@@ -162,7 +160,7 @@ class P():
             d, n = os.path.split(one_path)
 
             if totif:
-                self.CreatTf(one_path, y_ori, outpath, type=0)
+                self.CreatTf(one_path, y_ori, outpath)
             else:
                 save_file = os.path.join(outpath,'/', n[:-4] + '_init' + '.png')
                 #skimage.io.imsave(save_file, y_ori)
@@ -187,11 +185,14 @@ if __name__ == '__main__':
     Img_type = '*.dat' # 待预测影像的类型
     trainListRoot = r'E:\xinjiang\water\2-train_list\trainlist_0710.txt' #与模型训练相同的trainlist
     numclass = 2 # 样本类别数
-    model = DinkNet34 #模型
-    model_path = r'D:\AGRS\weights/DinkNet34-WaterFourBand.th' # 模型文件路径
+    model = DLinkNet34 #模型
+    model_path = r'D:\AGRS\weights/DinkNet34-WaterFourBand.th' # 模型文件完整路径
     output_path = r'E:\xinjiang\water\3-predict_result' # 输出的预测结果路径
     band_num = 4 #影像的波段数 训练与预测应一致
     label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
+
+    model_name = model.__class__.__name__
+    print(model_name)
 
     dataCollect = DataTrainInform(classes_num=numclass, trainlistPath=trainListRoot, band_num=band_num, label_norm=label_norm) #计算数据集信息
     data_dict = dataCollect.collectDataAndSave()
@@ -215,10 +216,8 @@ if __name__ == '__main__':
     else:
         print(listpic)
 
-    listmask = ['dataset/53.png', ]
-
     a = P(number = numclass)
-    a.main_p(listpic, listmask, target, solver, rate = 0.5, loss_cal = 0, changes = False, totif = False, class_num = numclass) #w rate是二值化的比例
+    a.main_p(listpic, target, solver, rate = 0.5, loss_cal = 0, changes = False, totif = True, class_num = numclass) #w rate是二值化的比例
 
 
 

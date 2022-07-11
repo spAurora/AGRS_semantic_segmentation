@@ -4,7 +4,7 @@ import torch.utils.data as data
 from torch.autograd import Variable as V
 import os
 from time import time
-from networks.dinknet import  DinkNet34, DinkNet101   
+from networks.dinknet import  DLinkNet34, DLinkNet50, DLinkNet101   
 from networks.unet import Unet
 from networks.dunet import Dunet
 from networks.deeplabv3 import DeepLabv3_plus, ResNet
@@ -19,8 +19,8 @@ SHAPE = (256,256) #数据维度
 
 trainListRoot = r'E:\xinjiang\water\2-train_list\trainlist_0710.txt' #训练样本列表
 save_model_path = r'D:\AGRS\weights' #训练模型保存路径  
-model = DinkNet34 #选择的训练模型
-save_model_name = 'DinkNet34-WaterFourBand.th' #训练模型保存名   
+model = DLinkNet50 #选择的训练模型
+save_model_name = 'DinkNet50-WaterFourBand.th' #训练模型保存名   
 loss = FocalLoss2d #损失函数
 numclass = 2 #样本类别数
 batchsize = 8 #计算批次大小
