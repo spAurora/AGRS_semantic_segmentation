@@ -181,13 +181,13 @@ class P():
 if __name__ == '__main__':
 
 
-    predictImgPath = r'E:\xinjiang\water\0-srimg' # 待预测影像的文件夹路径
+    predictImgPath = r'E:\manas_class\project_manas\0-src_img_for_glacier' # 待预测影像的文件夹路径
     Img_type = '*.dat' # 待预测影像的类型
-    trainListRoot = r'E:\xinjiang\water\2-train_list\trainlist_0710.txt' #与模型训练相同的trainlist
+    trainListRoot = r'E:\manas_class\project_manas\glacier\2-trainlist\trainlist_0713.txt' #与模型训练相同的trainlist
     numclass = 2 # 样本类别数
     model = DLinkNet34 #模型
-    model_path = r'D:\AGRS\weights/DinkNet34-WaterFourBand.th' # 模型文件完整路径
-    output_path = r'E:\xinjiang\water\3-predict_result' # 输出的预测结果路径
+    model_path = r'E:\manas_class\project_manas\glacier\3-weights\DinkNet34-manans_glacier.th' # 模型文件完整路径
+    output_path = r'E:\manas_class\project_manas\glacier\3-predict_result_no_negative' # 输出的预测结果路径
     band_num = 4 #影像的波段数 训练与预测应一致
     label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
 

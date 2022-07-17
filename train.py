@@ -17,14 +17,14 @@ import numpy as np
 
 SHAPE = (256,256) #数据维度
 
-trainListRoot = r'E:\xinjiang\water\2-train_list\trainlist_0710.txt' #训练样本列表
-save_model_path = r'D:\AGRS\weights' #训练模型保存路径  
+trainListRoot = r'E:\manas_class\project_manas\glacier\2-trainlist\trainlist_0713.txt' #训练样本列表
+save_model_path = r'E:\manas_class\project_manas\glacier\3-weights' #训练模型保存路径  
 model = DLinkNet34 #选择的训练模型
-save_model_name = 'DinkNet34-WaterFourBand.th' #训练模型保存名   
+save_model_name = 'DinkNet34-manans_glacier.th' #训练模型保存名   
 loss = FocalLoss2d #损失函数
 numclass = 2 #样本类别数
 batchsize = 8 #计算批次大小
-init_lr = 1e-3 #初始学习率
+init_lr = 0.005 #初始学习率
 total_epoch = 300 #训练次数
 band_num = 4 #影像的波段数
 label_norm = True # 是否对标签进行归一化 针对0/255二分类标签
@@ -94,7 +94,7 @@ for epoch in tqdm(range(1, total_epoch + 1)):
         if solver.old_lr < 5e-7:
             break
         solver.load(save_model_full_path)
-        solver.update_lr(3.0, factor = True, mylog = mylog)
+        solver.update_lr(2.0, factor = True, mylog = mylog)
     mylog.flush()
 
 print('Finish!')
