@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+
+"""
+AGRS_semantic_segmentation
+训练框架及函数
+~~~~~~~~~~~~~~~~
+code by wHy
+Aerospace Information Research Institute, Chinese Academy of Sciences
+751984964@qq.com
+"""
 from turtle import shape
 import torch
 import torch.nn as nn

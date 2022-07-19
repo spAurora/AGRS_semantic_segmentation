@@ -1,5 +1,12 @@
-"""
+# -*- coding: utf-8 -*-
 
+"""
+AGRS_semantic_segmentation
+数据处理
+~~~~~~~~~~~~~~~~
+code by wHy
+Aerospace Information Research Institute, Chinese Academy of Sciences
+751984964@qq.com
 """
 from cProfile import label
 from cv2 import mean

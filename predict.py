@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+
+"""
+AGRS_semantic_segmentation
+模型预测
+~~~~~~~~~~~~~~~~
+code by wHy
+Aerospace Information Research Institute, Chinese Academy of Sciences
+751984964@qq.com
+"""
 import skimage.io
 import numpy as np
 import os

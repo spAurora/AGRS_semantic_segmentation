@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+
+"""
+AGRS_semantic_segmentation
+模型训练
+~~~~~~~~~~~~~~~~
+code by wHy
+Aerospace Information Research Institute, Chinese Academy of Sciences
+751984964@qq.com
+"""
 import torch
 import torch.nn as nn
 import torch.utils.data as data
