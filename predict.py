@@ -31,11 +31,9 @@ meadow = [255, 255, 0]
 water = [0, 0, 255]
 COLOR_DICT = np.array([background, built_up, farmland, forest, meadow, water]) 
 
-# 在下文改了一下归一化！predict_x 与训练时一致 改了一下可以选择每个预测切片的大小
-class TTAFrame():
-    def __init__(self, net, data_dict, name='d34', band_num = 3):
+class SolverFrame():
+    def __init__(self, net, data_dict, band_num = 3):
         self.net = net.cuda()
-        self.name = name
         self.img_mean = data_dict['mean']
         self.std = data_dict['std']
         self.band_num = band_num
@@ -53,23 +51,23 @@ class TTAFrame():
         img = np.expand_dims(img, 0)
         img = img.transpose(0, 3, 1, 2)
         img = V(torch.Tensor(img).cuda())
-        maska = self.net.forward(img).squeeze().cpu().data.numpy()  # .squeeze(1)
+        maska = self.net.forward(img).squeeze().cpu().data.numpy()
 
         return maska
 
     def load(self, path):
         self.net.load_state_dict(torch.load(path))
 
-class P():
-    def __init__(self, number):
-        self.number = number
+class Predict():
+    def __init__(self, class_number):
+        self.class_number = class_number
 
-    def CreatTf(self, file_path_img, data, outpath):  # 原始文件，识别后的文件数组形式，新保存文件 1type为二值化 0为原始 区别在于文件名
+    def CreatTf(self, file_path_img, data, outpath):  # 创建tif文件
         print(file_path_img)
         d, n = os.path.split(file_path_img)
-        dataset = gdal.Open(file_path_img, GA_ReadOnly)  # 打开图片只读
+        dataset = gdal.Open(file_path_img, GA_ReadOnly)  
 
-        projinfo = dataset.GetProjection()  # 获取坐标系
+        projinfo = dataset.GetProjection() 
         geotransform = dataset.GetGeoTransform()
 
         format = "GTiff"
@@ -79,14 +77,14 @@ class P():
 
         dst_ds = driver.Create(os.path.join(outpath, name), dataset.RasterXSize, dataset.RasterYSize,
                                1, gdal.GDT_Byte)  # 创建一个新的文件
-        dst_ds.SetGeoTransform(geotransform)  # 投影
-        dst_ds.SetProjection(projinfo)  # 坐标
+        dst_ds.SetGeoTransform(geotransform)  # 写入投影
+        dst_ds.SetProjection(projinfo)  # 写入坐标
         dst_ds.GetRasterBand(1).WriteArray(data)
         dst_ds.FlushCache()
     
-    def make_prediction_wHy(self, x, target_size, overlap, predict, class_num):
+    def make_prediction_wHy(self, x, target_size, overlap_rate, predict, class_num):
         weights = np.zeros((x.shape[0], x.shape[1], class_num), dtype=np.float32)
-        space = int(target_size * (1-overlap))
+        space = int(target_size * (1-overlap_rate))
         print('space: ', space)
         print('img shape: ', x.shape[0], x.shape[1], x.shape[2])
         pad_y = np.zeros(
@@ -141,55 +139,50 @@ class P():
         return pad_y
 
 
-    def main_p(self, allpath, outpath, fun, rate=0.5, loss_cal=0, changes=False, totif=False, class_num=0):  # 模型，所有图片路径列表，输出图片路径
-        print('执行预测...')
-        num = 0
+    def main(self, allpath, outpath, solver, overlap_rate=0.5, target_size=256, totif=False, class_num=0):  # 模型，所有图片路径列表，输出图片路径
+        print('start predict...')
         for one_path in allpath:
             t0 = time.time()
             dataset = gdal.Open(one_path)
             if dataset == None:
-                print("open img false")
+                print("failed to open img")
                 sys.exit(1)
             pic = dataset.ReadAsArray()
             pic = pic.transpose(1,2,0)
             pic = pic.astype(np.float32)
 
-            y_probs = self.make_prediction_wHy(pic, 256, 0, lambda xx: fun.predict_x(xx), class_num=class_num) # 数据，目标大小，重叠度 预测函数 预测类别数，返回每次识别的
+            y_probs = self.make_prediction_wHy(x=pic, target_size=target_size, overlap_rate=overlap_rate, predict = lambda xx: solver.predict_x(xx), class_num=class_num) # 数据，目标大小，重叠度 预测函数 预测类别数，返回每次识别的
 
             y_ori = np.argmax(y_probs, axis=2)
             d, n = os.path.split(one_path)
 
             if totif:
                 self.CreatTf(one_path, y_ori, outpath)
-            else:
-                save_file = os.path.join(outpath,'/', n[:-4] + '_init' + '.png')
-                #skimage.io.imsave(save_file, y_ori)
-                #os.startfile(outpath)
-
 
             img_out = np.zeros(y_ori.shape + (3,))
             img_out = img_out.astype(np.int16)
-            for i in range(self.number):
+            for i in range(self.class_number):
                 img_out[y_ori == i, :] = COLOR_DICT[i]  # 对应上色
             save_file = os.path.join(outpath, n[:-4] + '_color' + '.png')
             skimage.io.imsave(save_file, img_out)
             os.startfile(outpath)
             print('预测耗费时间: %0.2f(min).' % ((time.time() - t0) / 60))
-            num += 1
 
 
 if __name__ == '__main__':
 
 
-    predictImgPath = r'E:\manas_class\project_manas\0-src_img_for_glacier' # 待预测影像的文件夹路径
+    predictImgPath = r'E:\xinjiang\water\0-srimg' # 待预测影像的文件夹路径
     Img_type = '*.dat' # 待预测影像的类型
-    trainListRoot = r'E:\manas_class\project_manas\glacier\2-trainlist\trainlist_0713.txt' #与模型训练相同的trainlist
+    trainListRoot = r'E:\xinjiang\water\2-train_list\trainlist_0710.txt' #与模型训练相同的trainlist
     numclass = 2 # 样本类别数
     model = DLinkNet34 #模型
-    model_path = r'E:\manas_class\project_manas\glacier\3-weights\DinkNet34-manans_glacier.th' # 模型文件完整路径
-    output_path = r'E:\manas_class\project_manas\glacier\3-predict_result_no_negative' # 输出的预测结果路径
+    model_path = r'D:\AGRS\weights\DinkNet34-WaterFourBand.th' # 模型文件完整路径
+    output_path = r'E:\xinjiang\water\3-predict_result' # 输出的预测结果路径
     band_num = 4 #影像的波段数 训练与预测应一致
     label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
+    overlap_rate = 0
+    target_size = 256
 
     model_name = model.__class__.__name__
     print(model_name)
@@ -203,11 +196,10 @@ if __name__ == '__main__':
     #data_dict['mean'] = [92.663475, 97.823914, 90.74943] #自定义
     #data_dict['std'] = [44.311825, 41.875866, 38.67438] #自定义
 
-    solver = TTAFrame(net = model(num_classes=numclass, band_num = band_num), name='dlink34', data_dict=data_dict, band_num=band_num) 
+    solver = SolverFrame(net = model(num_classes=numclass, band_num = band_num), data_dict=data_dict, band_num=band_num) 
     solver.load(model_path)
-    target = output_path
-    if not os.path.exists(target):
-        os.mkdir(target)
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
 
     listpic = fnmatch.filter(os.listdir(predictImgPath), Img_type)
     for i in range(len(listpic)):
@@ -219,8 +211,8 @@ if __name__ == '__main__':
     else:
         print(listpic)
 
-    a = P(number = numclass)
-    a.main_p(listpic, target, solver, rate = 0.5, loss_cal = 0, changes = False, totif = True, class_num = numclass) #w rate是二值化的比例
+    predict_instantiation = Predict(class_number = numclass)
+    predict_instantiation.main(listpic, output_path, solver, target_size=target_size, overlap_rate=overlap_rate, totif = True, class_num = numclass)
 
 
 
