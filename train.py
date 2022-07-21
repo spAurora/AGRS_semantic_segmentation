@@ -14,7 +14,7 @@ import torch.utils.data as data
 from torch.autograd import Variable as V
 import os
 from time import time
-from networks.dinknet import  DLinkNet34, DLinkNet50, DLinkNet101   
+from networks.dinknet import  DinkNet34, DinkNet50, DinkNet101   
 from networks.unet import Unet
 from networks.dunet import Dunet
 from networks.deeplabv3 import DeepLabv3_plus, ResNet
@@ -29,7 +29,7 @@ SHAPE = (256,256) #数据维度
 
 trainListRoot = r'E:\manas_class\project_manas\glacier\2-trainlist\trainlist_0713.txt' #训练样本列表
 save_model_path = r'E:\manas_class\project_manas\glacier\3-weights' #训练模型保存路径  
-model = DLinkNet34 #选择的训练模型
+model = DinkNet34 #选择的训练模型
 save_model_name = 'DinkNet34-manans_glacier.th' #训练模型保存名   
 loss = FocalLoss2d #损失函数
 numclass = 2 #样本类别数
