@@ -17,7 +17,7 @@ from framework import MyFrame
 from loss import CrossEntropyLoss2d, FocalLoss2d
 from data import MyDataLoader, DataTrainInform
 
-from networks.Dinknet import  DinkNet34, DinkNet50, DinkNet101   
+from networks.DLinknet import DLinkNet34, DLinkNet50, DLinkNet101   
 from networks.Unet import Unet
 from networks.Dunet import Dunet
 from networks.Deeplab_v3_plus import DeepLabv3_plus
@@ -25,8 +25,8 @@ from networks.FCN8S import FCN8S
 
 trainListRoot = r'E:\xinjiang\water\2-train_list\trainlist_0710.txt' # 训练样本列表
 save_model_path = r'D:\AGRS\weights' # 训练模型保存路径  
-model = DinkNet34 # 选择的训练模型
-save_model_name = 'DinkNet-WaterFourBand.th' # 训练模型保存名   
+model = DLinkNet34 # 选择的训练模型
+save_model_name = 'DLinkNet34-WaterFourBand.th' # 训练模型保存名   
 loss = FocalLoss2d # 损失函数
 classes_num = 2 # 样本类别数
 batch_size = 8 # 计算批次大小
@@ -93,7 +93,7 @@ for epoch in tqdm(range(1, total_epoch + 1)):
     train_epoch_loss /= len(data_loader_iter)
 
     print('\n---------')
-    print('epoch:',epoch, '   training time:', int(time.time()-tic), 's')
+    print('epoch:',epoch, '  training time:', int(time.time()-tic), 's')
     print('epoch average train loss:',train_epoch_loss)
     print('current learn rate: ', solver.optimizer.state_dict()['param_groups'][0]['lr'])
     

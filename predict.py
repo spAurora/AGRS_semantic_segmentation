@@ -22,7 +22,7 @@ import sys
 
 from data import DataTrainInform
 
-from networks.Dinknet import DinkNet34, DinkNet50, DinkNet101
+from networks.DLinknet import DLinkNet34, DLinkNet50, DLinkNet101
 from networks.Unet import Unet
 from networks.Dunet import Dunet
 from networks.Deeplab_v3_plus import DeepLabv3_plus

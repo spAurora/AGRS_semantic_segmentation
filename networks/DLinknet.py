@@ -83,9 +83,9 @@ class DecoderBlock(nn.Module):
         x = self.relu3(x)
         return x
     
-class DinkNet34(nn.Module):
+class DLinkNet34(nn.Module):
     def __init__(self, num_classes=1, band_num=3):
-        super(DinkNet34, self).__init__()
+        super(DLinkNet34, self).__init__()
 
         filters = [64, 128, 256, 512]
         resnet = models.resnet34(pretrained=True)
@@ -140,9 +140,9 @@ class DinkNet34(nn.Module):
 
         return torch.sigmoid(out)
 
-class DinkNet50(nn.Module):
+class DLinkNet50(nn.Module):
     def __init__(self, num_classes=1, band_num=3):
-        super(DinkNet50, self).__init__()
+        super(DLinkNet50, self).__init__()
 
         filters = [256, 512, 1024, 2048]
         resnet = models.resnet50(pretrained=True)
@@ -196,9 +196,9 @@ class DinkNet50(nn.Module):
 
         return torch.sigmoid(out)
     
-class DinkNet101(nn.Module):
+class DLinkNet101(nn.Module):
     def __init__(self, num_classes=1, band_num=3):
-        super(DinkNet101, self).__init__()
+        super(DLinkNet101, self).__init__()
 
         filters = [256, 512, 1024, 2048]
         resnet = models.resnet101(pretrained=False) #why 0628关闭预训练
