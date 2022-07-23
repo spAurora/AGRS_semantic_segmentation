@@ -17,11 +17,11 @@ from tqdm import tqdm
 import time
 import glob
 import torch
-from networks.dinknet import DinkNet34, DinkNet50, DinkNet101
-from networks.unet import Unet
-from networks.dunet import Dunet
-from networks.deeplabv3 import DeepLabv3_plus
-from networks.fcn8s import FCN8S
+from networks.Dinknet import DinkNet34, DinkNet50, DinkNet101
+from networks.Unet import Unet
+from networks.Dunet import Dunet
+from networks.Deeplab_v3_plus import DeepLabv3_plus
+from networks.FCN8S import FCN8S
 from torch.autograd import Variable as V
 from PIL import Image
 import cv2

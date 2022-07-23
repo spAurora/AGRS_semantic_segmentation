@@ -33,12 +33,12 @@ class Dblock(nn.Module):
         return out
     
 class Dunet(nn.Module):
-    def __init__(self, num_classes = 3):
+    def __init__(self, num_classes = 3, band_num=3):
         super(Dunet, self).__init__()
         
         vgg13 = models.vgg13(pretrained=False)
 
-        self.conv1 = vgg13.features[0]
+        self.conv1 = nn.Conv2d(band_num, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
         self.conv2 = vgg13.features[2]
         self.conv3 = vgg13.features[5]
         self.conv4 = vgg13.features[7]

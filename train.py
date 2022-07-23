@@ -14,11 +14,11 @@ import torch.utils.data as data
 from torch.autograd import Variable as V
 import os
 from time import time
-from networks.dinknet import  DinkNet34, DinkNet50, DinkNet101   
-from networks.unet import Unet
-from networks.dunet import Dunet
-from networks.deeplabv3 import DeepLabv3_plus, ResNet
-from networks.fcn8s import FCN8S
+from networks.Dinknet import  DinkNet34, DinkNet50, DinkNet101   
+from networks.Unet import Unet
+from networks.Dunet import Dunet
+from networks.Deeplab_v3_plus import DeepLabv3_plus
+from networks.FCN8S import FCN8S
 from framework import MyFrame
 from loss import CrossEntropyLoss2d, FocalLoss2d
 from data import DataLoader, DataTrainInform
@@ -27,10 +27,10 @@ import numpy as np
 
 SHAPE = (256,256) #数据维度
 
-trainListRoot = r'E:\manas_class\project_manas\glacier\2-trainlist\trainlist_0713.txt' #训练样本列表
-save_model_path = r'E:\manas_class\project_manas\glacier\3-weights' #训练模型保存路径  
+trainListRoot = r'E:\xinjiang\water\2-train_list\trainlist_0710.txt' #训练样本列表
+save_model_path = r'D:\AGRS\weights' #训练模型保存路径  
 model = DinkNet34 #选择的训练模型
-save_model_name = 'DinkNet34-manans_glacier.th' #训练模型保存名   
+save_model_name = 'DinkNet-WaterFourBand.th' #训练模型保存名   
 loss = FocalLoss2d #损失函数
 numclass = 2 #样本类别数
 batchsize = 8 #计算批次大小

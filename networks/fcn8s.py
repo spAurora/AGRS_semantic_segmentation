@@ -5,11 +5,12 @@ import torch
 
 
 class FCN8S(nn.Module):
-    def __init__(self, num_classes = 3):
+    def __init__(self, num_classes = 3, band_num=3):
         super().__init__()
 
-        mode_vgg19 = vgg19(pretrained=True).cuda()
+        mode_vgg19 = vgg19(pretrained=False).cuda()
         self.base_model = mode_vgg19.features
+        self.base_model[0] = nn.Conv2d(band_num, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
         self.relu = nn.ReLU(inplace=True)
         self.deconv1 = nn.ConvTranspose2d(512,512,3,2,1,1,1)  # 尺寸增加一倍16
         self.bn1 =nn.BatchNorm2d(512)  # 归一化，网络结构稳定

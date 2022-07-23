@@ -3,10 +3,10 @@ import torch.nn as nn
 from torch.autograd import Variable as V
 
 class Unet(nn.Module):
-    def __init__(self, num_classes = 3):
+    def __init__(self, num_classes=1, band_num=3):
         super(Unet, self).__init__()
         
-        self.down1 = self.conv_stage(3, 8)
+        self.down1 = self.conv_stage(band_num, 8)
         self.down2 = self.conv_stage(8, 16)
         self.down3 = self.conv_stage(16, 32)
         self.down4 = self.conv_stage(32, 64)
