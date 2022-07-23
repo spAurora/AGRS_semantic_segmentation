@@ -8,19 +8,13 @@ code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
 751984964@qq.com
 """
-from cProfile import label
-from cv2 import mean
 import torch
 import torch.utils.data as data
-from torch.autograd import Variable as V
 import skimage.io
-from PIL import Image
-import pickle
-import cv2
 import numpy as np
-import os
+from tqdm import tqdm
 
-class DataLoader(data.Dataset):
+class MyDataLoader(data.Dataset):
     def __init__(self,data_dict, root='', normalized_Label = False, band_num = 3):
         self.root = root
         self.normalized_Label = normalized_Label
@@ -67,7 +61,7 @@ class DataTrainInform:
         The class is employed for tackle class imbalance.
     """
 
-    def __init__(self, classes_num = 6, trainlistPath="",
+    def __init__(self, classes_num = 2, trainlistPath="",
                  inform_data_file="", normVal=1.10, band_num = 3, label_norm = False):
         """
         Args:
@@ -86,6 +80,7 @@ class DataTrainInform:
         self.std = np.zeros(band_num, dtype=np.float32)
         self.inform_data_file = inform_data_file
         self.label_norm = label_norm
+        self.img_shape = (-1, -1, -1)
 
     def compute_class_weights(self, histogram):
         """to compute the class weights
@@ -110,7 +105,11 @@ class DataTrainInform:
 
         with open(trainlistPath, 'r') as f:
             textFile = f.readlines()
-            for line in textFile:
+            
+            img_file, label_file = textFile[0].split()
+            self.img_shape = np.shape(skimage.io.imread(img_file))
+
+            for line in tqdm(textFile):
                 img_file, label_file = line.split()
                 img_data = skimage.io.imread(img_file)
                 label_data = skimage.io.imread(label_file, as_gray=True)
@@ -151,12 +150,12 @@ class DataTrainInform:
         print('Processing training data')
         return_val = self.readWholeTrainSet(trainlistPath=self.trainlistPath)
 
-        print('Pickling data')
         if return_val == 0:
             data_dict = dict()
             data_dict['mean'] = self.mean
             data_dict['std'] = self.std
             data_dict['classWeights'] = self.classWeights
+            data_dict['img_shape'] = self.img_shape
             return data_dict
         return None
           

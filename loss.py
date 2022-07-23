@@ -10,10 +10,7 @@ Aerospace Information Research Institute, Chinese Academy of Sciences
 """
 import torch
 import torch.nn as nn
-from torch.autograd import Variable as V
-from torch.nn.modules.loss import _Loss, _WeightedLoss
-import cv2
-import numpy as np
+from torch.nn.modules.loss import _WeightedLoss
 
 class CrossEntropyLoss2d(_WeightedLoss):
     """

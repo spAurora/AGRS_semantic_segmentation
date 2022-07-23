@@ -15,24 +15,21 @@ from osgeo.gdalconst import *
 from osgeo import gdal
 from tqdm import tqdm
 import time
-import glob
 import torch
+from torch.autograd import Variable as V
+import fnmatch
+import sys
+
+from data import DataTrainInform
+
 from networks.Dinknet import DinkNet34, DinkNet50, DinkNet101
 from networks.Unet import Unet
 from networks.Dunet import Dunet
 from networks.Deeplab_v3_plus import DeepLabv3_plus
 from networks.FCN8S import FCN8S
-from torch.autograd import Variable as V
-from PIL import Image
-import cv2
-import fnmatch
-from PIL import Image
-from data import DataTrainInform
-import sys
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
-BATCHSIZE_PER_CARD = 4
 background = [0, 0, 0]
 built_up = [255, 0, 0]
 farmland = [0, 255, 0]
@@ -192,7 +189,7 @@ if __name__ == '__main__':
     band_num = 4 #影像的波段数 训练与预测应一致
     label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
     overlap_rate = 0
-    target_size = 256
+    target_size = 256 # 预测滑窗大小，应与训练集应一致
 
     model_name = model.__class__.__name__
     print(model_name)

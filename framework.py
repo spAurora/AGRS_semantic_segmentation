@@ -8,19 +8,11 @@ code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
 751984964@qq.com
 """
-from turtle import shape
 import torch
 import torch.nn as nn
 from torch.autograd import Variable as V
-import torch.nn.functional as F
-
-import cv2
-import numpy as np
 
 class MyFrame():
-    """
-    一些参数函数
-    """
     def __init__(self, net, loss, lr=2e-4, evalmode = False):
         self.net = net.cuda()
         self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
@@ -66,6 +58,7 @@ class MyFrame():
         for param_group in self.optimizer.param_groups:
             param_group['lr'] = new_lr
 
-        print(mylog, 'update learning rate: %f -> %f' % (self.old_lr, new_lr))
+        mylog.write('update learning rate: %f -> %f' % (self.old_lr, new_lr) + '\n')
+
         print('update learning rate: %f -> %f' % (self.old_lr, new_lr))
         self.old_lr = new_lr
