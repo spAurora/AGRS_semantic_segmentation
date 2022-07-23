@@ -1,2 +1,2 @@
-Sun Jul 24 00:18:08 2022
+Sun Jul 24 00:02:11 2022
 data_dict: {'mean': array([52.548763, 56.491596, 64.769806, 66.900475], dtype=float32), 'std': array([3.1029084, 4.273212 , 6.525924 , 8.27117  ], dtype=float32), 'classWeights': array([1.5394629, 3.9845717], dtype=float32), 'img_shape': (256, 256, 4)}

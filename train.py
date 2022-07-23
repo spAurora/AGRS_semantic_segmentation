@@ -11,7 +11,9 @@ Aerospace Information Research Institute, Chinese Academy of Sciences
 import torch
 import os
 import time
+import numpy as np
 from tqdm import tqdm
+from torchsummary import summary
 
 from framework import MyFrame
 from loss import CrossEntropyLoss2d, FocalLoss2d
@@ -22,6 +24,7 @@ from networks.Unet import Unet
 from networks.Dunet import Dunet
 from networks.Deeplab_v3_plus import DeepLabv3_plus
 from networks.FCN8S import FCN8S
+from networks.DABNet import DABNet
 
 trainListRoot = r'E:\xinjiang\water\2-train_list\trainlist_0710.txt' # 训练样本列表
 save_model_path = r'D:\AGRS\weights' # 训练模型保存路径  
@@ -64,12 +67,18 @@ weight = torch.from_numpy(data_dict['classWeights']).cuda()
 loss = loss(weight=weight) 
 
 solver = MyFrame(net=model(num_classes=classes_num, band_num = band_num), loss=loss, lr=init_lr) # 初始化网络，损失函数，学习率
+
 save_model_full_path = save_model_path + '/' + save_model_name
 if os.path.exists(save_model_full_path):
     solver.load(save_model_full_path)
     print('---------\n***Resume Training***\n---------')
 else:
     print('---------\n***New Training***\n---------')
+
+'''输出模型信息'''
+torch_shape = np.array(data_dict['img_shape'])
+torch_shape = [torch_shape[2], torch_shape[0], torch_shape[1]]
+summary((solver.net), input_size = tuple(torch_shape), batch_size=batch_size)
 
 '''初始化dataloader'''
 dataset = MyDataLoader(root = trainListRoot, normalized_Label=if_norm_label, data_dict=data_dict, band_num=band_num) # 读取训练数据集
