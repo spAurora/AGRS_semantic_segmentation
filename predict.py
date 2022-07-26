@@ -183,7 +183,7 @@ if __name__ == '__main__':
     Img_type = '*.dat' # 待预测影像的类型
     trainListRoot = r'E:\xinjiang\water\2-train_list\trainlist_0710.txt' #与模型训练相同的trainlist
     numclass = 2 # 样本类别数
-    model = DLinkNet34 #模型ccc
+    model = DLinkNet34 #模型
     model_path = r'D:\AGRS\weights\DinkNet34-WaterFourBand.th' # 模型文件完整路径
     output_path = r'E:\xinjiang\water\3-predict_result' # 输出的预测结果路径
     band_num = 4 #影像的波段数 训练与预测应一致
