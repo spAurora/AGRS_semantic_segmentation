@@ -62,7 +62,7 @@ class DataTrainInform:
     """
 
     def __init__(self, classes_num = 2, trainlistPath="",
-                 inform_data_file="", normVal=1.10, band_num = 3, label_norm = False):
+                 inform_data_file="", normVal=1.10, band_num = 3, label_norm = False, label_weight_scale_factor = 1):
         """
         Args:
            data_dir: directory where the dataset is kept
@@ -81,6 +81,7 @@ class DataTrainInform:
         self.inform_data_file = inform_data_file
         self.label_norm = label_norm
         self.img_shape = (-1, -1, -1)
+        self.label_weight_scale_factor = label_weight_scale_factor
 
     def compute_class_weights(self, histogram):
         """to compute the class weights
@@ -89,7 +90,9 @@ class DataTrainInform:
         """
         normHist = histogram / np.sum(histogram)
         for i in range(self.classes):
-            self.classWeights[i] = 1 / (np.log(self.normVal + normHist[i]))
+            self.classWeights[i] = 1 / (np.log(self.normVal + normHist[i])) # 平滑类别权重
+            #self.classWeights[i] = 1 / (normHist[i] + 0.01) # 直接置倒数
+        self.classWeights = np.power(self.classWeights, self.label_weight_scale_factor) # 根据标签权重系数缩放
 
     def readWholeTrainSet(self, trainlistPath, train_flag=True):
         """to read the whole train set of current dataset.

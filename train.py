@@ -8,6 +8,7 @@ code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
 751984964@qq.com
 """
+from tkinter.tix import Tree
 import torch
 import os
 import time
@@ -26,20 +27,28 @@ from networks.Deeplab_v3_plus import DeepLabv3_plus
 from networks.FCN8S import FCN8S
 from networks.DABNet import DABNet
 
-trainListRoot = r'E:\xinjiang\water\2-train_list\trainlist_0710.txt' # 训练样本列表
-save_model_path = r'D:\AGRS\weights' # 训练模型保存路径  
-model = DLinkNet34 # 选择的训练模型
-save_model_name = 'DLinkNet34-WaterFourBand.th' # 训练模型保存名   
+'''参数设置'''
+trainListRoot = r'G:\manas_class\project_manas\water\2-trainlist\trainlist_0727_balance_test.txt' # 训练样本列表
+save_model_path = r'G:\manas_class\project_manas\water\3-weights' # 训练模型保存路径  
+model = Dunet # 选择的训练模型
+save_model_name = 'Dunet-manans_water_balance_0728test.th' # 训练模型保存名
+mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
 classes_num = 2 # 样本类别数
 batch_size = 8 # 计算批次大小
-init_lr = 0.005 # 初始学习率
+init_lr = 0.001 # 初始学习率
+lr_mode = 0 # 学习率更新模式，0为等比下降，1为标准下降
 total_epoch = 300 # 训练次数
 band_num = 4 # 影像的波段数
 if_norm_label = True # 是否对标签进行归一化 针对0/255二分类标签
 
-mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件
+simulate_batch_size = False #是否模拟大batchsize；除非显存太小一般不开启
+simulate_batch_size_num = 4 #模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
 
+label_weight_scale_factor = 1.2 #标签权重的指数缩放系数 1为不缩放
+
+
+'''收集系统环境信息'''
 tic = time.time()
 format_time = time.asctime(time.localtime(tic))
 print(format_time)
@@ -50,7 +59,8 @@ print('Cuda device count: ', torch.cuda.device_count())
 print('Current device: ', torch.cuda.current_device())
 
 '''收集数据集信息'''
-dataCollect = DataTrainInform(classes_num=classes_num, trainlistPath=trainListRoot, band_num=band_num, label_norm=if_norm_label) # 计算数据集信息
+dataCollect = DataTrainInform(classes_num=classes_num, trainlistPath=trainListRoot, band_num=band_num, 
+                            label_norm=if_norm_label, label_weight_scale_factor=label_weight_scale_factor) # 计算数据集信息
 data_dict = dataCollect.collectDataAndSave()
 if data_dict is None:
     print("error while pickling data. Please check.")
@@ -95,9 +105,17 @@ for epoch in tqdm(range(1, total_epoch + 1)):
     
     data_loader_iter = iter(data_loader) # 迭代器
     train_epoch_loss = 0
+    cnt = 0
     for img, mask in tqdm(data_loader_iter):
+        cnt = cnt + 1
         solver.set_input(img, mask)
-        train_loss = solver.optimize() # 优化器
+        if simulate_batch_size:
+            if (cnt % simulate_batch_size_num == 0): # 模拟大batchsize
+                train_loss = solver.optimize(ifStep=True)
+            else:
+                train_loss = solver.optimize(ifStep=False) 
+        else:
+            train_loss = solver.optimize(ifStep=True) # 非模拟大batchsize 每次迭代都更新参数
         train_epoch_loss += train_loss
     train_epoch_loss /= len(data_loader_iter)
 
@@ -106,21 +124,28 @@ for epoch in tqdm(range(1, total_epoch + 1)):
     print('epoch average train loss:',train_epoch_loss)
     print('current learn rate: ', solver.optimizer.state_dict()['param_groups'][0]['lr'])
     
-    if train_epoch_loss >= train_epoch_best_loss: 
-        no_optim += 1
-    else: # 若当前epoch的loss小于之前最好的loss
-        no_optim = 0
-        train_epoch_best_loss = train_epoch_loss # 保留当前epoch的loss
-        solver.save(save_model_full_path)
-    if no_optim > 12:
-        print(mylog, 'early stop at %d epoch' % epoch)
-        print('early stop at %d epoch' % epoch)
-        break
-    if no_optim > 0:
-        if solver.old_lr < 1e-6:
+    if lr_mode == 0:
+        if train_epoch_loss >= train_epoch_best_loss: 
+            no_optim += 1
+        else: # 若当前epoch的loss小于之前最好的loss
+            no_optim = 0
+            train_epoch_best_loss = train_epoch_loss # 保留当前epoch的loss
+            solver.save(save_model_full_path)
+        if no_optim > 15:
+            print(mylog, 'early stop at %d epoch' % epoch)
+            print('early stop at %d epoch' % epoch)
             break
-        solver.load(save_model_full_path)
-        solver.update_lr(2.0, factor = True, mylog = mylog)
+        if no_optim > 3:
+            if solver.old_lr < 1e-6:
+                break
+            solver.load(save_model_full_path)
+            solver.update_lr_geometric_decline(2.0, factor = True, mylog = mylog)
+    elif lr_mode == 1:
+        if train_epoch_loss >= train_epoch_best_loss:
+            train_epoch_best_loss = train_epoch_loss
+            solver.save(save_model_full_path)
+        solver.update_lr_standard(init_lr=init_lr, now_it=epoch, total_it=total_epoch+1, mylog = mylog)
+
     mylog.flush()
 
 print('\n---------')

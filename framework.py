@@ -10,7 +10,7 @@ Aerospace Information Research Institute, Chinese Academy of Sciences
 """
 import torch
 import torch.nn as nn
-from torch.autograd import Variable as V
+from torch.autograd import Variable
 
 class MyFrame():
     def __init__(self, net, loss, lr=2e-4, evalmode = False):
@@ -31,19 +31,20 @@ class MyFrame():
         self.img_id = img_id
     
         
-    def forward(self, volatile=False):#添加变量
-        self.img = V(self.img.cuda(), volatile=volatile)
+    def forward(self, volatile=False): # 添加变量
+        self.img = Variable(self.img.cuda(), volatile=volatile)
         if self.mask is not None:
-            self.mask = V(self.mask.long().cuda(), volatile=volatile)
+            self.mask = Variable(self.mask.long().cuda(), volatile=volatile)
         
-    def optimize(self):
+    def optimize(self, ifStep=True):
         self.forward()
-        self.optimizer.zero_grad()
-        pred = self.net.forward(self.img)#网络中输入数据
+        pred = self.net.forward(self.img) # 网络中输入数据
         label = self.mask.cpu().squeeze().cuda()
         loss = self.loss(output = pred, target = label)
-        loss.backward()
-        self.optimizer.step()
+        loss.backward() # 反向传播梯度
+        if ifStep:
+            self.optimizer.step() # 更新所有参数
+            self.optimizer.zero_grad() # 清空梯度
         return loss.item()
         
     def save(self, path):
@@ -52,7 +53,7 @@ class MyFrame():
     def load(self, path):
         self.net.load_state_dict(torch.load(path))
 
-    def update_lr(self, new_lr, mylog, factor=False):
+    def update_lr_geometric_decline(self, new_lr, mylog, factor=False): # 学习率等比下降更新
         if factor:
             new_lr = self.old_lr / new_lr
         for param_group in self.optimizer.param_groups:
@@ -62,3 +63,15 @@ class MyFrame():
 
         print('update learning rate: %f -> %f' % (self.old_lr, new_lr))
         self.old_lr = new_lr
+    
+    def update_lr_standard(self, init_lr, now_it, total_it, mylog): # 学习率标准下降更新
+        power = 0.9
+        lr = init_lr * (1 - float(now_it) / total_it) ** power
+        
+        for param_group in self.optimizer.param_groups:
+            param_group['lr'] = lr
+
+        mylog.write('update learning rate: %f -> %f' % (self.old_lr, lr) + '\n')
+        print('update learning rate: %f -> %f' % (self.old_lr, lr))
+
+        self.old_lr = lr
