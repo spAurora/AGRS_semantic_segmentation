@@ -180,13 +180,13 @@ class Predict():
 if __name__ == '__main__':
 
 
-    predictImgPath = r'G:\manas_class\project_manas\0-src_img_for_water_test' # 待预测影像的文件夹路径
+    predictImgPath = r'G:\manas_class\project_manas\0-src_img' # 待预测影像的文件夹路径
     Img_type = '*.dat' # 待预测影像的类型
     trainListRoot = r'G:\manas_class\project_manas\water\2-trainlist\trainlist_0727_balance_test.txt' #与模型训练相同的trainlist
     numclass = 2 # 样本类别数
     model = Dunet #模型
     model_path = r'G:\manas_class\project_manas\water\3-weights\Dunet-manans_water_balance_0728test.th' # 模型文件完整路径
-    output_path = r'G:\manas_class\project_manas\water\3-predict_result_0728_balance_dunt_test' # 输出的预测结果路径
+    output_path = r'G:\manas_class\project_manas\water\3-predict_result_0728_balance_dunt_test_labelweight1.0' # 输出的预测结果路径
     band_num = 4 #影像的波段数 训练与预测应一致
     label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
     overlap_rate = 0

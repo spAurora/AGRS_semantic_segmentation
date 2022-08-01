@@ -45,7 +45,7 @@ if_norm_label = True # 是否对标签进行归一化 针对0/255二分类标签
 simulate_batch_size = False #是否模拟大batchsize；除非显存太小一般不开启
 simulate_batch_size_num = 4 #模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
 
-label_weight_scale_factor = 1.2 #标签权重的指数缩放系数 1为不缩放
+label_weight_scale_factor = 1 #标签权重的指数缩放系数 1为不缩放
 
 
 '''收集系统环境信息'''
