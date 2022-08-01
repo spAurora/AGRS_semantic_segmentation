@@ -8,7 +8,6 @@ code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
 751984964@qq.com
 """
-import skimage.io
 import numpy as np
 import os
 from osgeo.gdalconst import *
@@ -19,6 +18,7 @@ import torch
 from torch.autograd import Variable as V
 import fnmatch
 import sys
+import math
 
 from data import DataTrainInform
 
@@ -103,29 +103,28 @@ class Predict():
 
             '''分块预测并写入输出影像'''
             # 全局
-            for i in tqdm(range(0, img_height - target_size, target_size)):
-                for j in range(0, img_width - target_size, target_size):
+            for i in tqdm(range(0, math.floor(img_width/target_size-1)*target_size, target_size)):
+                for j in range(0, math.floor(img_height/target_size-1)*target_size, target_size):
                     img_block = dataset.ReadAsArray(i, j, target_size, target_size)
                     self.Predict_wHy(img_block, dst_ds, xoff=i, yoff=j)
-            
-            # 右侧边缘
-            col_begin = img_width - target_size
-            for i in tqdm(range(0, img_height - target_size, target_size)):
-                img_block = dataset.ReadAsArray(i, col_begin, target_size, target_size)
-                self.Predict_wHy(img_block, dst_ds, xoff=i, yoff=col_begin)
-            
+                
             # 下侧边缘
             row_begin = img_height - target_size
             for i in tqdm(range(0, img_width - target_size, target_size)):
-                img_block = dataset.ReadAsArray(row_begin, i, target_size, target_size)
-                self.Predict_wHy(img_block, dst_ds, xoff=row_begin, yoff=i)
+                img_block = dataset.ReadAsArray(i, row_begin, target_size, target_size)
+                self.Predict_wHy(img_block, dst_ds, xoff=i, yoff=row_begin)
+            
+            # 右侧边缘
+            col_begin = img_width - target_size
+            for j in tqdm(range(0, img_height - target_size, target_size)):
+                img_block = dataset.ReadAsArray(col_begin, j, target_size, target_size)
+                self.Predict_wHy(img_block, dst_ds, xoff=col_begin, yoff=j)
 
             # 右下角
-            img_block = dataset.ReadAsArray(img_height-target_size, img_width-target_size, target_size, target_size)
-            self.Predict_wHy(img_block, dst_ds, img_height-target_size, img_width-target_size)
+            img_block = dataset.ReadAsArray(img_width-target_size, img_height-target_size, target_size, target_size)
+            self.Predict_wHy(img_block, dst_ds, img_width-target_size, img_height-target_size)
 
             print('预测耗费时间: %0.2f(min).' % ((time.time() - t0) / 60))
-
 
 if __name__ == '__main__':
 
