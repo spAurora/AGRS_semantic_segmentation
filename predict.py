@@ -8,6 +8,7 @@ code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
 751984964@qq.com
 """
+from email.policy import strict
 import skimage.io
 import numpy as np
 import os
@@ -28,6 +29,7 @@ from networks.Dunet import Dunet
 from networks.Deeplab_v3_plus import DeepLabv3_plus
 from networks.FCN8S import FCN8S
 from networks.DABNet import DABNet
+from networks.Segformer import Segformer
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
@@ -91,7 +93,7 @@ class Predict():
         dst_ds.FlushCache()
     
     def make_prediction_wHy(self, x, target_size, overlap_rate, predict, class_num):
-        weights = np.zeros((x.shape[0], x.shape[1], class_num), dtype=np.float32)
+        weights = np.zeros((x.shape[0], x.shape[1],class_num), dtype=np.float32)
         space = int(target_size * (1-overlap_rate))
         print('space: ', space)
         print('img shape: ', x.shape[0], x.shape[1], x.shape[2])
@@ -102,48 +104,50 @@ class Predict():
         
         for i in tqdm(range(0, x.shape[0] - target_size, space)):
             for j in range(0, x.shape[1] - target_size, space):
-                img_one = x[i:i + target_size, j:j + target_size, :]
+                img_one = x[i:i + target_size, j:j + target_size, :].copy()
                 pre_one = predict(img_one)
                 pre_one = pre_one.transpose(1,2,0)
-                weight = weights[i:i + target_size, j:j + target_size]
-                pre_current = pad_y[i:i + target_size, j:j + target_size]
-                result = (weight * pre_current + pre_one) * (1 / (weight + 1))
-                pad_y[i:i + target_size, j:j + target_size] = result
-                weights[i:i + target_size, j:j + target_size] += 1
+                weight = weights[i:i + target_size, j:j + target_size,:]
+                pre_current = pad_y[i:i + target_size, j:j + target_size,:]
+                result = (weight * pre_current + pre_one) * (1/(weight + 1))
+                pad_y[i:i + target_size, j:j + target_size,:] = result
+                weights[i:i + target_size, j:j + target_size,:] += 1
 
+        
+        #处理右侧边缘
         col_begin = x.shape[1] - target_size
         for i in tqdm(range(0, x.shape[0] - target_size, target_size)):
-            img_one = x[i:i + target_size, col_begin:x.shape[1], :]
+            img_one = x[i:i + target_size, col_begin:x.shape[1], :].copy()
             pre_one = predict(img_one)
             pre_one = pre_one.transpose(1, 2, 0)
-            weight = weights[i:i + target_size, col_begin:x.shape[1]]
-            pre_current = pad_y[i:i + target_size, col_begin:x.shape[1]]
+            weight = weights[i:i + target_size, col_begin:x.shape[1],:]
+            pre_current = pad_y[i:i + target_size, col_begin:x.shape[1],:]
             result = (weight * pre_current + pre_one) * (1 / (weight + 1))
-            pad_y[i:i + target_size, col_begin:x.shape[1]] = result
-            weights[i:i + target_size, col_begin:x.shape[1]] += 1
+            pad_y[i:i + target_size, col_begin:x.shape[1],:] = result
+            weights[i:i + target_size, col_begin:x.shape[1],:] += 1
 
         # 处理下方边缘数据
         row_begin = x.shape[0] - target_size
         for i in tqdm(range(0, x.shape[1] - target_size, target_size)):
-            img_one = x[row_begin:x.shape[0], i:i + target_size, :]
+            img_one = x[row_begin:x.shape[0], i:i + target_size, :].copy()
             pre_one = predict(img_one)
             pre_one = pre_one.transpose(1, 2, 0)
-            weight = weights[row_begin:x.shape[0], i:i + target_size]
-            pre_current = pad_y[row_begin:x.shape[0], i:i + target_size]
+            weight = weights[row_begin:x.shape[0], i:i + target_size,:]
+            pre_current = pad_y[row_begin:x.shape[0], i:i + target_size,:]
             result = (weight * pre_current + pre_one) * (1 / (weight + 1))
-            pad_y[row_begin:x.shape[0], i:i + target_size] = result
-            weights[row_begin:x.shape[0], i:i + target_size] += 1
+            pad_y[row_begin:x.shape[0], i:i + target_size,:] = result
+            weights[row_begin:x.shape[0], i:i + target_size,:] += 1
         
         # 处理右下角数据
-        img_one = x[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1], :]
+        img_one = x[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1], :].copy()
         pre_one = predict(img_one)
         pre_one = pre_one.transpose(1, 2, 0)
-        weight = weights[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1]]
-        pre_current = pad_y[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1]]
+        weight = weights[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1],:]
+        pre_current = pad_y[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1], :]
         result = (weight * pre_current + pre_one) * (1 / (weight + 1))
-        pad_y[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1]] = result
-        weights[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1]] += 1
-
+        pad_y[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1],:] = result
+        weights[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1],:] += 1
+        
         return pad_y
 
 
@@ -156,7 +160,7 @@ class Predict():
                 print("failed to open img")
                 sys.exit(1)
             pic = dataset.ReadAsArray()
-            pic = pic.transpose(1,2,0)
+            pic = pic.transpose(1,2,0) # (, , c)
             pic = pic.astype(np.float32)
 
             y_probs = self.make_prediction_wHy(x=pic, target_size=target_size, overlap_rate=overlap_rate, predict = lambda xx: solver.predict_x(xx), class_num=class_num) # 数据，目标大小，重叠度 预测函数 预测类别数，返回每次识别的
@@ -180,16 +184,16 @@ class Predict():
 if __name__ == '__main__':
 
 
-    predictImgPath = r'G:\manas_class\project_manas\0-src_img' # 待预测影像的文件夹路径
+    predictImgPath = r'G:\WV_GF_Tarim\WV2_dealed\Talimu_dealed' # 待预测影像的文件夹路径
     Img_type = '*.dat' # 待预测影像的类型
-    trainListRoot = r'G:\manas_class\project_manas\water\2-trainlist\trainlist_0727_balance_test.txt' #与模型训练相同的trainlist
-    numclass = 2 # 样本类别数
-    model = Dunet #模型
-    model_path = r'G:\manas_class\project_manas\water\3-weights\Dunet-manans_water_balance_0728test.th' # 模型文件完整路径
-    output_path = r'G:\manas_class\project_manas\water\3-predict_result_0728_balance_dunt_test_labelweight1.0' # 输出的预测结果路径
-    band_num = 4 #影像的波段数 训练与预测应一致
-    label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
-    overlap_rate = 0
+    trainListRoot = r'G:\Huyang_test_0808\2-trainlist\trainlist_0808_first_1.txt' #与模型训练相同的trainlist
+    numclass = 3 # 样本类别数
+    model = Unet #模型
+    model_path = r'G:\Huyang_test_0808\3-weights\Unet-huyang_test_0808_first_1.th' # 模型文件完整路径
+    output_path = r'G:\Huyang_test_0808\3-predict_test_result_0808_2' # 输出的预测结果路径
+    band_num = 8 #影像的波段数 训练与预测应一致
+    label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
+    overlap_rate = 0.8
     target_size = 256 # 预测滑窗大小，应与训练集应一致
 
     model_name = model.__class__.__name__

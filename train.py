@@ -26,21 +26,22 @@ from networks.Dunet import Dunet
 from networks.Deeplab_v3_plus import DeepLabv3_plus
 from networks.FCN8S import FCN8S
 from networks.DABNet import DABNet
+from networks.Segformer import Segformer
 
 '''参数设置'''
-trainListRoot = r'G:\manas_class\project_manas\water\2-trainlist\trainlist_0727_balance_test.txt' # 训练样本列表
-save_model_path = r'G:\manas_class\project_manas\water\3-weights' # 训练模型保存路径  
-model = Dunet # 选择的训练模型
-save_model_name = 'Dunet-manans_water_balance_0728test.th' # 训练模型保存名
+trainListRoot = r'G:\Huyang_test_0808\2-trainlist\trainlist_0808_first_2.txt' # 训练样本列表
+save_model_path = r'G:\Huyang_test_0808\3-weights' # 训练模型保存路径  
+model = Unet # 选择的训练模型
+save_model_name = 'Unet-huyang_test_0808_first_2.th' # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
-classes_num = 2 # 样本类别数
-batch_size = 8 # 计算批次大小
-init_lr = 0.001 # 初始学习率
+classes_num = 3 # 样本类别数"""  """
+batch_size = 4 # 计算批次大小
+init_lr = 0.0005 # 初始学习率
 lr_mode = 0 # 学习率更新模式，0为等比下降，1为标准下降
 total_epoch = 300 # 训练次数
-band_num = 4 # 影像的波段数
-if_norm_label = True # 是否对标签进行归一化 针对0/255二分类标签
+band_num = 8 # 影像的波段数
+if_norm_label = False # 是否对标签进行归一化 针对0/255二分类标签
 
 simulate_batch_size = False #是否模拟大batchsize；除非显存太小一般不开启
 simulate_batch_size_num = 4 #模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
@@ -140,6 +141,7 @@ for epoch in tqdm(range(1, total_epoch + 1)):
                 break
             solver.load(save_model_full_path)
             solver.update_lr_geometric_decline(2.0, factor = True, mylog = mylog)
+            no_optim = 0
     elif lr_mode == 1:
         if train_epoch_loss >= train_epoch_best_loss:
             train_epoch_best_loss = train_epoch_loss
