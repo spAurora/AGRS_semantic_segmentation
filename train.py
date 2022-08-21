@@ -32,7 +32,7 @@ from networks.Segformer import Segformer
 trainListRoot = r'G:\Huyang_test_0808\2-trainlist\trainlist_0808_first_2.txt' # 训练样本列表
 save_model_path = r'G:\Huyang_test_0808\3-weights' # 训练模型保存路径  
 model = Unet # 选择的训练模型
-save_model_name = 'Unet-huyang_test_0808_first_2.th' # 训练模型保存名
+save_model_name = 'Unet-huyang_test_0808_first_2_s1.2.th' # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
 classes_num = 3 # 样本类别数"""  """
@@ -46,8 +46,7 @@ if_norm_label = False # 是否对标签进行归一化 针对0/255二分类标�
 simulate_batch_size = False #是否模拟大batchsize；除非显存太小一般不开启
 simulate_batch_size_num = 4 #模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
 
-label_weight_scale_factor = 1 #标签权重的指数缩放系数 1为不缩放
-
+label_weight_scale_factor = 1.2 #标签权重的指数缩放系数 1为不缩放
 
 '''收集系统环境信息'''
 tic = time.time()

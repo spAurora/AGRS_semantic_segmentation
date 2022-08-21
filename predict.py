@@ -151,7 +151,7 @@ class Predict():
         return pad_y
 
 
-    def main(self, allpath, outpath, solver, overlap_rate=0.5, target_size=256, totif=False, class_num=0):  # 模型，所有图片路径列表，输出图片路径
+    def main(self, allpath, outpath, solver, overlap_rate=0.5, target_size=256, totif=False, class_num=0, output_png_preview = True):  # 模型，所有图片路径列表，输出图片路径
         print('start predict...')
         for one_path in allpath:
             t0 = time.time()
@@ -171,12 +171,14 @@ class Predict():
             if totif:
                 self.CreatTf(one_path, y_ori, outpath)
 
-            img_out = np.zeros(y_ori.shape + (3,))
-            img_out = img_out.astype(np.int16)
-            for i in range(self.class_number):
-                img_out[y_ori == i, :] = COLOR_DICT[i]  # 对应上色
-            save_file = os.path.join(outpath, n[:-4] + '_color' + '.png')
-            skimage.io.imsave(save_file, img_out)
+            if output_png_preview:
+                img_out = np.zeros(y_ori.shape + (3,))
+                img_out = img_out.astype(np.int16)
+                for i in range(self.class_number):
+                    img_out[y_ori == i, :] = COLOR_DICT[i]  # 对应上色
+                save_file = os.path.join(outpath, n[:-4] + '_color' + '.png')
+                skimage.io.imsave(save_file, img_out)
+
             os.startfile(outpath)
             print('预测耗费时间: %0.2f(min).' % ((time.time() - t0) / 60))
 
@@ -186,15 +188,16 @@ if __name__ == '__main__':
 
     predictImgPath = r'G:\WV_GF_Tarim\WV2_dealed\Talimu_dealed' # 待预测影像的文件夹路径
     Img_type = '*.dat' # 待预测影像的类型
-    trainListRoot = r'G:\Huyang_test_0808\2-trainlist\trainlist_0808_first_1.txt' #与模型训练相同的trainlist
+    trainListRoot = r'G:\Huyang_test_0808\2-trainlist\trainlist_0808_first_2.txt' #与模型训练相同的trainlist
     numclass = 3 # 样本类别数
     model = Unet #模型
-    model_path = r'G:\Huyang_test_0808\3-weights\Unet-huyang_test_0808_first_1.th' # 模型文件完整路径
-    output_path = r'G:\Huyang_test_0808\3-predict_test_result_0808_2' # 输出的预测结果路径
+    model_path = r'G:\Huyang_test_0808\3-weights\Unet-huyang_test_0808_first_2_s1.2.th' # 模型文件完整路径
+    output_path = r'G:\Huyang_test_0808\3-predict_test_result_0808_2_overlap0.5_s1.2' # 输出的预测结果路径
     band_num = 8 #影像的波段数 训练与预测应一致
     label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
     overlap_rate = 0.8
     target_size = 256 # 预测滑窗大小，应与训练集应一致
+    output_png_preview = False #是否输出png预览图
 
     model_name = model.__class__.__name__
     print(model_name)
@@ -224,7 +227,7 @@ if __name__ == '__main__':
         print(listpic)
 
     predict_instantiation = Predict(class_number = numclass)
-    predict_instantiation.main(listpic, output_path, solver, target_size=target_size, overlap_rate=overlap_rate, totif = True, class_num = numclass)
+    predict_instantiation.main(listpic, output_path, solver, target_size=target_size, overlap_rate=overlap_rate, totif = True, class_num = numclass, output_png_preview = output_png_preview)
 
 
 
