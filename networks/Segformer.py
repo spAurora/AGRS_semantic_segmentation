@@ -1,3 +1,4 @@
+from ctypes import sizeof
 from math import sqrt
 from functools import partial
 import torch
@@ -6,6 +7,7 @@ import torch.nn.functional as F
 
 from einops import rearrange, reduce
 from einops.layers.torch import Rearrange
+import numpy as np
 
 # helpers
 
@@ -187,7 +189,7 @@ class Segformer(nn.Module):
 
         self.to_fused = nn.ModuleList([nn.Sequential(
             nn.Conv2d(dim, decoder_dim, 1),
-            nn.Upsample(scale_factor = 2 ** i)
+            nn.Upsample(scale_factor = (2 ** i)*4)
         ) for i, dim in enumerate(dims)])
 
         self.to_segmentation = nn.Sequential(

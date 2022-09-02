@@ -2,6 +2,7 @@
 
 """
 AGRS_semantic_segmentation
+Training Framework and Functions
 训练框架及函数
 ~~~~~~~~~~~~~~~~
 code by wHy

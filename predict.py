@@ -2,6 +2,7 @@
 
 """
 AGRS_semantic_segmentation
+Model Prediction
 模型预测
 ~~~~~~~~~~~~~~~~
 code by wHy
@@ -190,12 +191,12 @@ if __name__ == '__main__':
     Img_type = '*.dat' # 待预测影像的类型
     trainListRoot = r'G:\Huyang_test_0808\2-trainlist\trainlist_0808_first_2.txt' #与模型训练相同的trainlist
     numclass = 3 # 样本类别数
-    model = Unet #模型
-    model_path = r'G:\Huyang_test_0808\3-weights\Unet-huyang_test_0808_first_2_s1.2.th' # 模型文件完整路径
-    output_path = r'G:\Huyang_test_0808\3-predict_test_result_0808_2_overlap0.5_s1.2' # 输出的预测结果路径
+    model = Segformer #模型
+    model_path = r'G:\Huyang_test_0808\3-weights\Segformer-huyang_test_0808_first_2_s1.th' # 模型文件完整路径
+    output_path = r'G:\Huyang_test_0808\3-predict_test_result_0902_1' # 输出的预测结果路径
     band_num = 8 #影像的波段数 训练与预测应一致
     label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
-    overlap_rate = 0.8
+    overlap_rate = 0
     target_size = 256 # 预测滑窗大小，应与训练集应一致
     output_png_preview = False #是否输出png预览图
 
