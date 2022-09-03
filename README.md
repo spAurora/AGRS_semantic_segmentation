@@ -1,6 +1,6 @@
 # AGRS_semantic_segmentation
 
-## 0.引入
+## 0.简介
 AGRS_semantic_segmentation是一个面向遥感制图工程的语义分割项目，作者于2022年5月起开始构建该项目，目前仍在持续更新中:star:。<br>
 
 感谢SZF老师、LJC老师、LJL老师课题组各位同学的通力合作<br>
