@@ -32,8 +32,24 @@ AGRS_semantic_segmentation是一个面向'遥感制图工程'的语义分割项�
 </details>
 
 ## 1. 部分结果展示
-### 1.1 玛纳斯流域多要素分类
-Sentinel-2 4波段<br>
-<img width="1000" src="github_img/1-2.gif"/> <br>
+### 1.1 玛纳斯流域多要素分类`(Sentinel-2 10m 4波段)`
+利用多个CNN-based语义分割模型提取了玛纳斯流域（约13万平方公里）的耕地、林地、冰川、建筑、水体、沙漠。<br>
+[矢量结果下载链接(百度网盘)](https://pan.baidu.com/s/1KyNjj8fd2pjWo6NxU5dWKQ) 
+提取码：ilvj<br>
 
+概览<br>
+<img width="800" src="github_img/1-0-2.gif"/> <br>
+局部放大<br>
+<img width="800" src="github_img/1-1-2.gif"/> <br>
 
+### 1.2 2021年7月新疆农作物种植分布`(Sentinel-2 10m 4波段)`
+概览<br>
+<img width="400" src="github_img/2-1-新疆2021年7月作物种植概览.png"/> <br>
+局部放大<br>
+<img width="800" src="github_img/2-1-2.gif"/> <br>
+
+### 1.3 塔里木河流域胡杨与红柳提取`(WV-2 2m 8波段)`
+概览<br>
+<img width="600" src="github_img/3-0-1.png"/> <br>
+局部放大<br>
+<img width="800" src="github_img/3-1-2.gif"/> <br>
