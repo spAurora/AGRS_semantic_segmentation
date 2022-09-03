@@ -34,7 +34,6 @@ AGRS_semantic_segmentation是一个面向'遥感制图工程'的语义分割项�
 ## 1. 部分结果展示
 ### 1.1 玛纳斯流域多要素分类
 Sentinel-2 4波段<br>
-[](github_img/1-2.gif)
-<width="1000" src="github_img/1-2.gif"/> <br>
+<img width="1000" src="github_img/1-2.gif"/> <br>
 
 
