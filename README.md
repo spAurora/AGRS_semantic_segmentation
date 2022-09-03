@@ -45,7 +45,7 @@ AGRS_semantic_segmentation是一个面向'遥感制图工程'的语义分割项�
 ### 1.2 2021年7月新疆农作物种植分布`(Sentinel-2 10m 4波段)`
 全疆大尺度遥感工程应用实践<br>
 概览<br>
-<img width="400" src="github_img/2-1-新疆2021年7月作物种植概览.png"/> <br>
+<img width="400" src="github_img/2-0-0.png"/> <br>
 局部放大<br>
 <img width="800" src="github_img/2-1-2.gif"/> <br>
 
