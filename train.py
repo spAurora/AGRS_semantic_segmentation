@@ -28,15 +28,16 @@ from networks.Deeplab_v3_plus import DeepLabv3_plus
 from networks.FCN8S import FCN8S
 from networks.DABNet import DABNet
 from networks.Segformer import Segformer
+from networks.RS_Segformer import RS_Segformer
 
 '''参数设置'''
 trainListRoot = r'G:\Huyang_test_0808\2-trainlist\trainlist_0808_first_2.txt' # 训练样本列表
 save_model_path = r'G:\Huyang_test_0808\3-weights' # 训练模型保存路径  
-model = Segformer # 选择的训练模型
-save_model_name = 'Segformer-huyang_test_0808_first_2_s1.th' # 训练模型保存名
+model = RS_Segformer # 选择的训练模型
+save_model_name = 'rsSegformer-huyang_test_0808_first_2_s1.th' # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
-classes_num = 3 # 样本类别数"""  """
+classes_num = 3 # 样本类别数
 batch_size = 4 # 计算批次大小
 init_lr = 0.0005 # 初始学习率
 lr_mode = 0 # 学习率更新模式，0为等比下降，1为标准下降

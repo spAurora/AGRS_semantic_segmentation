@@ -31,6 +31,7 @@ from networks.Deeplab_v3_plus import DeepLabv3_plus
 from networks.FCN8S import FCN8S
 from networks.DABNet import DABNet
 from networks.Segformer import Segformer
+from networks.RS_Segformer import RS_Segformer
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
@@ -191,9 +192,9 @@ if __name__ == '__main__':
     Img_type = '*.dat' # 待预测影像的类型
     trainListRoot = r'G:\Huyang_test_0808\2-trainlist\trainlist_0808_first_2.txt' #与模型训练相同的trainlist
     numclass = 3 # 样本类别数
-    model = Segformer #模型
-    model_path = r'G:\Huyang_test_0808\3-weights\Segformer-huyang_test_0808_first_2_s1.th' # 模型文件完整路径
-    output_path = r'G:\Huyang_test_0808\3-predict_test_result_0902_1' # 输出的预测结果路径
+    model = RS_Segformer #模型
+    model_path = r'G:\Huyang_test_0808\3-weights\rsSegformer-huyang_test_0808_first_2_s1.th' # 模型文件完整路径
+    output_path = r'G:\Huyang_test_0808\3-predict_test_result_0903_1' # 输出的预测结果路径
     band_num = 8 #影像的波段数 训练与预测应一致
     label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
     overlap_rate = 0
