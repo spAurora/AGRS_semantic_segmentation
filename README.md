@@ -33,9 +33,12 @@ AGRS_semantic_segmentation是一个面向遥感制图工程的语义分割项目
 
 ## 1. 部分结果展示
 ### 1.1 玛纳斯流域多要素分类`(Sentinel-2 10m 4波段)`
-利用多个CNN-based语义分割模型提取了玛纳斯流域（约13万平方公里）的耕地、林地、冰川、建筑、水体、沙漠。<br>
+利用多个CNN-based语义分割模型提取了玛纳斯流域（约13万平方公里）的耕地、林地、冰川、建筑、水体、沙漠。<br><br>
+
+[原始影像下载链接(百度网盘)](https://pan.baidu.com/s/1Pdm_mmMqskV4VxpuVOumgg)
+提取码：zodr<br>
 [矢量结果下载链接(百度网盘)](https://pan.baidu.com/s/1KyNjj8fd2pjWo6NxU5dWKQ) 
-提取码：ilvj<br>
+提取码：ilvj<br><br>
 
 **概览**<br>
 <img width="800" src="github_img/1-0-2.gif"/> <br>
