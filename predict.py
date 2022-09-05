@@ -2,15 +2,12 @@
 
 """
 AGRS_semantic_segmentation
-Model Prediction
 模型预测
 ~~~~~~~~~~~~~~~~
 code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
 751984964@qq.com
 """
-from email.policy import strict
-import skimage.io
 import numpy as np
 import os
 from osgeo.gdalconst import *
@@ -21,6 +18,7 @@ import torch
 from torch.autograd import Variable as V
 import fnmatch
 import sys
+import math
 
 from data import DataTrainInform
 
@@ -44,116 +42,42 @@ water = [0, 0, 255]
 COLOR_DICT = np.array([background, built_up, farmland, forest, meadow, water]) 
 
 class SolverFrame():
-    def __init__(self, net, data_dict, band_num = 3):
+    def __init__(self, net):
         self.net = net.cuda()
-        self.img_mean = data_dict['mean']
-        self.std = data_dict['std']
-        self.band_num = band_num
-
-
         self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
-
-    def predict_x(self, img):
-        self.net.eval()
-
-        for i in range(self.band_num):
-            img[:,:,i] -= self.img_mean[i]
-        img = img / self.std
-
-        img = np.expand_dims(img, 0)
-        img = img.transpose(0, 3, 1, 2)
-        img = V(torch.Tensor(img).cuda())
-        maska = self.net.forward(img).squeeze().cpu().data.numpy()
-
-        return maska
 
     def load(self, path):
         self.net.load_state_dict(torch.load(path))
 
 class Predict():
-    def __init__(self, class_number):
+    def __init__(self, net, class_number, band_num):
         self.class_number = class_number
-
-    def CreatTf(self, file_path_img, data, outpath):  # 创建tif文件
-        print(file_path_img)
-        d, n = os.path.split(file_path_img)
-        dataset = gdal.Open(file_path_img, GA_ReadOnly)  
-
-        projinfo = dataset.GetProjection() 
-        geotransform = dataset.GetGeoTransform()
-
-        format = "GTiff"
-        driver = gdal.GetDriverByName(format)  # 数据格式
-        name = n[:-4] + '_result' + '.tif'  # 输出文件名字
-
-
-        dst_ds = driver.Create(os.path.join(outpath, name), dataset.RasterXSize, dataset.RasterYSize,
-                               1, gdal.GDT_Byte)  # 创建一个新的文件
-        dst_ds.SetGeoTransform(geotransform)  # 写入投影
-        dst_ds.SetProjection(projinfo)  # 写入坐标
-        dst_ds.GetRasterBand(1).WriteArray(data)
-        dst_ds.FlushCache()
+        self.img_mean = data_dict['mean']
+        self.std = data_dict['std']
+        self.net = net
+        self.band_num = band_num
     
-    def make_prediction_wHy(self, x, target_size, overlap_rate, predict, class_num):
-        weights = np.zeros((x.shape[0], x.shape[1],class_num), dtype=np.float32)
-        space = int(target_size * (1-overlap_rate))
-        print('space: ', space)
-        print('img shape: ', x.shape[0], x.shape[1], x.shape[2])
-        pad_y = np.zeros(
-            (x.shape[0], x.shape[1], class_num),
-            dtype=np.float32)
-        print('pad_y shape:', np.shape(pad_y))
-        
-        for i in tqdm(range(0, x.shape[0] - target_size, space)):
-            for j in range(0, x.shape[1] - target_size, space):
-                img_one = x[i:i + target_size, j:j + target_size, :].copy()
-                pre_one = predict(img_one)
-                pre_one = pre_one.transpose(1,2,0)
-                weight = weights[i:i + target_size, j:j + target_size,:]
-                pre_current = pad_y[i:i + target_size, j:j + target_size,:]
-                result = (weight * pre_current + pre_one) * (1/(weight + 1))
-                pad_y[i:i + target_size, j:j + target_size,:] = result
-                weights[i:i + target_size, j:j + target_size,:] += 1
+    def Predict_wHy(self, img_block, dst_ds, xoff, yoff):
+        img_block = img_block.transpose(1, 2, 0) # (c, h, w) -> (h, w ,c)
+        img_block = img_block.astype(np.float32)
 
-        
-        #处理右侧边缘
-        col_begin = x.shape[1] - target_size
-        for i in tqdm(range(0, x.shape[0] - target_size, target_size)):
-            img_one = x[i:i + target_size, col_begin:x.shape[1], :].copy()
-            pre_one = predict(img_one)
-            pre_one = pre_one.transpose(1, 2, 0)
-            weight = weights[i:i + target_size, col_begin:x.shape[1],:]
-            pre_current = pad_y[i:i + target_size, col_begin:x.shape[1],:]
-            result = (weight * pre_current + pre_one) * (1 / (weight + 1))
-            pad_y[i:i + target_size, col_begin:x.shape[1],:] = result
-            weights[i:i + target_size, col_begin:x.shape[1],:] += 1
+        self.net.eval()
 
-        # 处理下方边缘数据
-        row_begin = x.shape[0] - target_size
-        for i in tqdm(range(0, x.shape[1] - target_size, target_size)):
-            img_one = x[row_begin:x.shape[0], i:i + target_size, :].copy()
-            pre_one = predict(img_one)
-            pre_one = pre_one.transpose(1, 2, 0)
-            weight = weights[row_begin:x.shape[0], i:i + target_size,:]
-            pre_current = pad_y[row_begin:x.shape[0], i:i + target_size,:]
-            result = (weight * pre_current + pre_one) * (1 / (weight + 1))
-            pad_y[row_begin:x.shape[0], i:i + target_size,:] = result
-            weights[row_begin:x.shape[0], i:i + target_size,:] += 1
-        
-        # 处理右下角数据
-        img_one = x[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1], :].copy()
-        pre_one = predict(img_one)
-        pre_one = pre_one.transpose(1, 2, 0)
-        weight = weights[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1],:]
-        pre_current = pad_y[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1], :]
-        result = (weight * pre_current + pre_one) * (1 / (weight + 1))
-        pad_y[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1],:] = result
-        weights[x.shape[0] - target_size:x.shape[0], x.shape[1] - target_size:x.shape[1],:] += 1
-        
-        return pad_y
+        for i in range(self.band_num):
+            img_block[:, :, i] -= self.img_mean[i]
+        img_block = img_block / self.std
+
+        img_block = np.expand_dims(img_block, 0)
+        img_block = img_block.transpose(0, 3, 1, 2)
+        img_block = V(torch.Tensor(img_block).cuda())
+        predict_out = self.net.forward(img_block).squeeze().cpu().data.numpy()
+
+        predict_out = predict_out.transpose(1, 2, 0) # (h, w, c) -> (c, h, w)
+        predict_result = np.argmax(predict_out, axis=2)
+        dst_ds.GetRasterBand(1).WriteArray(predict_result, xoff, yoff)
 
 
-    def main(self, allpath, outpath, solver, overlap_rate=0.5, target_size=256, totif=False, class_num=0, output_png_preview = True):  # 模型，所有图片路径列表，输出图片路径
+    def Main(self, allpath, outpath, target_size=256, unify_read_img = False):  
         print('start predict...')
         for one_path in allpath:
             t0 = time.time()
@@ -161,63 +85,104 @@ class Predict():
             if dataset == None:
                 print("failed to open img")
                 sys.exit(1)
-            pic = dataset.ReadAsArray()
-            pic = pic.transpose(1,2,0) # (, , c)
-            pic = pic.astype(np.float32)
+            img_width = dataset.RasterXSize
+            img_height = dataset.RasterYSize
 
-            y_probs = self.make_prediction_wHy(x=pic, target_size=target_size, overlap_rate=overlap_rate, predict = lambda xx: solver.predict_x(xx), class_num=class_num) # 数据，目标大小，重叠度 预测函数 预测类别数，返回每次识别的
-
-            y_ori = np.argmax(y_probs, axis=2)
+            '''新建输出tif'''
             d, n = os.path.split(one_path)
 
-            if totif:
-                self.CreatTf(one_path, y_ori, outpath)
+            projinfo = dataset.GetProjection() 
+            geotransform = dataset.GetGeoTransform()
 
-            if output_png_preview:
-                img_out = np.zeros(y_ori.shape + (3,))
-                img_out = img_out.astype(np.int16)
-                for i in range(self.class_number):
-                    img_out[y_ori == i, :] = COLOR_DICT[i]  # 对应上色
-                save_file = os.path.join(outpath, n[:-4] + '_color' + '.png')
-                skimage.io.imsave(save_file, img_out)
+            format = "GTiff"
+            driver = gdal.GetDriverByName(format)  # 数据格式
+            name = n[:-4] + '_result' + '.tif'  # 输出文件名
 
-            os.startfile(outpath)
-            print('预测耗费时间: %0.2f(min).' % ((time.time() - t0) / 60))
+            dst_ds = driver.Create(os.path.join(outpath, name), dataset.RasterXSize, dataset.RasterYSize,
+                                1, gdal.GDT_Byte)  # 创建一个新的文件
+            dst_ds.SetGeoTransform(geotransform)  # 写入投影
+            dst_ds.SetProjection(projinfo)  # 写入坐标
 
+            
+            if unify_read_img:
+                '''集中读取影像并预测'''
+                img_block = dataset.ReadAsArray() # 影像一次性读入内存
+                #全局
+                for i in tqdm(range(0, math.floor(img_width/target_size-1)*target_size, target_size)):
+                    for j in range(0, math.floor(img_height/target_size-1)*target_size, target_size):
+                        self.Predict_wHy(img_block[:, j:j+target_size, i:i+target_size], dst_ds, xoff=i, yoff=j)
+                
+                #下侧边缘
+                row_begin = img_height - target_size
+                for i in tqdm(range(0, img_width - target_size, target_size)):
+                    self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, i:i+target_size], dst_ds, xoff=i, yoff=row_begin)
+
+                #右侧边缘
+                col_begin = img_width - target_size
+                for j in tqdm(range(0, img_height - target_size, target_size)):
+                    self.Predict_wHy(img_block[:, j:j+target_size, col_begin:col_begin+target_size], dst_ds, xoff=col_begin, yoff=j)
+
+                #右下角
+                self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, col_begin:col_begin+target_size], dst_ds, img_width-target_size, img_height-target_size)
+                dst_ds.FlushCache() # 缓存写入磁盘
+            else:
+                '''分块读取影像并预测'''
+                # 全局
+                for i in tqdm(range(0, math.floor(img_width/target_size-1)*target_size, target_size)):
+                    for j in range(0, math.floor(img_height/target_size-1)*target_size, target_size):
+                        img_block = dataset.ReadAsArray(i, j, target_size, target_size)
+                        self.Predict_wHy(img_block, dst_ds, xoff=i, yoff=j)
+                    dst_ds.FlushCache()
+                    
+                # 下侧边缘
+                row_begin = img_height - target_size
+                for i in tqdm(range(0, img_width - target_size, target_size)):
+                    img_block = dataset.ReadAsArray(i, row_begin, target_size, target_size)
+                    self.Predict_wHy(img_block, dst_ds, xoff=i, yoff=row_begin)
+                dst_ds.FlushCache()
+                
+                # 右侧边缘
+                col_begin = img_width - target_size
+                for j in tqdm(range(0, img_height - target_size, target_size)):
+                    img_block = dataset.ReadAsArray(col_begin, j, target_size, target_size)
+                    self.Predict_wHy(img_block, dst_ds, xoff=col_begin, yoff=j)
+                dst_ds.FlushCache()
+
+                # 右下角
+                img_block = dataset.ReadAsArray(img_width-target_size, img_height-target_size, target_size, target_size)
+                self.Predict_wHy(img_block, dst_ds, img_width-target_size, img_height-target_size)
+                dst_ds.FlushCache()
+
+            print('预测耗费时间: %0.1f(s).' % (time.time() - t0))
 
 if __name__ == '__main__':
-
 
     predictImgPath = r'G:\WV_GF_Tarim\WV2_dealed\Talimu_dealed' # 待预测影像的文件夹路径
     Img_type = '*.dat' # 待预测影像的类型
     trainListRoot = r'G:\Huyang_test_0808\2-trainlist\trainlist_0808_first_2.txt' #与模型训练相同的trainlist
     numclass = 3 # 样本类别数
-    model = RS_Segformer #模型
-    model_path = r'G:\Huyang_test_0808\3-weights\rsSegformer-huyang_test_0808_first_2_s1.th' # 模型文件完整路径
-    output_path = r'G:\Huyang_test_0808\3-predict_test_result_0903_1' # 输出的预测结果路径
+    model = Segformer #模型
+    model_path = r'G:\Huyang_test_0808\3-weights\Segformer-huyang_test_0808_first_2_s1.th' # 模型文件完整路径
+    output_path = r'G:\Huyang_test_0808\3-predict_test_result_0902_1' # 输出的预测结果路径
     band_num = 8 #影像的波段数 训练与预测应一致
     label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
-    overlap_rate = 0
     target_size = 256 # 预测滑窗大小，应与训练集应一致
-    output_png_preview = False #是否输出png预览图
+    unify_read_img = True # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
 
-    model_name = model.__class__.__name__
-    print(model_name)
-
+    '''收集训练集信息'''
     dataCollect = DataTrainInform(classes_num=numclass, trainlistPath=trainListRoot, band_num=band_num, label_norm=label_norm) #计算数据集信息
     data_dict = dataCollect.collectDataAndSave()
 
     print('data mean: ', data_dict['mean'])
     print('data std: ', data_dict['std'])
 
-    #data_dict['mean'] = [92.663475, 97.823914, 90.74943] #自定义
-    #data_dict['std'] = [44.311825, 41.875866, 38.67438] #自定义
-
-    solver = SolverFrame(net = model(num_classes=numclass, band_num = band_num), data_dict=data_dict, band_num=band_num) 
+    '''初始化模型'''
+    solver = SolverFrame(net = model(num_classes=numclass, band_num = band_num)) 
     solver.load(model_path)
     if not os.path.exists(output_path):
         os.mkdir(output_path)
 
+    '''读取待预测影像'''
     listpic = fnmatch.filter(os.listdir(predictImgPath), Img_type)
     for i in range(len(listpic)):
         listpic[i] = os.path.join(predictImgPath + '/' + listpic[i])
@@ -228,8 +193,9 @@ if __name__ == '__main__':
     else:
         print(listpic)
 
-    predict_instantiation = Predict(class_number = numclass)
-    predict_instantiation.main(listpic, output_path, solver, target_size=target_size, overlap_rate=overlap_rate, totif = True, class_num = numclass, output_png_preview = output_png_preview)
+    '''执行预测'''
+    predict_instantiation = Predict(net=solver.net, class_number=numclass, band_num=band_num)
+    predict_instantiation.Main(listpic, output_path, target_size, unify_read_img=unify_read_img)
 
 
 
