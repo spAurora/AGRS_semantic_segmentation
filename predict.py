@@ -33,14 +33,6 @@ from networks.RS_Segformer import RS_Segformer
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
-background = [0, 0, 0]
-built_up = [255, 0, 0]
-farmland = [0, 255, 0]
-forest = [0, 255, 255]
-meadow = [255, 255, 0]
-water = [0, 0, 255]
-COLOR_DICT = np.array([background, built_up, farmland, forest, meadow, water]) 
-
 class SolverFrame():
     def __init__(self, net):
         self.net = net.cuda()
