@@ -31,21 +31,21 @@ from networks.Segformer import Segformer
 from networks.RS_Segformer import RS_Segformer
 
 '''参数设置'''
-trainListRoot = r'G:\Huyang_test_0808\2-trainlist\trainlist_0808_first_2.txt' # 训练样本列表
-save_model_path = r'G:\Huyang_test_0808\3-weights' # 训练模型保存路径  
-model = RS_Segformer # 选择的训练模型
-save_model_name = 'rsSegformer-huyang_test_0808_first_2_s1.th' # 训练模型保存名
+trainListRoot = r'E:\project_UAV\2-trainlist\trainlist_0907_1.txt' # 训练样本列表
+save_model_path = r'E:\project_UAV\3-weights' # 训练模型保存路径  
+model = Dunet # 选择的训练模型
+save_model_name = 'Dunet-UAV_building_0907_1.th' # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
-classes_num = 3 # 样本类别数
-batch_size = 4 # 计算批次大小
+classes_num = 2 # 样本类别数
+batch_size = 2 # 计算批次大小
 init_lr = 0.0005 # 初始学习率
 lr_mode = 0 # 学习率更新模式，0为等比下降，1为标准下降
 total_epoch = 300 # 训练次数
-band_num = 8 # 影像的波段数
-if_norm_label = False # 是否对标签进行归一化 针对0/255二分类标签
+band_num = 4 # 影像的波段数
+if_norm_label = True # 是否对标签进行归一化 0/255二分类应设置为True
 
-simulate_batch_size = False #是否模拟大batchsize；除非显存太小一般不开启
+simulate_batch_size = True #是否模拟大batchsize；除非显存太小一般不开启
 simulate_batch_size_num = 4 #模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
 
 label_weight_scale_factor = 1 #标签权重的指数缩放系数 1为不缩放
