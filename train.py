@@ -31,21 +31,21 @@ from networks.Segformer import Segformer
 from networks.RS_Segformer import RS_Segformer
 
 '''参数设置'''
-trainListRoot = r'E:\project_UAV\2-trainlist\trainlist_0907_1.txt' # 训练样本列表
+trainListRoot = r'E:\project_UAV\2-trainlist\trainlist_0909_1.txt' # 训练样本列表
 save_model_path = r'E:\project_UAV\3-weights' # 训练模型保存路径  
 model = Dunet # 选择的训练模型
-save_model_name = 'Dunet-UAV_building_0907_1.th' # 训练模型保存名
+save_model_name = 'Dunet-UAV_building_0909_1.th' # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
 classes_num = 2 # 样本类别数
-batch_size = 2 # 计算批次大小
-init_lr = 0.0005 # 初始学习率
+batch_size = 16 # 计算批次大小
+init_lr = 0.0001 # 初始学习率
 lr_mode = 0 # 学习率更新模式，0为等比下降，1为标准下降
 total_epoch = 300 # 训练次数
-band_num = 4 # 影像的波段数
+band_num = 3 # 影像的波段数
 if_norm_label = True # 是否对标签进行归一化 0/255二分类应设置为True
 
-simulate_batch_size = True #是否模拟大batchsize；除非显存太小一般不开启
+simulate_batch_size = False #是否模拟大batchsize；除非显存太小一般不开启
 simulate_batch_size_num = 4 #模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
 
 label_weight_scale_factor = 1 #标签权重的指数缩放系数 1为不缩放
@@ -137,7 +137,7 @@ for epoch in tqdm(range(1, total_epoch + 1)):
             print(mylog, 'early stop at %d epoch' % epoch)
             print('early stop at %d epoch' % epoch)
             break
-        if no_optim > 3:
+        if no_optim > 0:
             if solver.old_lr < 1e-6:
                 break
             solver.load(save_model_full_path)

@@ -1,0 +1,2 @@
+Thu Sep  8 23:04:14 2022
+data_dict: {'mean': array([149.0412 , 146.62044, 139.13342], dtype=float32), 'std': array([54.73652 , 52.401585, 53.678047], dtype=float32), 'classWeights': array([1.4714684, 4.8897114], dtype=float32), 'img_shape': (256, 256, 3)}

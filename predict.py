@@ -149,16 +149,16 @@ class Predict():
 
 if __name__ == '__main__':
 
-    predictImgPath = r'F:\project_UAV\1-clip_img' # 待预测影像的文件夹路径
+    predictImgPath = r'E:\project_UAV\0-other_data\pre_test_img' # 待预测影像的文件夹路径
     Img_type = '*.tif' # 待预测影像的类型
-    trainListRoot = r'F:\project_UAV\2-trainlist\trainlist_0907_1.txt' #与模型训练相同的trainlist
+    trainListRoot = r'E:\liuyang\dataset_for_pre_training\augmented\2-trainlist\trainlist_0908_pre.txt' #与模型训练相同的trainlist
     numclass = 2 # 样本类别数
     model = Dunet #模型
-    model_path = r'F:\project_UAV\3-weights\Dunet-UAV_0907_1.th' # 模型文件完整路径
-    output_path = r'F:\project_UAV\3-predict_result_0907_1' # 输出的预测结果路径
-    band_num = 4 #影像的波段数 训练与预测应一致
+    model_path = r'E:\project_UAV\3-weights\Dunet-UAV_building_0908_pre.th' # 模型文件完整路径
+    output_path = r'E:\project_UAV\0-other_data\pre_test_out' # 输出的预测结果路径
+    band_num = 3 #影像的波段数 训练与预测应一致
     label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
-    target_size = 768 # 预测滑窗大小，应与训练集应一致
+    target_size = 256 # 预测滑窗大小，应与训练集应一致
     unify_read_img = True # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
 
     '''收集训练集信息'''
