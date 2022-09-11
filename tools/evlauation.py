@@ -20,8 +20,8 @@ import ogr
 
 os.environ['GDAL_DATA'] = r'C:\Users\75198\.conda\envs\learn\Lib\site-packages\GDAL-2.4.1-py3.6-win-amd64.egg-info\gata-data' #防止报error4错误
 
-ground_truth_path = r'E:\project_manans\forest\1-raster_label\1-raster_label_ori' # 存储待评定真值标签的文件夹
-predict_shp_path = r'E:\project_manans\forest\5-forest_shp_final\forest_all_merge.shp' # 存储预测矢量的文件
+ground_truth_path = r'E:\project_UAV\1-raster_label' # 存储待评定真值标签的文件夹
+predict_shp_path = r'E:\project_UAV\1-artificial_shp' # 存储预测矢量的文件
 
 gt_list = fnmatch.filter(os.listdir(ground_truth_path), '*.tif') # 过滤出所有tif文件
 
@@ -40,6 +40,8 @@ MIoU = []
 for gt_file in gt_list:
     gt_file = os.path.join(ground_truth_path + '/' + gt_file)
 
+    print(gt_file)
+    
     '''读取真值数据'''
     image_gt = gdal.Open(gt_file)
     geotransform = image_gt.GetGeoTransform()             
@@ -89,11 +91,11 @@ for gt_file in gt_list:
                 sys.exit(1)
 
     '''计算精度评定指标'''
-    OA_tmp = (TP_tmp+TN_tmp)/(TP_tmp+TN_tmp+FP_tmp+FN_tmp)
-    PA_tmp = TP_tmp/(TP_tmp+FP_tmp)
-    UA_tmp = TP_tmp/(TP_tmp+FN_tmp)
-    F1_tmp = 2*(PA_tmp*UA_tmp)/(PA_tmp+UA_tmp)
-    MIoU_tmp = TP_tmp/(FN_tmp+FP_tmp+TP_tmp)
+    OA_tmp = (TP_tmp+TN_tmp)/(TP_tmp+TN_tmp+FP_tmp+FN_tmp+1)
+    PA_tmp = TP_tmp/(TP_tmp+FP_tmp+1)
+    UA_tmp = TP_tmp/(TP_tmp+FN_tmp+1)
+    F1_tmp = 2*(PA_tmp*UA_tmp)/(PA_tmp+UA_tmp+1)
+    MIoU_tmp = TP_tmp/(FN_tmp+FP_tmp+TP_tmp+1)
 
     print(TP_tmp, TN_tmp, FP_tmp, FN_tmp, PA_tmp, UA_tmp, OA_tmp, F1_tmp, MIoU_tmp)
 
