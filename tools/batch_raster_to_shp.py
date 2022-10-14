@@ -81,13 +81,14 @@ os.environ['GDAL_DATA'] = r'C:\Users\75198\.conda\envs\learn\Lib\site-packages\G
 gdal.SetConfigOption("GDAL_FILENAME_IS_UTF8", "YES")
 gdal.SetConfigOption("SHAPE_ENCODING", "GBK")
 
-tif_img_path = r'F:\project_UAV_predict_result_0909_1'
-shp_img_path = r'E:\project_UAV\4-shp_result_0909_1\process'
+tif_img_path = r'F:\4-predict_glacier'
+shp_img_path = r'F:\4-predict_glacier_shp'
 
 listpic = fnmatch.filter(os.listdir(tif_img_path), '*.tif')
 for img in tqdm(listpic):
     tif_img_full_path = tif_img_path + '/' + img
     shp_full_path = shp_img_path + '/' + img[:-4] + '.shp'
+    print('start processing: '+ img)
     raster2poly(tif_img_full_path, shp_full_path)
 
     ogr.RegisterAll()# 注册所有的驱动
@@ -111,5 +112,5 @@ for img in tqdm(listpic):
     del shp_dataset
 
     '''平滑矢量'''
-    smooth_shp_full_path = shp_img_path + '/' + 'smooth_' + img[:-4] + '.shp'
-    smoothing(shp_full_path, smooth_shp_full_path, bdistance=0.1)
+    #smooth_shp_full_path = shp_img_path + '/' + 'smooth_' + img[:-4] + '.shp'
+    #smoothing(shp_full_path, smooth_shp_full_path, bdistance=0.15)

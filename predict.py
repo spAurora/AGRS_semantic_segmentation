@@ -8,6 +8,7 @@ code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
 751984964@qq.com
 """
+from multiprocessing.spawn import import_main_path
 import numpy as np
 import os
 from osgeo.gdalconst import *
@@ -30,6 +31,8 @@ from networks.FCN8S import FCN8S
 from networks.DABNet import DABNet
 from networks.Segformer import Segformer
 from networks.RS_Segformer import RS_Segformer
+from networks.DE_Segformer import DE_Segformer
+
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
@@ -155,7 +158,7 @@ class Predict():
             '''统一argmax'''
             predict_result = dst_ds.ReadAsArray()
             class_result = np.argmax(predict_result, axis=0)
-            rst_ds.GetRasterBand(1).WriteArray(class_result, 0, 0)
+            rst_ds.GetRasterBand(1).WriteArray(class_result*255, 0, 0)
             rst_ds.FlushCache() #写入硬盘
             del rst_ds
             del dst_ds
@@ -164,14 +167,14 @@ class Predict():
 
 if __name__ == '__main__':
 
-    predictImgPath = r'D:\0code\predict_test_img' # 待预测影像的文件夹路径
-    Img_type = '*.dat' # 待预测影像的类型
-    trainListRoot = r'E:\project_manas\farmland\2-trainlist\D34-manans_farmland_0802_add_negative.txt' #与模型训练相同的trainlist
+    predictImgPath = r'D:\0-zhuanhuan2\srimg' # 待预测影像的文件夹路径
+    Img_type = '*.tif' # 待预测影像的类型
+    trainListRoot = r'E:\project_UAV\2-trainlist\trainlist_0910_1.txt' #与模型训练相同的trainlist
     numclass = 2 # 样本类别数
-    model = DLinkNet34 #模型
-    model_path = r'E:\project_manas\farmland\3-weights\DinkNet34-manans_farmland_addnage.th' # 模型文件完整路径
-    output_path = r'D:\0code\predict_test_out' # 输出的预测结果路径
-    band_num = 4 #影像的波段数 训练与预测应一致
+    model = DE_Segformer #模型
+    model_path = r'E:\project_UAV\3-weights\DE_Segformer_N-UAV_building_1008.th' # 模型文件完整路径
+    output_path = r'D:\0-zhuanhuan2\predict_result\DE_Segformer_N' # 输出的预测结果路径
+    band_num = 3 #影像的波段数 训练与预测应一致
     label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
     target_size = 256 # 预测滑窗大小，应与训练集应一致
     unify_read_img = True # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
@@ -180,6 +183,13 @@ if __name__ == '__main__':
     '''收集训练集信息'''
     dataCollect = DataTrainInform(classes_num=numclass, trainlistPath=trainListRoot, band_num=band_num, label_norm=label_norm) #计算数据集信息
     data_dict = dataCollect.collectDataAndSave()
+
+    '''手动设置data_dict'''
+    #data_dict = {}
+    #data_dict['mean'] = [125.304955, 127.38818,  114.94185]
+    #data_dict['std'] = [40.3933, 35.64181, 37.925995]
+    #data_dict['classWeights'] = np.ones(2, dtype=np.float32)
+    #data_dict['img_shape'] = (256, 256, 3)
 
     print('data mean: ', data_dict['mean'])
     print('data std: ', data_dict['std'])

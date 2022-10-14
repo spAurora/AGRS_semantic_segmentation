@@ -91,11 +91,11 @@ for gt_file in gt_list:
                 sys.exit(1)
 
     '''计算精度评定指标'''
-    OA_tmp = (TP_tmp+TN_tmp)/(TP_tmp+TN_tmp+FP_tmp+FN_tmp+1)
-    PA_tmp = TP_tmp/(TP_tmp+FP_tmp+1)
-    UA_tmp = TP_tmp/(TP_tmp+FN_tmp+1)
-    F1_tmp = 2*(PA_tmp*UA_tmp)/(PA_tmp+UA_tmp+1)
-    MIoU_tmp = TP_tmp/(FN_tmp+FP_tmp+TP_tmp+1)
+    OA_tmp = (TP_tmp+TN_tmp)/(TP_tmp+TN_tmp+FP_tmp+FN_tmp)
+    PA_tmp = TP_tmp/(TP_tmp+FP_tmp)
+    UA_tmp = TP_tmp/(TP_tmp+FN_tmp)
+    F1_tmp = 2*(PA_tmp*UA_tmp)/(PA_tmp+UA_tmp)
+    MIoU_tmp = TP_tmp/(FN_tmp+FP_tmp+TP_tmp)
 
     print(TP_tmp, TN_tmp, FP_tmp, FN_tmp, PA_tmp, UA_tmp, OA_tmp, F1_tmp, MIoU_tmp)
 
