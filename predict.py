@@ -158,7 +158,7 @@ class Predict():
             '''统一argmax'''
             predict_result = dst_ds.ReadAsArray()
             class_result = np.argmax(predict_result, axis=0)
-            rst_ds.GetRasterBand(1).WriteArray(class_result*255, 0, 0)
+            rst_ds.GetRasterBand(1).WriteArray(class_result, 0, 0)
             rst_ds.FlushCache() #写入硬盘
             del rst_ds
             del dst_ds
