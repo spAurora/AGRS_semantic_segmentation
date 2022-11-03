@@ -81,8 +81,8 @@ os.environ['GDAL_DATA'] = r'C:\Users\75198\.conda\envs\learn\Lib\site-packages\G
 gdal.SetConfigOption("GDAL_FILENAME_IS_UTF8", "YES")
 gdal.SetConfigOption("SHAPE_ENCODING", "GBK")
 
-tif_img_path = r'F:\4-predict_glacier'
-shp_img_path = r'F:\4-predict_glacier_shp'
+tif_img_path = r'E:\projict_UAV_yunnan\3-predict_result'
+shp_img_path = r'E:\projict_UAV_yunnan\4-predict_result_shp'
 
 listpic = fnmatch.filter(os.listdir(tif_img_path), '*.tif')
 for img in tqdm(listpic):

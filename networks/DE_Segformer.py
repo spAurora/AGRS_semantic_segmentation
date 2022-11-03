@@ -183,6 +183,8 @@ class DE_Segformer(nn.Module):
         dims, heads, ff_expansion, reduction_ratio, num_layers = map(partial(cast_tuple, depth = 4), (dims, heads, ff_expansion, reduction_ratio, num_layers))
         assert all([*map(lambda t: len(t) == 4, (dims, heads, ff_expansion, reduction_ratio, num_layers))]), 'only four stages are allowed, all keyword arguments must be either a single value or a tuple of 4 values'
 
+        self.decoder_dim = decoder_dim
+
         self.mit = MiT(
             channels = band_num,
             dims = dims,
@@ -193,14 +195,14 @@ class DE_Segformer(nn.Module):
         )
 
         self.decode_stage_1 = nn.ModuleList([nn.Sequential(
-            nn.Conv2d(dim, 64, 1),
-            nn.BatchNorm2d(64),
+            nn.Conv2d(dim, decoder_dim, 1),
+            nn.BatchNorm2d(decoder_dim),
             nn.ReLU()
         ) for i, dim in enumerate(dims)])
 
         self.downsampleConv = nn.Sequential(
-            nn.Conv2d(64, 64, 3, 2, 1),
-            nn.BatchNorm2d(64),
+            nn.Conv2d(decoder_dim, decoder_dim, 3, 2, 1),
+            nn.BatchNorm2d(decoder_dim),
             nn.ReLU())
         
         self.upsampleTransConv1 = self.UpSampleTransConv(1)
@@ -208,19 +210,20 @@ class DE_Segformer(nn.Module):
         self.upsampleTransConv3 = self.UpSampleTransConv(3)
 
         self.to_segmentation = nn.Sequential(
-            nn.Conv2d(256, 64, 1),
-            nn.BatchNorm2d(64),
+            nn.Conv2d(decoder_dim*4, decoder_dim, 1),
+            nn.BatchNorm2d(decoder_dim),
             nn.ReLU(),
-            nn.ConvTranspose2d(64, 64, 4, 2, 1),
-            nn.BatchNorm2d(64),
+            nn.ConvTranspose2d(decoder_dim, decoder_dim, 4, 2, 1),
+            nn.BatchNorm2d(decoder_dim),
             nn.ReLU(), 
-            nn.Conv2d(64, num_classes, 1),
+            #nn.Upsample(scale_factor=2), #无TC实验
+            nn.Conv2d(decoder_dim, num_classes, 1),
         )
 
     def UpSampleTransConv(self, scale):
         return nn.Sequential(
-            nn.ConvTranspose2d(64, 64, (2 ** scale)*2, 2 ** scale, 2 ** (scale-1), bias=False),
-            nn.BatchNorm2d(64),
+            nn.ConvTranspose2d(self.decoder_dim, self.decoder_dim, (2 ** scale)*2, 2 ** scale, 2 ** (scale-1), bias=False),
+            nn.BatchNorm2d(self.decoder_dim),
             nn.ReLU())      
 
     def forward(self, x):
@@ -233,6 +236,7 @@ class DE_Segformer(nn.Module):
         for i in range(0,3):
             fused_downConv = self.downsampleConv(fused_merge[i])
             fused_merge.append(fused_downConv + fused[i+1])
+            #fused_merge.append(fused[i+1]) # 无MB实验
  
         fused_merge[1] = self.upsampleTransConv1(fused_merge[1]) #上采样到H/2*W/2
         fused_merge[2] = self.upsampleTransConv2(fused_merge[2])

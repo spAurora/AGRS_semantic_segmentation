@@ -77,8 +77,8 @@ def read_img(sr_img):
 
 os.environ['GDAL_DATA'] = r'C:\Users\75198\.conda\envs\learn\Lib\site-packages\GDAL-2.4.1-py3.6-win-amd64.egg-info\gata-data' #To prevent ERROR4
 
-img_path = r'E:\project_UAV\0-other_data\img\img'
-output_path = r'E:\project_UAV\1-clip_img'
+img_path = r'E:\projict_UAV_yunnan\0-srimg_1026new\4channels'
+output_path = r'E:\projict_UAV_yunnan\0-srimg_1026new\3channels'
 
 listpic = fnmatch.filter(os.listdir(img_path), '*.tif')
 

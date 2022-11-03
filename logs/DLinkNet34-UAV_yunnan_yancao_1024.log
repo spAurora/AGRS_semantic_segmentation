@@ -1,0 +1,9 @@
+Mon Oct 24 18:27:37 2022
+data_dict: {'mean': array([122.35223, 129.32281,  97.32824], dtype=float32), 'std': array([34.2015  , 34.449654, 28.855701], dtype=float32), 'classWeights': array([1.699654 , 2.9784868], dtype=float32), 'img_shape': (192, 192, 3)}
+update learning rate: 0.000100 -> 0.000050
+update learning rate: 0.000050 -> 0.000025
+update learning rate: 0.000025 -> 0.000013
+update learning rate: 0.000013 -> 0.000006
+update learning rate: 0.000006 -> 0.000003
+update learning rate: 0.000003 -> 0.000002
+update learning rate: 0.000002 -> 0.000001

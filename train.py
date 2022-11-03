@@ -9,6 +9,7 @@ code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
 751984964@qq.com
 """
+from sre_parse import FLAGS
 from tkinter.tix import Tree
 import torch
 import os
@@ -32,15 +33,15 @@ from networks.RS_Segformer import RS_Segformer
 from networks.DE_Segformer import DE_Segformer
 
 '''参数设置'''
-trainListRoot = r'E:\project_UAV\2-trainlist\trainlist_0910_1.txt' # 训练样本列表
-save_model_path = r'E:\project_UAV\3-weights' # 训练模型保存路径  
-model = DE_Segformer # 选择的训练模型
-save_model_name = 'DE_Segformer_N-UAV_building_1008.th' # 训练模型保存名
+trainListRoot = r'E:\projict_UAV_yunnan\2-trainlist\trainlist_1026_add_neg_1.txt' # 训练样本列表
+save_model_path = r'E:\projict_UAV_yunnan\3-weights' # 训练模型保存路径  
+model = DLinkNet34 # 选择的训练模型
+save_model_name = 'DLinkNet34-UAV_yunnan_yancao_1026_add_neg_1.th' # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
 classes_num = 2 # 样本类别数
-batch_size = 8 # 计算批次大小
-init_lr = 0.000005 # 初始学习率
+batch_size = 2 # 计算批次大小
+init_lr = 0.00005 # 初始学习率
 lr_mode = 0 # 学习率更新模式，0为等比下降，1为标准下降
 total_epoch = 300 # 训练次数
 band_num = 3 # 影像的波段数
