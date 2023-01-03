@@ -33,19 +33,19 @@ from networks.RS_Segformer import RS_Segformer
 from networks.DE_Segformer import DE_Segformer
 
 '''参数设置'''
-trainListRoot = r'E:\projict_UAV_yunnan\2-trainlist\trainlist_1026_add_neg_1.txt' # 训练样本列表
-save_model_path = r'E:\projict_UAV_yunnan\3-weights' # 训练模型保存路径  
-model = DLinkNet34 # 选择的训练模型
-save_model_name = 'DLinkNet34-UAV_yunnan_yancao_1026_add_neg_1.th' # 训练模型保存名
+trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\trainlist_1108_add_haze_test.txt' # 训练样本列表
+save_model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights' # 训练模型保存路径  
+model = Unet # 选择的训练模型
+save_model_name = 'Unet-huyang_add_haze_test_1115_mix_haze_0.6_test.th' # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
-classes_num = 2 # 样本类别数
-batch_size = 2 # 计算批次大小
-init_lr = 0.00005 # 初始学习率
+classes_num = 3 # 样本类别数
+batch_size = 8 # 计算批次大小
+init_lr = 0.001 # 初始学习率
 lr_mode = 0 # 学习率更新模式，0为等比下降，1为标准下降
 total_epoch = 300 # 训练次数
-band_num = 3 # 影像的波段数
-if_norm_label = True # 是否对标签进行归一化 0/255二分类应设置为True
+band_num = 8 # 影像的波段数
+if_norm_label = False # 是否对标签进行归一化 0/255二分类应设置为True
 
 simulate_batch_size = False #是否模拟大batchsize；除非显存太小一般不开启
 simulate_batch_size_num = 4 #模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
@@ -146,11 +146,11 @@ for epoch in tqdm(range(1, total_epoch + 1)):
             print(mylog, 'early stop at %d epoch' % epoch)
             print('early stop at %d epoch' % epoch)
             break
-        if no_optim > 0:
+        if no_optim > 1:
             if solver.old_lr < 1e-6:
                 break
             solver.load(save_model_full_path)
-            solver.update_lr_geometric_decline(2.0, factor = True, mylog = mylog)
+            solver.update_lr_geometric_decline(3.0, factor = True, mylog = mylog)
             no_optim = 0
     elif lr_mode == 1:
         if train_epoch_loss >= train_epoch_best_loss:
