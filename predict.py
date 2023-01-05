@@ -53,7 +53,7 @@ class Predict():
         img_block = img_block.transpose(1, 2, 0) # (c, h, w) -> (h, w ,c)
         img_block = img_block.astype(np.float32)
 
-        self.net.eval()
+        self.net.eval() # 启动预测模式
 
         for i in range(self.band_num):
             img_block[:, :, i] -= self.img_mean[i]
