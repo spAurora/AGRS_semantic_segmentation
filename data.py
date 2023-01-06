@@ -17,41 +17,40 @@ from tqdm import tqdm
 
 class MyDataLoader(data.Dataset):
     def __init__(self,data_dict, root='', normalized_Label = False, band_num = 3):
-        self.root = root
-        self.normalized_Label = normalized_Label
-        self.img_mean = data_dict['mean']
-        self.std = data_dict['std']
-        self.filelist = self.root
-        self.band_num = band_num
+        self.root = root # 训练列表路径
+        self.normalized_Label = normalized_Label # 是否执行数据归一化
+        self.img_mean = data_dict['mean'] # 数据集均值
+        self.std = data_dict['std'] # 数据集标准差
+        self.band_num = band_num # 波段数
 
-        with open(self.filelist, 'r') as f:
+        with open(self.root, 'r') as f:
             self.filelist = f.readlines() # 返回一个列表，其中包含文件中的每一行作为列表项
     
     def __len__(self):
-        return len(self.filelist)
+        return len(self.filelist) # 返回数据集长度
 
     def __getitem__(self, index):
-        img_file, label_file = self.filelist[index].split()
+        img_file, label_file = self.filelist[index].split() # 字符串切片提取样本影像和标签路径
 
         img = skimage.io.imread(img_file)
-        label = skimage.io.imread(label_file, as_gray=True)
+        label = skimage.io.imread(label_file, as_gray=True) # 标签以灰度图形式读取
         
-        img = np.array(img, np.float32)
+        img = np.array(img, np.float32) # 格式转换
         label = np.array(label, np.float32)
 
-        label = np.expand_dims(label, axis=2) #标签增加一个维度 (H W C)
+        label = np.expand_dims(label, axis=2) # 标签增加一个维度 (H W C)
         
-        for i in range(self.band_num):
+        for i in range(self.band_num): # 图像标准化
             img[:,:,i] -= self.img_mean[i]
         img = img / self.std
 
-        img = img.transpose(2,0,1)
-        if (self.normalized_Label == True): #标签根据需要做归一化
+        img = img.transpose(2,0,1) # (H W C)->(C H W)
+        if (self.normalized_Label == True): # 标签归一化
             label = label.transpose(2,0,1)/255.0
         else:
             label = label.transpose(2,0,1) 
         
-        img = torch.Tensor(img)
+        img = torch.Tensor(img) # 转换为张量
         label = torch.Tensor(label)
         
         return img, label

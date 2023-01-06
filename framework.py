@@ -27,20 +27,16 @@ class MyFrame():
                 if isinstance(i, nn.BatchNorm2d): # 返回判断对象的变量类型匹配结果
                     i.eval() # 设置BN层单独失活
         
-    def set_input(self, img_batch, mask_batch=None, img_id=None):
+    def set_input(self, img_batch, mask_batch=None): # 设置每一个batch的img和label输入
         self.img = img_batch
         self.mask = mask_batch
-        self.img_id = img_id
-    
-    def forward(self, volatile=False):
-        self.img = Variable(self.img.cuda(), volatile=volatile)
-        if self.mask is not None:
-            self.mask = Variable(self.mask.long().cuda(), volatile=volatile)
-        
+
     def optimize(self, ifStep=True):
-        self.forward() # 前向传播
-        pred = self.net.forward(self.img) # 网络中输入数据
-        label = self.mask.cpu().squeeze().cuda() # label规整
+        self.img = Variable(self.img.cuda()) # Variable容器装载img
+        if self.mask is not None:
+            self.mask = Variable(self.mask.long().cuda()) # # Variable容器装载label
+        pred = self.net.forward(self.img) # 前向传递计算输出
+        label = self.mask.cpu().squeeze().cuda() # label维度规整
         loss = self.loss(output = pred, target = label) # 计算loss
         loss.backward() # 反向传播梯度
         if ifStep:
@@ -54,15 +50,15 @@ class MyFrame():
     def load(self, path):
         self.net.load_state_dict(torch.load(path)) # 模型读取
 
-    def update_lr_geometric_decline(self, new_lr, mylog, factor=False): # 学习率等比下降更新
+    def update_lr_geometric_decline(self, rate, mylog, factor=False): # 学习率等比下降更新
         if factor:
-            new_lr = self.old_lr / new_lr
-        for param_group in self.optimizer.param_groups:
+            new_lr = self.old_lr / rate # 等比更新
+        for param_group in self.optimizer.param_groups: # 参数组中记录当前学习率
             param_group['lr'] = new_lr
 
-        mylog.write('update learning rate: %f -> %f' % (self.old_lr, new_lr) + '\n')
+        mylog.write('update learning rate: %f -> %f' % (self.old_lr, new_lr) + '\n') # 打印日志
 
-        print('update learning rate: %f -> %f' % (self.old_lr, new_lr))
+        print('update learning rate: %f -> %f' % (self.old_lr, new_lr)) # 终端信息显示输出
         self.old_lr = new_lr
     
     def update_lr_standard(self, init_lr, now_it, total_it, mylog): # 学习率标准下降更新

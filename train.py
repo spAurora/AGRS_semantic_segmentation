@@ -9,8 +9,6 @@ code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
 751984964@qq.com
 """
-from sre_parse import FLAGS
-from tkinter.tix import Tree
 import torch
 import os
 import time
