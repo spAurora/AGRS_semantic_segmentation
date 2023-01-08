@@ -52,18 +52,18 @@ label_weight_scale_factor = 1 #标签权重的指数缩放系数 1为不缩放
 
 '''收集系统环境信息'''
 tic = time.time()
-format_time = time.asctime(time.localtime(tic))
+format_time = time.asctime(time.localtime(tic)) # 系统当前时间
 print(format_time)
 mylog.write(format_time + '\n')
 
-print('Is cuda availabel: ', torch.cuda.is_available())
-print('Cuda device count: ', torch.cuda.device_count())
-print('Current device: ', torch.cuda.current_device())
+print('Is cuda availabel: ', torch.cuda.is_available()) # 是否支持cuda
+print('Cuda device count: ', torch.cuda.device_count()) # 显卡数
+print('Current device: ', torch.cuda.current_device()) # 当前计算的显卡id
 
 '''收集数据集信息'''
 dataCollect = DataTrainInform(classes_num=classes_num, trainlistPath=trainListRoot, band_num=band_num, 
                             label_norm=if_norm_label, label_weight_scale_factor=label_weight_scale_factor) # 计算数据集信息
-data_dict = dataCollect.collectDataAndSave()
+data_dict = dataCollect.collectDataAndSave() # 数据集信息存储于字典中
 '''手动设置data_dict'''
 #data_dict = {}
 #data_dict['mean'] = [125.304955, 127.38818,  114.94185]
@@ -109,24 +109,22 @@ print('Number of Iterations: ', int(len(dataset)/batch_size))
 train_epoch_best_loss = 100 
 no_optim = 0
 print('---------')
-
-for epoch in tqdm(range(1, total_epoch + 1)):
-    
-    data_loader_iter = iter(data_loader) # 迭代器
+for epoch in tqdm(range(1, total_epoch + 1)):    
+    data_loader_iter = iter(data_loader) # 初始化迭代器
     train_epoch_loss = 0
     cnt = 0
     for img, mask in tqdm(data_loader_iter):
-        cnt = cnt + 1
-        solver.set_input(img, mask)
+        cnt = cnt + 1 # 计数累加
+        solver.set_input(img, mask) # 设置batch的影像和标签输入
         if simulate_batch_size:
             if (cnt % simulate_batch_size_num == 0): # 模拟大batchsize
                 train_loss = solver.optimize(ifStep=True)
             else:
                 train_loss = solver.optimize(ifStep=False) 
         else:
-            train_loss = solver.optimize(ifStep=True) # 非模拟大batchsize 每次迭代都更新参数
+            train_loss = solver.optimize(ifStep=True) # 非模拟大batchsize，每次迭代都更新参数
         train_epoch_loss += train_loss
-    train_epoch_loss /= len(data_loader_iter)
+    train_epoch_loss /= len(data_loader_iter) # 计算该epoch的loss
 
     print('\n---------')
     print('epoch:',epoch, '  training time:', int(time.time()-tic), 's')
@@ -134,22 +132,22 @@ for epoch in tqdm(range(1, total_epoch + 1)):
     print('current learn rate: ', solver.optimizer.state_dict()['param_groups'][0]['lr'])
     
     if lr_mode == 0:
-        if train_epoch_loss >= train_epoch_best_loss: 
+        if train_epoch_loss >= train_epoch_best_loss: # 若当前epoch的loss大于等于之前最小的loss
             no_optim += 1
-        else: # 若当前epoch的loss小于之前最好的loss
-            no_optim = 0
+        else: # 若当前epoch的loss小于之前最小的loss
+            no_optim = 0 # loss未降低的轮数归0
             train_epoch_best_loss = train_epoch_loss # 保留当前epoch的loss
-            solver.save(save_model_full_path)
-        if no_optim > 15:
-            print(mylog, 'early stop at %d epoch' % epoch)
+            solver.save(save_model_full_path) # 保留当前epoch的模型
+        if no_optim > 9: # 若过多epoch后loss仍不下降则终止训练
+            print(mylog, 'early stop at %d epoch' % epoch) # 打印信息至日志
             print('early stop at %d epoch' % epoch)
             break
-        if no_optim > 1:
-            if solver.old_lr < 1e-6:
+        if no_optim > 1: # 多轮epoch后loss不下降则更新学习率
+            if solver.old_lr < 1e-6: # 当前学习率过低终止训练
                 break
-            solver.load(save_model_full_path)
-            solver.update_lr_geometric_decline(3.0, factor = True, mylog = mylog)
-            no_optim = 0
+            solver.load(save_model_full_path) # 读取保存的loss最低的模型
+            solver.update_lr_geometric_decline(3.0, factor = True, mylog = mylog) # 更新学习率
+            no_optim = 0 # loss未降低轮数归0
     elif lr_mode == 1:
         if train_epoch_loss >= train_epoch_best_loss:
             train_epoch_best_loss = train_epoch_loss
