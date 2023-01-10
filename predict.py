@@ -15,7 +15,7 @@ from osgeo import gdal
 from tqdm import tqdm
 import time
 import torch
-from torch.autograd import Variable as V
+from torch.autograd import Variable
 import fnmatch
 import sys
 import math
@@ -35,96 +35,97 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
 class SolverFrame():
     def __init__(self, net):
-        self.net = net.cuda()
-        self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
+        self.net = net.cuda() # 模型迁移至显卡
+        self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count())) # 支持多卡并行处理
 
     def load(self, path):
-        self.net.load_state_dict(torch.load(path))
+        self.net.load_state_dict(torch.load(path)) # 模型读取
 
 class Predict():
     def __init__(self, net, class_number, band_num):
-        self.class_number = class_number
-        self.img_mean = data_dict['mean']
-        self.std = data_dict['std']
-        self.net = net
-        self.band_num = band_num
+        self.class_number = class_number # 类别数
+        self.img_mean = data_dict['mean'] # 数据集均值
+        self.std = data_dict['std'] # 数据集方差
+        self.net = net # 模型
+        self.band_num = band_num # 影像波段数
     
     def Predict_wHy(self, img_block, dst_ds, xoff, yoff):
         img_block = img_block.transpose(1, 2, 0) # (c, h, w) -> (h, w ,c)
-        img_block = img_block.astype(np.float32)
+        img_block = img_block.astype(np.float32) # 数据类型转换
 
         self.net.eval() # 启动预测模式
 
-        for i in range(self.band_num):
-            img_block[:, :, i] -= self.img_mean[i]
+        for i in range(self.band_num): # 数据标准化
+            img_block[:, :, i] -= self.img_mean[i] 
         img_block = img_block / self.std
 
-        img_block = np.expand_dims(img_block, 0)
-        img_block = img_block.transpose(0, 3, 1, 2)
-        img_block = V(torch.Tensor(img_block).cuda())
-        predict_out = self.net.forward(img_block).squeeze().cpu().data.numpy()
+        img_block = np.expand_dims(img_block, 0) # 扩展数据维度 (h, w, c) -> (b, h, w, c) 
+        img_block = img_block.transpose(0, 3, 1, 2) # (b, h, w, c) -> (b, c, h, w)
+        img_block = Variable(torch.Tensor(img_block).cuda()) # Variable容器装载
+        predict_out = self.net.forward(img_block).squeeze().cpu().data.numpy() # 模型预测；删除b维度；转换为numpy
 
-        predict_out = predict_out.transpose(1, 2, 0) # (h, w, c) -> (c, h, w)
-        predict_result = np.argmax(predict_out, axis=2)
-        dst_ds.GetRasterBand(1).WriteArray(predict_result, xoff, yoff)
+        predict_out = predict_out.transpose(1, 2, 0) # (c, h, w) -> (h, w, c)
+        predict_result = np.argmax(predict_out, axis=2) # 返回第三维度最大值的下标
+        dst_ds.GetRasterBand(1).WriteArray(predict_result, xoff, yoff) # 预测结果写入gdal_dataset
 
 
     def Main(self, allpath, outpath, target_size=256, unify_read_img = False):  
         print('start predict...')
         for one_path in allpath:
             t0 = time.time()
-            dataset = gdal.Open(one_path)
+            dataset = gdal.Open(one_path) # GDAL打开待预测影像
             if dataset == None:
                 print("failed to open img")
                 sys.exit(1)
-            img_width = dataset.RasterXSize
-            img_height = dataset.RasterYSize
+            img_width = dataset.RasterXSize # 读取影像宽度
+            img_height = dataset.RasterYSize # 读取影像高度
 
             '''新建输出tif'''
             d, n = os.path.split(one_path)
 
-            projinfo = dataset.GetProjection() 
-            geotransform = dataset.GetGeoTransform()
+            projinfo = dataset.GetProjection() # 获取原始影像投影
+            geotransform = dataset.GetGeoTransform() # 获取原始影像地理坐标
 
             format = "GTiff"
             driver = gdal.GetDriverByName(format)  # 数据格式
             name = n[:-4] + '_result' + '.tif'  # 输出文件名
 
             dst_ds = driver.Create(os.path.join(outpath, name), dataset.RasterXSize, dataset.RasterYSize,
-                                1, gdal.GDT_Byte)  # 创建一个新的文件
-            dst_ds.SetGeoTransform(geotransform)  # 写入投影
-            dst_ds.SetProjection(projinfo)  # 写入坐标
+                                1, gdal.GDT_Byte)  # 创建预测结果写入文件
+            dst_ds.SetGeoTransform(geotransform)  # 写入地理坐标
+            dst_ds.SetProjection(projinfo)  # 写入投影
 
             
             if unify_read_img:
                 '''集中读取影像并预测'''
                 img_block = dataset.ReadAsArray() # 影像一次性读入内存
-                #全局
+                # 全局整体
                 for i in tqdm(range(0, img_width-target_size, target_size)):
                     for j in range(0, img_height-target_size, target_size):
                         self.Predict_wHy(img_block[:, j:j+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=j)
                 
-                #下侧边缘
+                # 下侧边缘
                 row_begin = img_height - target_size
                 for i in tqdm(range(0, img_width - target_size, target_size)):
                     self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=row_begin)
 
-                #右侧边缘
+                # 右侧边缘
                 col_begin = img_width - target_size
                 for j in tqdm(range(0, img_height - target_size, target_size)):
                     self.Predict_wHy(img_block[:, j:j+target_size, col_begin:col_begin+target_size].copy(), dst_ds, xoff=col_begin, yoff=j)
 
-                #右下角
+                # 右下角
                 self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, col_begin:col_begin+target_size].copy(), dst_ds, img_width-target_size, img_height-target_size)
-                dst_ds.FlushCache() # 缓存写入磁盘
+                
+                dst_ds.FlushCache() # 全部预测完毕后统一写入磁盘
             else:
                 '''分块读取影像并预测'''
-                # 全局
+                # 全局整体
                 for i in tqdm(range(0, math.floor(img_width/target_size-1)*target_size, target_size)):
                     for j in range(0, math.floor(img_height/target_size-1)*target_size, target_size):
-                        img_block = dataset.ReadAsArray(i, j, target_size, target_size)
+                        img_block = dataset.ReadAsArray(i, j, target_size, target_size) # 读取滑窗影像进内存
                         self.Predict_wHy(img_block.copy(), dst_ds, xoff=i, yoff=j)
-                    dst_ds.FlushCache()
+                    dst_ds.FlushCache() # 预测完每列后写入磁盘
                     
                 # 下侧边缘
                 row_begin = img_height - target_size
@@ -151,7 +152,7 @@ if __name__ == '__main__':
 
     predictImgPath = r'E:\xinjiang_huyang_hongliu\WV_GF_Tarim\WV2_dealed\Talimu_dealed' # 待预测影像的文件夹路径
     Img_type = '*.dat' # 待预测影像的类型
-    trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\trainlist_1108_add_haze_test.txt' #与模型训练相同的trainlist
+    trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\trainlist_1108_add_haze_test.txt' #与模型训练相同的训练列表路径
     numclass = 3 # 样本类别数
     model = Unet #模型
     model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights\Unet-huyang_add_haze_test_1115_mix_haze_0.6_test.th' # 模型文件完整路径
@@ -169,13 +170,13 @@ if __name__ == '__main__':
     print('data std: ', data_dict['std'])
 
     '''初始化模型'''
-    solver = SolverFrame(net = model(num_classes=numclass, band_num = band_num)) 
-    solver.load(model_path)
+    solver = SolverFrame(net = model(num_classes=numclass, band_num = band_num))
+    solver.load(model_path) # 加载模型
     if not os.path.exists(output_path):
         os.mkdir(output_path)
 
     '''读取待预测影像'''
-    listpic = fnmatch.filter(os.listdir(predictImgPath), Img_type)
+    listpic = fnmatch.filter(os.listdir(predictImgPath), Img_type) # 过滤对应文件类型
     for i in range(len(listpic)):
         listpic[i] = os.path.join(predictImgPath + '/' + listpic[i])
     
@@ -186,5 +187,5 @@ if __name__ == '__main__':
         print(listpic)
 
     '''执行预测'''
-    predict_instantiation = Predict(net=solver.net, class_number=numclass, band_num=band_num)
-    predict_instantiation.Main(listpic, output_path, target_size, unify_read_img=unify_read_img)
+    predict_instantiation = Predict(net=solver.net, class_number=numclass, band_num=band_num) # 初始化预测
+    predict_instantiation.Main(listpic, output_path, target_size, unify_read_img=unify_read_img) # 预测主体
