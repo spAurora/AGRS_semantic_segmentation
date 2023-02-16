@@ -130,6 +130,8 @@ for epoch in tqdm(range(1, total_epoch + 1)):
     print('epoch:',epoch, '  training time:', int(time.time()-tic), 's')
     print('epoch average train loss:',train_epoch_loss)
     print('current learn rate: ', solver.optimizer.state_dict()['param_groups'][0]['lr'])
+
+    mylog.write('epoch: %d train_epoch_loss: %f learn_rate: %f' % (epoch, train_epoch_loss, solver.old_lr) + '\n') # 打印日志
     
     if lr_mode == 0:
         if train_epoch_loss >= train_epoch_best_loss: # 若当前epoch的loss大于等于之前最小的loss

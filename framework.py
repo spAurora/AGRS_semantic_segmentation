@@ -50,25 +50,29 @@ class MyFrame():
     def load(self, path):
         self.net.load_state_dict(torch.load(path)) # 模型读取
 
-    def update_lr_geometric_decline(self, rate, mylog, factor=False): # 学习率等比下降更新
+    def update_lr_geometric_decline(self, rate, mylog, factor=False, log_print = False): # 学习率等比下降更新
         if factor:
             new_lr = self.old_lr / rate # 等比更新
         for param_group in self.optimizer.param_groups: # 参数组中记录当前学习率
             param_group['lr'] = new_lr
 
-        mylog.write('update learning rate: %f -> %f' % (self.old_lr, new_lr) + '\n') # 打印日志
+        if log_print:
+            mylog.write('update learning rate: %f -> %f' % (self.old_lr, new_lr) + '\n') # 打印日志
 
         print('update learning rate: %f -> %f' % (self.old_lr, new_lr)) # 终端信息显示输出
+        
         self.old_lr = new_lr
     
-    def update_lr_standard(self, init_lr, now_it, total_it, mylog): # 学习率标准下降更新
+    def update_lr_standard(self, init_lr, now_it, total_it, mylog, log_print = False): # 学习率标准下降更新
         power = 0.9
         lr = init_lr * (1 - float(now_it) / total_it) ** power
         
         for param_group in self.optimizer.param_groups:
             param_group['lr'] = lr
-
-        mylog.write('update learning rate: %f -> %f' % (self.old_lr, lr) + '\n')
+            
+        if log_print:
+            mylog.write('update learning rate: %f -> %f' % (self.old_lr, lr) + '\n')
+        
         print('update learning rate: %f -> %f' % (self.old_lr, lr))
 
         self.old_lr = lr
