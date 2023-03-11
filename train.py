@@ -7,7 +7,7 @@ Model Training
 ~~~~~~~~~~~~~~~~
 code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
-751984964@qq.com
+wanghaoyu191@mails.ucas.ac.cn
 """
 import torch
 import os
@@ -31,19 +31,20 @@ from networks.RS_Segformer import RS_Segformer
 from networks.DE_Segformer import DE_Segformer
 
 '''参数设置'''
-trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\trainlist_1108_add_haze_test.txt' # 训练样本列表
+trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\0-trainlist_add_haze_FIL_5x5_0.8_rate_0.5_230309.txt' # 训练样本列表
 save_model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights' # 训练模型保存路径  
 model = Unet # 选择的训练模型
-save_model_name = 'Unet-huyang_add_haze_test_1115_mix_haze_0.6_test.th' # 训练模型保存名
+save_model_name = '0-Unet-huyang_add_haze_FIL_5x5_0.8_rate_0.5_230309.th' # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
 classes_num = 3 # 样本类别数
 batch_size = 8 # 计算批次大小
-init_lr = 0.001 # 初始学习率
+init_lr = 0.0001 # 初始学习率
 lr_mode = 0 # 学习率更新模式，0为等比下降，1为标准下降
 total_epoch = 300 # 训练次数
 band_num = 8 # 影像的波段数
 if_norm_label = False # 是否对标签进行归一化 0/255二分类应设置为True
+if_vis = False # 是否输出中间可视化信息 一般设置为False，设置为True需要模型支持 
 
 simulate_batch_size = False #是否模拟大batchsize；除非显存太小一般不开启
 simulate_batch_size_num = 4 #模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
@@ -85,7 +86,10 @@ mylog.flush()
 weight = torch.from_numpy(data_dict['classWeights']).cuda()
 loss = loss(weight=weight) 
 
-solver = MyFrame(net=model(num_classes=classes_num, band_num = band_num), loss=loss, lr=init_lr) # 初始化网络，损失函数，学习率
+if if_vis:
+    solver = MyFrame(net=model(num_classes=classes_num, band_num = band_num, ifVis=if_vis), loss=loss, lr=init_lr) # 初始化网络，损失函数，学习率
+else:
+    solver = MyFrame(net=model(num_classes=classes_num, band_num = band_num), loss=loss, lr=init_lr) # 初始化网络，损失函数，学习率
 
 save_model_full_path = save_model_path + '/' + save_model_name
 if os.path.exists(save_model_full_path):
@@ -118,11 +122,11 @@ for epoch in tqdm(range(1, total_epoch + 1)):
         solver.set_input(img, mask) # 设置batch的影像和标签输入
         if simulate_batch_size:
             if (cnt % simulate_batch_size_num == 0): # 模拟大batchsize
-                train_loss = solver.optimize(ifStep=True)
+                train_loss = solver.optimize(ifStep=True, ifVis=if_vis)
             else:
-                train_loss = solver.optimize(ifStep=False) 
+                train_loss = solver.optimize(ifStep=False, ifVis=if_vis) 
         else:
-            train_loss = solver.optimize(ifStep=True) # 非模拟大batchsize，每次迭代都更新参数
+            train_loss = solver.optimize(ifStep=True, ifVis=if_vis) # 非模拟大batchsize，每次迭代都更新参数
         train_epoch_loss += train_loss
     train_epoch_loss /= len(data_loader_iter) # 计算该epoch的loss
 

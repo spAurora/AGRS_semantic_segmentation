@@ -3,10 +3,11 @@
 
 """
 批量删除影像第四个通道
+主要用于无人机影像
 ~~~~~~~~~~~~~~~~
 code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
-751984964@qq.com
+wanghaoyu191@mails.ucas.ac.cn
 """
 
 import gdal

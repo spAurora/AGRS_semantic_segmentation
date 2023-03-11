@@ -7,7 +7,7 @@ gdal的栅格转矢量存在问题，大影像建议使用arcgis
 ~~~~~~~~~~~~~~~~
 code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
-751984964@qq.com
+wanghaoyu191@mails.ucas.ac.cn
 """
 from pathlib import Path
 import gdal

@@ -7,7 +7,7 @@ Training Framework and Functions
 ~~~~~~~~~~~~~~~~
 code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
-751984964@qq.com
+wanghaoyu191@mails.ucas.ac.cn
 """
 import torch
 import torch.nn as nn
@@ -31,11 +31,14 @@ class MyFrame():
         self.img = img_batch
         self.mask = mask_batch
 
-    def optimize(self, ifStep=True):
+    def optimize(self, ifStep=True, ifVis = False):
         self.img = Variable(self.img.cuda()) # Variable容器装载img
         if self.mask is not None:
             self.mask = Variable(self.mask.long().cuda()) # # Variable容器装载label
-        pred = self.net.forward(self.img) # 前向传递计算输出
+        if ifVis: # 带可视化输出
+            pred, _ = self.net.forward(self.img) # 前向传递计算输出
+        else:
+            pred = self.net.forward(self.img) # 前向传递计算输出
         label = self.mask.cpu().squeeze().cuda() # label维度规整
         loss = self.loss(output = pred, target = label) # 计算loss
         loss.backward() # 反向传播梯度

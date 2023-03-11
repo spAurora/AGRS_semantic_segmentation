@@ -6,7 +6,7 @@
 ~~~~~~~~~~~~~~~~
 code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
-751984964@qq.com
+wanghaoyu191@mails.ucas.ac.cn
 """
 
 import gdal
@@ -77,8 +77,8 @@ def read_img(sr_img):
 
 os.environ['GDAL_DATA'] = r'C:\Users\75198\.conda\envs\learn\Lib\site-packages\GDAL-2.4.1-py3.6-win-amd64.egg-info\gata-data' # To prevent ERROR4
 
-img_path = r'D:\github_repository\PyTorch-CycleGAN\datasets\syn2real\train\A_8channels'
-output_path = r'D:\github_repository\PyTorch-CycleGAN\datasets\syn2real\train\A'
+img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\0-FL_test\haze_real_img'
+output_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\0-FL_test\haze_real_img_3channel'
 save_channels = [8, 5, 3] # 顺序抽取的通道
 
 listpic = fnmatch.filter(os.listdir(img_path), '*.tif')

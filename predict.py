@@ -6,7 +6,7 @@ AGRS_semantic_segmentation
 ~~~~~~~~~~~~~~~~
 code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
-751984964@qq.com
+wanghaoyu191@mails.ucas.ac.cn
 """
 import numpy as np
 import os
@@ -152,25 +152,25 @@ if __name__ == '__main__':
 
     predictImgPath = r'E:\xinjiang_huyang_hongliu\WV_GF_Tarim\WV2_dealed\Talimu_dealed' # 待预测影像的文件夹路径
     Img_type = '*.dat' # 待预测影像的类型
-    trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\trainlist_1108_add_haze_test.txt' #与模型训练相同的训练列表路径
-    numclass = 3 # 样本类别数
+    trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\0-trainlist_add_haze_FIL_5x5_0.8_rate_0.5_230309.txt' #与模型训练相同的训练列表路径
+    num_class = 3 # 样本类别数
     model = Unet #模型
-    model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights\Unet-huyang_add_haze_test_1115_mix_haze_0.6_test.th' # 模型文件完整路径
-    output_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-predict_result_add_haze_test_1115' # 输出的预测结果路径
+    model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights\0-Unet-huyang_add_haze_FIL_5x5_0.8_rate_0.5_230309.th' # 模型文件完整路径
+    output_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-predict_result\0-predict_result_Unet-huyang_add_haze_FIL_5x5_0.8_rate_0.5_230309' # 输出的预测结果路径
     band_num = 8 #影像的波段数 训练与预测应一致
     label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
     target_size = 256 # 预测滑窗大小，应与训练集应一致
     unify_read_img = True # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
 
     '''收集训练集信息'''
-    dataCollect = DataTrainInform(classes_num=numclass, trainlistPath=trainListRoot, band_num=band_num, label_norm=label_norm) #计算数据集信息
+    dataCollect = DataTrainInform(classes_num=num_class, trainlistPath=trainListRoot, band_num=band_num, label_norm=label_norm) #计算数据集信息
     data_dict = dataCollect.collectDataAndSave()
 
     print('data mean: ', data_dict['mean'])
     print('data std: ', data_dict['std'])
 
     '''初始化模型'''
-    solver = SolverFrame(net = model(num_classes=numclass, band_num = band_num))
+    solver = SolverFrame(net = model(num_classes=num_class, band_num=band_num))
     solver.load(model_path) # 加载模型
     if not os.path.exists(output_path):
         os.mkdir(output_path)
@@ -187,5 +187,5 @@ if __name__ == '__main__':
         print(listpic)
 
     '''执行预测'''
-    predict_instantiation = Predict(net=solver.net, class_number=numclass, band_num=band_num) # 初始化预测
+    predict_instantiation = Predict(net=solver.net, class_number=num_class, band_num=band_num) # 初始化预测
     predict_instantiation.Main(listpic, output_path, target_size, unify_read_img=unify_read_img) # 预测主体

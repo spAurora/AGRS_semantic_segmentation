@@ -3,8 +3,10 @@ import torch.nn as nn
 from torch.autograd import Variable as V
 
 class Unet(nn.Module):
-    def __init__(self, num_classes=1, band_num=3):
+    def __init__(self, num_classes=1, band_num=3, ifVis=False):
         super(Unet, self).__init__()
+
+        self.ifVis = ifVis
         
         self.down1 = self.conv_stage(band_num, 8)
         self.down2 = self.conv_stage(8, 16)
@@ -93,4 +95,7 @@ class Unet(nn.Module):
 
         out = self.conv_last(out)
 
-        return out
+        if self.ifVis:
+            return out, conv5_out  # 协同输出可视化信息
+        else:
+            return out
