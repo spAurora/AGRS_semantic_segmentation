@@ -75,7 +75,7 @@ def read_img(sr_img):
 
     return im_data, im_proj, im_geotrans
 
-os.environ['GDAL_DATA'] = r'C:\Users\75198\.conda\envs\learn\Lib\site-packages\GDAL-2.4.1-py3.6-win-amd64.egg-info\gata-data' # To prevent ERROR4
+os.environ['GDAL_DATA'] = r'C:\Users\75198\anaconda3\envs\learn\Lib\site-packages\osgeo\data\gdal' # To prevent ERROR4
 
 img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_haze_lv3'
 output_path = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\图片\2-模拟云展示图\853波段的真实有云影像\LV3'
