@@ -31,15 +31,15 @@ from networks.RS_Segformer import RS_Segformer
 from networks.DE_Segformer import DE_Segformer
 
 '''参数设置'''
-trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\0-trainlist_add_haze_FIL_5x5_0.8_rate_0.5_230309.txt' # 训练样本列表
+trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\1-trainlist_clear_mix_sim_haze_ATSC+convw_LV3_rate_0.3_230401.txt' # 训练样本列表
 save_model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights' # 训练模型保存路径  
 model = Unet # 选择的训练模型
-save_model_name = '0-Unet-huyang_add_haze_FIL_5x5_0.8_rate_0.5_230309.th' # 训练模型保存名
+save_model_name = '1-Unet-huyang_clear_mix_sim_haze_ATSC+convw_LV3_rate_0.3_230401.th' # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
 classes_num = 3 # 样本类别数
 batch_size = 8 # 计算批次大小
-init_lr = 0.0001 # 初始学习率
+init_lr = 0.0009 # 初始学习率
 lr_mode = 0 # 学习率更新模式，0为等比下降，1为标准下降
 total_epoch = 300 # 训练次数
 band_num = 8 # 影像的波段数

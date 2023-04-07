@@ -77,8 +77,8 @@ def read_img(sr_img):
 
 os.environ['GDAL_DATA'] = r'C:\Users\75198\.conda\envs\learn\Lib\site-packages\GDAL-2.4.1-py3.6-win-amd64.egg-info\gata-data' # To prevent ERROR4
 
-img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\0-FL_test\haze_real_img'
-output_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\0-FL_test\haze_real_img_3channel'
+img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_haze_lv3'
+output_path = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\图片\2-模拟云展示图\853波段的真实有云影像\LV3'
 save_channels = [8, 5, 3] # 顺序抽取的通道
 
 listpic = fnmatch.filter(os.listdir(img_path), '*.tif')
