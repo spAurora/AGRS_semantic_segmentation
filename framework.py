@@ -32,14 +32,14 @@ class MyFrame():
         self.mask = mask_batch
 
     def optimize(self, ifStep=True, ifVis = False):
-        self.img = Variable(self.img.cuda()) # Variable容器装载img
+        self.img = self.img.cuda(non_blocking=True) # Variable 已经被弃用，Tensor类型已经实现了自动求导功能
         if self.mask is not None:
-            self.mask = Variable(self.mask.long().cuda()) # # Variable容器装载label
+            self.mask = self.mask.cuda(non_blocking=True).to(torch.int64)
         if ifVis: # 带可视化输出
-            pred, _ = self.net.forward(self.img) # 前向传递计算输出
+            pred, _ = self.net(self.img) # 前向传递计算输出
         else:
-            pred = self.net.forward(self.img) # 前向传递计算输出
-        label = self.mask.cpu().squeeze().cuda() # label维度规整
+            pred = self.net(self.img) # 前向传递计算输出
+        label = self.mask.squeeze() # label维度规整
         loss = self.loss(output = pred, target = label) # 计算loss
         loss.backward() # 反向传播梯度
         if ifStep:
