@@ -2,7 +2,7 @@
 
 """
 AGRS_semantic_segmentation
-模型预测
+模型测试
 ~~~~~~~~~~~~~~~~
 code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
