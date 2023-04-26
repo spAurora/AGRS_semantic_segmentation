@@ -154,7 +154,8 @@ with torch.autograd.profiler.profile(enabled=if_open_profile, use_cuda=True, rec
             else:
                 train_loss = solver.optimize(ifStep=True, ifVis=if_vis) # 非模拟大batchsize，每次迭代都更新参数
             train_epoch_loss += train_loss
-        train_epoch_loss /= len(data_loader_iter) # 计算该epoch的loss
+            mylog.write('epoch: %d iter: %d train_iter_loss: %f learn_rate: %f ' % (epoch, cnt, train_loss, solver.old_lr) + '\n') # 打印日志
+        train_epoch_loss /= len(data_loader_iter) # 计算该epoch的平均loss
 
         if if_open_test: # 如果开启测试模型就在测试集上计算精度指标
             p, r, f = GetTestIndicator(net=solver.net, data_dict=data_dict, target_size=target_size, band_num=band_num, img_type='*.tif', test_img_path=test_img_path, test_label_path=test_label_path)
@@ -166,10 +167,11 @@ with torch.autograd.profiler.profile(enabled=if_open_profile, use_cuda=True, rec
         print('current learn rate: ', solver.optimizer.state_dict()['param_groups'][0]['lr'])
         print('---------')
 
-        mylog.write('epoch: %d train_epoch_loss: %f learn_rate: %f ' % (epoch, train_epoch_loss, solver.old_lr) + '\n') # 打印日志
         if if_open_test:
             mylog.write('epoch: %d train_epoch_loss: %f learn_rate: %f test_p: %f test_r: %f test_f: %f' % (epoch, train_epoch_loss, solver.old_lr, p, r, f) + '\n')
-        
+        else:
+            mylog.write('epoch: %d train_epoch_loss: %f learn_rate: %f ' % (epoch, train_epoch_loss, solver.old_lr) + '\n') # 打印日志
+
         if lr_mode == 0:
             if train_epoch_loss >= train_epoch_best_loss: # 若当前epoch的loss大于等于之前最小的loss
                 no_optim += 1
