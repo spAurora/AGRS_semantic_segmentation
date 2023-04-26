@@ -20,6 +20,7 @@ from torchsummary import summary
 from framework import MyFrame
 from loss import CrossEntropyLoss2d, FocalLoss2d
 from data import MyDataLoader, DataTrainInform
+from test import GetTestIndicator
 
 from networks.DLinknet import DLinkNet34, DLinkNet50, DLinkNet101   
 from networks.Unet import Unet
@@ -32,22 +33,22 @@ from networks.RS_Segformer import RS_Segformer
 from networks.DE_Segformer import DE_Segformer
 
 '''参数设置'''
-trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\1-trainlist_clear_mix_sim_haze_ATSC_LV1_rate_0.3_230401.txt' # 训练样本列表
+trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\3-trainlist_clear_mix_sim_haze_ATSC_LV2_rate_0.2_230425.txt' # 训练样本列表
 save_model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights' # 训练模型保存路径  
 model = Unet # 选择的训练模型
-save_model_name = 'torch_profile_test.th' # 训练模型保存名
+save_model_name = '3-Unet-huyang_clear_mix_sim_haze_ATSC_LV2_rate_0.2_230425_test.th' # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
 classes_num = 3 # 样本类别数
-batch_size = 8 # 计算批次大小
-init_lr = 0.001 # 初始学习率
+batch_size = 16 # 计算批次大小
+init_lr = 0.01 # 初始学习率
 total_epoch = 300 # 训练次数
 band_num = 8 # 影像的波段数
 if_norm_label = False # 是否对标签进行归一化 0/255二分类应设置为True
 label_weight_scale_factor = 1 #标签权重的指数缩放系数 1为不缩放
 
 if_vis = False # 是否输出中间可视化信息 一般设置为False，设置为True需要模型支持
-if_open_profile = True # 是否启用性能分析，启用后计算2个eopch即终止训练并打印报告，仅供硬件负载分析和性能优化使用
+if_open_profile = False # 是否启用性能分析，启用后计算2个eopch即终止训练并打印报告，仅供硬件负载分析和性能优化使用
 
 lr_mode = 0 # 学习率更新模式，0为等比下降，1为标准下降
 max_no_optim_num = 1 # 最大loss无优化次数
@@ -58,6 +59,11 @@ simulate_batch_size = False #是否模拟大batchsize；除非显存太小一般
 simulate_batch_size_num = 4 #模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
 
 full_cpu_mode = True # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
+
+if_open_test = True # 是否开启测试模式
+test_img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_haze_lv2_for_clear_Evaluation' # 测试集影像文件夹
+test_label_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-raster_label\1-raster_label_haze_lv2_for_clear_Evaluation' # 测试集真值标签文件夹
+target_size = 256 # 模型预测窗口大小，与训练模型一致
 
 '''全负荷使用CPU'''
 if full_cpu_mode:
@@ -131,9 +137,9 @@ print('Number of Iterations: ', int(len(dataset)/batch_size))
 # 初始化最佳loss和未优化epoch轮数
 train_epoch_best_loss = 100 
 no_optim = 0
-print('---------')
+print('-------------------------------------------')
 with torch.autograd.profiler.profile(enabled=if_open_profile, use_cuda=True, record_shapes=False, profile_memory=False) as prof:
-    for epoch in tqdm(range(1, total_epoch + 1)):    
+    for epoch in tqdm(range(1, total_epoch + 1)): 
         data_loader_iter = iter(data_loader) # 初始化迭代器
         train_epoch_loss = 0
         cnt = 0
@@ -149,12 +155,20 @@ with torch.autograd.profiler.profile(enabled=if_open_profile, use_cuda=True, rec
                 train_loss = solver.optimize(ifStep=True, ifVis=if_vis) # 非模拟大batchsize，每次迭代都更新参数
             train_epoch_loss += train_loss
         train_epoch_loss /= len(data_loader_iter) # 计算该epoch的loss
-        print('\n---------')
+
+        if if_open_test: # 如果开启测试模型就在测试集上计算精度指标
+            p, r, f = GetTestIndicator(net=solver.net, data_dict=data_dict, target_size=target_size, band_num=band_num, img_type='*.tif', test_img_path=test_img_path, test_label_path=test_label_path)
+
         print('epoch:',epoch, '  training time:', int(time.time()-tic), 's')
         print('epoch average train loss:',train_epoch_loss)
+        if if_open_test:
+            print('epoch test indicator: precision=' + str(p) + ', recall='+ str(r) + ', f1_score=' + str(f))
         print('current learn rate: ', solver.optimizer.state_dict()['param_groups'][0]['lr'])
+        print('---------')
 
-        mylog.write('epoch: %d train_epoch_loss: %f learn_rate: %f' % (epoch, train_epoch_loss, solver.old_lr) + '\n') # 打印日志
+        mylog.write('epoch: %d train_epoch_loss: %f learn_rate: %f ' % (epoch, train_epoch_loss, solver.old_lr) + '\n') # 打印日志
+        if if_open_test:
+            mylog.write('epoch: %d train_epoch_loss: %f learn_rate: %f test_p: %f test_r: %f test_f: %f' % (epoch, train_epoch_loss, solver.old_lr, p, r, f) + '\n')
         
         if lr_mode == 0:
             if train_epoch_loss >= train_epoch_best_loss: # 若当前epoch的loss大于等于之前最小的loss

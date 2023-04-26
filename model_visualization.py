@@ -21,6 +21,8 @@ import fnmatch
 import sys
 import math
 
+import matplotlib.pyplot as plt
+
 from data import DataTrainInform
 
 from networks.DLinknet import DLinkNet34, DLinkNet50, DLinkNet101
@@ -34,11 +36,51 @@ from networks.RS_Segformer import RS_Segformer
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
+global_cnt = 0 # 全局变量global_cnt用于控制预测图像编码
+
+def PrintEachFeatureMap(feature_map_out, enabled=False):
+    save_path = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\图片\4-隐藏层可视化\LV2'
+    datasets_name = r'clear'
+    deep_level = r'conv5'
+    haze_level = r'lv2'
+
+    feature_map_out = feature_map_out.squeeze() # 删除b维度
+    feature_map_out = feature_map_out.cpu().detach().numpy() # tensor转numpy
+    feature_map_number = np.shape(feature_map_out)[0] # 获取特征图数量
+
+    fmap_list_uint8 = []
+    for i in range(feature_map_number):
+        max_value = np.max(feature_map_out[i])
+        min_value = np.min(feature_map_out[i])
+        if max_value - min_value == 0:
+            fmap_list_uint8.append(np.zeros_like(feature_map_out[i]).astype(np.uint8))
+        else:
+            fmap_list_uint8.append((((feature_map_out[i] - min_value) / (max_value - min_value)) * 255).astype(np.uint8))
+    
+    print(len(fmap_list_uint8), feature_map_number)
+    
+    # 计算特征图排列方式
+    k = int(math.ceil(math.sqrt(feature_map_number)))
+    rows = math.ceil(feature_map_number / k)
+    cols = k if feature_map_number >= (k-1) * rows else feature_map_number - k * (rows - 1)
+
+    # 创建子图画布
+    fig, axs = plt.subplots(nrows=rows, ncols=cols, figsize=(20, 20))
+    axs = axs.ravel() # 将二维数组展开成一维数组
+
+    # 显示特征图
+    for i in range(feature_map_number):
+        axs[i].imshow(fmap_list_uint8[i], cmap='inferno')
+        axs[i].axis('off') # 隐藏坐标轴
+    
+    global global_cnt
+    global_cnt += 1
+
+    plt.savefig(save_path + '/' + datasets_name+'_'+deep_level+'_'+haze_level+'-'+str(global_cnt)+'_fmap.png', dpi=300, bbox_inches='tight')
 
 def modify_feats(feats):  # feaats形状: [b,c,h,w]
 
     return feats_mean
-
 
 class SolverFrame():
     def __init__(self, net):
@@ -75,14 +117,16 @@ class Predict():
         img_block = img_block.transpose(0, 3, 1, 2)
         img_block = Variable(torch.Tensor(img_block).cuda())  # Variable容器装载
         
-        _, vis_out = self.net.forward(img_block)  # 可视化数据输出
-        vis_out = torch.mean(vis_out, dim=1, keepdim=True) # 特征图c轴均值
+        _, feature_map_out = self.net.forward(img_block)  # 可视化数据输出
+        vis_out = torch.mean(feature_map_out, dim=1, keepdim=True) # 特征图c轴均值
         vis_out = F.interpolate(vis_out, size=self.output_shape, mode='bilinear', align_corners=False) # 上采样到预测滑窗大小
         vis_out = vis_out.squeeze() # 删除1维度 (b, c, h, w) -> (h, w)
         vis_out = vis_out.cpu().detach().numpy() # tensor转numpy
         vis_out = (((vis_out - np.min(vis_out))/(np.max(vis_out)-np.min(vis_out)))*255).astype(np.uint8) # 拉伸到0-255之间
         
         dst_ds.GetRasterBand(1).WriteArray(vis_out, xoff, yoff) # 特征图结果写入gdal_dataset
+
+        PrintEachFeatureMap(feature_map_out, enabled=True)
 
     def Main(self, allpath, outpath, target_size=256, unify_read_img=False):
         print('start predict...')
@@ -177,18 +221,18 @@ class Predict():
 
 if __name__ == '__main__':
 
-    predictImgPath = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\0-vis_test\test_img'  # 待预测影像的文件夹路径
+    predictImgPath = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_haze_lv2'  # 待预测影像的文件夹路径
     Img_type = '*.tif'  # 待预测影像的类型
-    trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\trainlist_1108_add_haze_test.txt'  # 与模型训练相同的训练列表路径
+    trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\1-trainlist_clear_mix_sim_haze_ATSC+convw_LV2_rate_0.3_230401.txt'  # 与模型训练相同的训练列表路径
     numclass = 3  # 样本类别数
     model = Unet  # 模型
-    model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights\Unet-huyang_add_haze_test_1115_mix_haze_0.6_test.th'  # 模型文件完整路径
-    output_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\0-vis_test\test_out'  # 输出的预测结果路径
+    model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights\1-Unet-huyang_clear_mix_sim_haze_ATSC+convw_LV2_rate_0.3_230401.th'  # 模型文件完整路径
+    output_path = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\图片\4-隐藏层可视化\LV2'  # 输出的预测结果路径
     band_num = 8  # 影像的波段数 训练与预测应一致
     label_norm = False  # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
     target_size = 256  # 预测滑窗大小，应与训练集应一致
     unify_read_img = True  # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
-    if_vis = True  # 是否输出中间可视化信息 一般设置为False，设置为True需要模型支持
+    if_vis = True  # 是否输出中间可视化信息 可视化文件中必须设置为True
 
     '''收集训练集信息'''
     dataCollect = DataTrainInform(classes_num=numclass, trainlistPath=trainListRoot,

@@ -1,0 +1,7 @@
+Mon Apr 24 22:49:21 2023
+data_dict: {'mean': array([57.01633 , 64.042076, 69.80057 , 76.18538 , 80.04333 , 77.25044 ,
+       83.240654, 69.46429 ], dtype=float32), 'std': array([ 3.1482737,  5.1976805,  7.0400186,  8.692827 , 10.15742  ,
+        6.8207073,  7.2719727,  5.923184 ], dtype=float32), 'classWeights': array([1.4622036, 6.022731 , 7.7465096], dtype=float32), 'img_shape': (256, 256, 8)}
+epoch: 1 train_epoch_loss: 0.177531 learn_rate: 0.010000
+epoch: 2 train_epoch_loss: 0.169279 learn_rate: 0.010000
+epoch: 3 train_epoch_loss: 0.169153 learn_rate: 0.010000
