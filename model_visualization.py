@@ -27,6 +27,7 @@ from data import DataTrainInform
 
 from networks.DLinknet import DLinkNet34, DLinkNet50, DLinkNet101
 from networks.Unet import Unet
+from networks.Unet_new import UNet
 from networks.Dunet import Dunet
 from networks.Deeplab_v3_plus import DeepLabv3_plus
 from networks.FCN8S import FCN8S
@@ -40,8 +41,8 @@ global_cnt = 0 # 全局变量global_cnt用于控制预测图像编码
 
 def PrintEachFeatureMap(feature_map_out, enabled=False):
     save_path = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\图片\4-隐藏层可视化\LV2'
-    datasets_name = r'clear'
-    deep_level = r'conv5'
+    datasets_name = r'ATSC+convw+perlin_LV2'
+    deep_level = r'x2'
     haze_level = r'lv2'
 
     feature_map_out = feature_map_out.squeeze() # 删除b维度
@@ -221,12 +222,12 @@ class Predict():
 
 if __name__ == '__main__':
 
-    predictImgPath = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_haze_lv2'  # 待预测影像的文件夹路径
+    predictImgPath = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\图片\4-隐藏层可视化\0-clip_img'  # 待预测影像的文件夹路径
     Img_type = '*.tif'  # 待预测影像的类型
-    trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\1-trainlist_clear_mix_sim_haze_ATSC+convw_LV2_rate_0.3_230401.txt'  # 与模型训练相同的训练列表路径
+    trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\3-trainlist_clear_mix_sim_haze_ATSC+convw+perlin_LV2_rate_0.2_230427.txt'  # 与模型训练相同的训练列表路径
     numclass = 3  # 样本类别数
-    model = Unet  # 模型
-    model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights\1-Unet-huyang_clear_mix_sim_haze_ATSC+convw_LV2_rate_0.3_230401.th'  # 模型文件完整路径
+    model = UNet  # 模型
+    model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights\4-UNet-huyang_clear_mix_sim_haze_ATSC+convw+perlin_LV2_rate_0.2_230428.th'  # 模型文件完整路径
     output_path = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\图片\4-隐藏层可视化\LV2'  # 输出的预测结果路径
     band_num = 8  # 影像的波段数 训练与预测应一致
     label_norm = False  # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致

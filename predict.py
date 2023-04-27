@@ -24,6 +24,7 @@ from data import DataTrainInform
 
 from networks.DLinknet import DLinkNet34, DLinkNet50, DLinkNet101
 from networks.Unet import Unet
+from networks.Unet_new import UNet
 from networks.Dunet import Dunet
 from networks.Deeplab_v3_plus import DeepLabv3_plus
 from networks.FCN8S import FCN8S
@@ -152,11 +153,11 @@ if __name__ == '__main__':
 
     predictImgPath = r'E:\xinjiang_huyang_hongliu\WV_GF_Tarim\WV2_dealed\Talimu_dealed' # 待预测影像的文件夹路径
     Img_type = '*.dat' # 待预测影像的类型
-    trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\3-trainlist_clear_mix_sim_haze_ATSC+supermix_LV2_rate_0.2_230425.txt' #与模型训练相同的训练列表路径
+    trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\3-trainlist_clear_mix_sim_haze_ATSC_LV2_rate_0.2_230425.txt' #与模型训练相同的训练列表路径
     num_class = 3 # 样本类别数
-    model = Unet #模型
-    model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights\3-Unet-huyang_clear_mix_sim_haze_ATSC+supermix_LV2_rate_0.2_230425.th' # 模型文件完整路径
-    output_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-predict_result\3-predict_result_Unet-huyang_clear_mix_sim_haze_ATSC+supermix_LV2_rate_0.2_230425' # 输出的预测结果路径
+    model = UNet #模型
+    model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights\4-UNet-huyang_clear_mix_sim_haze_ATSC_LV2_rate_0.2_230428.th' # 模型文件完整路径
+    output_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-predict_result\4-predict_result_UNet-huyang_clear_mix_sim_haze_ATSC_LV2_rate_0.2_230428' # 输出的预测结果路径
     band_num = 8 #影像的波段数 训练与预测应一致
     label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
     target_size = 256 # 预测滑窗大小，应与训练集应一致

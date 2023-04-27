@@ -24,6 +24,7 @@ from test import GetTestIndicator
 
 from networks.DLinknet import DLinkNet34, DLinkNet50, DLinkNet101   
 from networks.Unet import Unet
+from networks.Unet_new import UNet
 from networks.Dunet import Dunet
 from networks.Deeplab_v3_plus import DeepLabv3_plus
 from networks.FCN8S import FCN8S
@@ -33,15 +34,15 @@ from networks.RS_Segformer import RS_Segformer
 from networks.DE_Segformer import DE_Segformer
 
 '''参数设置'''
-trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\3-trainlist_clear_mix_sim_haze_ATSC+convw+perlin_LV3_rate_0.2_230427.txt' # 训练样本列表
+trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\3-trainlist_clear_mix_sim_haze_ATSC_LV2_rate_0.2_230425.txt' # 训练样本列表
 save_model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights' # 训练模型保存路径  
-model = Unet # 选择的训练模型
-save_model_name = '3-Unet-huyang_clear_mix_sim_haze_ATSC+convw+perlin_LV3_rate_0.2_230427.th' # 训练模型保存名
+model = UNet # 选择的训练模型
+save_model_name = '4-UNet-huyang_clear_mix_sim_haze_ATSC_LV2_rate_0.2_230428.th' # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
 classes_num = 3 # 样本类别数
-batch_size = 16 # 计算批次大小
-init_lr = 0.01 # 初始学习率
+batch_size = 8 # 计算批次大小
+init_lr = 0.005 # 初始学习率
 total_epoch = 300 # 训练次数
 band_num = 8 # 影像的波段数
 if_norm_label = False # 是否对标签进行归一化 0/255二分类应设置为True
@@ -61,8 +62,8 @@ simulate_batch_size_num = 4 #模拟batchsize倍数 最终batchsize = simulate_ba
 full_cpu_mode = True # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
 if_open_test = True # 是否开启测试模式
-test_img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_haze_lv2_for_clear_Evaluation' # 测试集影像文件夹
-test_label_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-raster_label\1-raster_label_haze_lv2_for_clear_Evaluation' # 测试集真值标签文件夹
+test_img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_haze_lv2' # 测试集影像文件夹
+test_label_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-raster_label\1-raster_label_haze_lv2' # 测试集真值标签文件夹
 target_size = 256 # 模型预测窗口大小，与训练模型一致
 
 '''全负荷使用CPU'''

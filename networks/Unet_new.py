@@ -76,13 +76,16 @@ class OutConv(nn.Module):
 
 '''模型组装'''
 class UNet(nn.Module):
-    def __init__(self, n_channels, n_classes, bilinear=True):
+    def __init__(self, band_num, num_classes, bilinear=True, ifVis=False):
         super(UNet, self).__init__()
-        self.n_channels = n_channels
-        self.n_classes = n_classes
+
+        self.ifVis = ifVis
+
+        self.n_channels = band_num
+        self.n_classes = num_classes
         self.bilinear = bilinear
 
-        self.inc = DoubleConv(n_channels, 64)
+        self.inc = DoubleConv(band_num, 64)
         self.down1 = Down(64, 128)
         self.down2 = Down(128, 256)
         self.down3 = Down(256, 512)
@@ -92,7 +95,7 @@ class UNet(nn.Module):
         self.up2 = Up(512, 256 // factor, bilinear)
         self.up3 = Up(256, 128 // factor, bilinear)
         self.up4 = Up(128, 64, bilinear)
-        self.outc = OutConv(64, n_classes)
+        self.outc = OutConv(64, num_classes)
 
     def forward(self, x):
         x1 = self.inc(x)
@@ -105,4 +108,7 @@ class UNet(nn.Module):
         x = self.up3(x, x2)
         x = self.up4(x, x1)
         logits = self.outc(x)
-        return logits
+        if self.ifVis:
+            return logits, x2  # 协同输出可视化信息
+        else:
+            return logits

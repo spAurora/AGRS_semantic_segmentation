@@ -96,6 +96,6 @@ class Unet(nn.Module):
         out = self.conv_last(out)
 
         if self.ifVis:
-            return out, conv5_out  # 协同输出可视化信息
+            return out, conv3_out  # 协同输出可视化信息
         else:
             return out
