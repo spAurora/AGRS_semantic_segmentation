@@ -69,11 +69,12 @@ def cal_cm_score(cm):
     return macro_precision, macro_recall, macro_f1_score
 
 class TestFrame():
-    def __init__(self, net, data_dict, band_num):
+    def __init__(self, net, data_dict, band_num, if_norm_label):
         self.img_mean = data_dict['mean'] # 数据集均值
         self.std = data_dict['std'] # 数据集方差
         self.net = net # 模型
         self.band_num = band_num # 影像波段数
+        self.if_norm_label = if_norm_label
     
     def Predict_wHy(self, img_block, dst_ds, xoff, yoff):
         img_block = img_block.transpose(1, 2, 0) # (c, h, w) -> (h, w ,c)
@@ -176,6 +177,9 @@ class TestFrame():
             im_data_pre = input_pre.ReadAsArray(0, 0, win_size, win_size)  # 读取预测结果数据
             im_data_true = input_gt.ReadAsArray(0, 0, win_size, win_size) # 读取真值标签数据
 
+            if self.if_norm_label is True:
+                im_data_true = im_data_true/255
+
             im_data_pre = list(im_data_pre.reshape(-1)) # 展平为一维
             im_data_true = list(im_data_true.reshape(-1)) # 展平为一维
 
@@ -196,9 +200,9 @@ class TestFrame():
         return p/len(listpic), r/len(listpic), f/len(listpic)
 
 
-def GetTestIndicator(net, data_dict, target_size, band_num, img_type, test_img_path, test_label_path):        
+def GetTestIndicator(net, data_dict, target_size, band_num, img_type, test_img_path, test_label_path, if_norm_label):        
     '''执行预测'''
-    test_instantiation = TestFrame(net=net, data_dict=data_dict, band_num=band_num) # 初始化预测
+    test_instantiation = TestFrame(net=net, data_dict=data_dict, band_num=band_num, if_norm_label=if_norm_label) # 初始化预测
     print(target_size)
     p, r, f = test_instantiation.Test_Main(target_size=target_size, img_type=img_type, test_img_path=test_img_path, test_label_path=test_label_path)
 

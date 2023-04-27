@@ -33,10 +33,10 @@ from networks.RS_Segformer import RS_Segformer
 from networks.DE_Segformer import DE_Segformer
 
 '''参数设置'''
-trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\3-trainlist_clear_mix_sim_haze_ATSC_LV2_rate_0.2_230425.txt' # 训练样本列表
+trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\3-trainlist_clear_mix_sim_haze_ATSC+convw+perlin_LV3_rate_0.2_230427.txt' # 训练样本列表
 save_model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights' # 训练模型保存路径  
 model = Unet # 选择的训练模型
-save_model_name = '3-Unet-huyang_clear_mix_sim_haze_ATSC_LV2_rate_0.2_230425_test.th' # 训练模型保存名
+save_model_name = '3-Unet-huyang_clear_mix_sim_haze_ATSC+convw+perlin_LV3_rate_0.2_230427.th' # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
 classes_num = 3 # 样本类别数
@@ -158,7 +158,7 @@ with torch.autograd.profiler.profile(enabled=if_open_profile, use_cuda=True, rec
         train_epoch_loss /= len(data_loader_iter) # 计算该epoch的平均loss
 
         if if_open_test: # 如果开启测试模型就在测试集上计算精度指标
-            p, r, f = GetTestIndicator(net=solver.net, data_dict=data_dict, target_size=target_size, band_num=band_num, img_type='*.tif', test_img_path=test_img_path, test_label_path=test_label_path)
+            p, r, f = GetTestIndicator(net=solver.net, data_dict=data_dict, target_size=target_size, band_num=band_num, img_type='*.tif', test_img_path=test_img_path, test_label_path=test_label_path, if_norm_label=if_norm_label)
 
         print('epoch:',epoch, '  training time:', int(time.time()-tic), 's')
         print('epoch average train loss:',train_epoch_loss)
