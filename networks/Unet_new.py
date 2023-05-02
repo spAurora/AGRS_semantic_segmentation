@@ -109,6 +109,6 @@ class UNet(nn.Module):
         x = self.up4(x, x1)
         logits = self.outc(x)
         if self.ifVis:
-            return logits, x2  # 协同输出可视化信息
+            return logits, x3  # 协同输出可视化信息
         else:
             return logits
