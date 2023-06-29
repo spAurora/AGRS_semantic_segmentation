@@ -12,6 +12,7 @@ wanghaoyu191@mails.ucas.ac.cn
 from multiprocessing.spawn import import_main_path
 import numpy as np
 import os
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE' # 放在import torch前，防止报OMP ERROR #15
 from osgeo.gdalconst import *
 from osgeo import gdal
 from tqdm import tqdm
@@ -35,7 +36,7 @@ from networks.RS_Segformer import RS_Segformer
 from networks.DE_Segformer import DE_Segformer
 
 
-os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
+
 
 class SolverFrame():
     def __init__(self, net):

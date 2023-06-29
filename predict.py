@@ -10,6 +10,7 @@ wanghaoyu191@mails.ucas.ac.cn
 """
 import numpy as np
 import os
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE' # 放在import torch前，防止报OMP ERROR #15
 from osgeo.gdalconst import *
 from osgeo import gdal
 from tqdm import tqdm
@@ -31,8 +32,6 @@ from networks.FCN8S import FCN8S
 from networks.DABNet import DABNet
 from networks.Segformer import Segformer
 from networks.RS_Segformer import RS_Segformer
-
-os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
 class SolverFrame():
     def __init__(self, net):
@@ -151,16 +150,16 @@ class Predict():
 
 if __name__ == '__main__':
 
-    predictImgPath = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\图片\7-预测结果展示图\待预测原始影像\8波段' # 待预测影像的文件夹路径
+    predictImgPath = r'E:\project_yu\3-predict_img-8' # 待预测影像的文件夹路径
     Img_type = '*.tif' # 待预测影像的类型
-    trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\3-trainlist_clear_mix_sim_haze_ATSC_LV1_rate_0.2_230425.txt' #与模型训练相同的训练列表路径
-    num_class = 3 # 样本类别数
+    trainListRoot = r'E:\project_yu\2-trainlist\trainlist_230528.txt' #与模型训练相同的训练列表路径
+    num_class = 2 # 样本类别数
     model = UNet #模型
-    model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights\4-UNet-clear_mix_sim_haze_ATSC_LV1_rate_0.2_230501.th' # 模型文件完整路径
-    output_path = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\图片\7-预测结果展示图\待预测原始影像\predict_result_ASM_LV1' # 输出的预测结果路径
-    band_num = 8 #影像的波段数 训练与预测应一致
-    label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
-    target_size = 256 # 预测滑窗大小，应与训练集应一致
+    model_path = r'E:\project_yu\3-weights\UNet_230528_1.th' # 模型文件完整路径
+    output_path = r'E:\project_yu\4-preidct_result' # 输出的预测结果路径
+    band_num = 3 #影像的波段数 训练与预测应一致
+    label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
+    target_size = 192 # 预测滑窗大小，应与训练集应一致
     unify_read_img = True # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
 
     '''收集训练集信息'''

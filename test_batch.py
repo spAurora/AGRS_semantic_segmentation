@@ -2,7 +2,8 @@
 
 """
 AGRS_semantic_segmentation
-模型测试
+批量精度评定
+该程序用于论文,需要放在框架主路径下
 ~~~~~~~~~~~~~~~~
 code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
@@ -21,6 +22,12 @@ import fnmatch
 import sys
 import math
 
+from framework import MyFrame
+from loss import CrossEntropyLoss2d, FocalLoss2d
+from data import MyDataLoader, DataTrainInform
+
+from networks.Unet_new import UNet
+
 from statistics import mean
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from sklearn.metrics import accuracy_score
@@ -29,6 +36,8 @@ from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
 from sklearn.metrics import classification_report
+
+
 
 def precision_recall(cm):
     # 计算每个类的TP, FP, FN
@@ -202,6 +211,46 @@ class TestFrame():
 def GetTestIndicator(net, data_dict, target_size, band_num, img_type, test_img_path, test_label_path, if_norm_label):        
     '''执行预测'''
     test_instantiation = TestFrame(net=net, data_dict=data_dict, band_num=band_num, if_norm_label=if_norm_label) # 初始化预测
+    print(target_size)
     p, r, f = test_instantiation.Test_Main(target_size=target_size, img_type=img_type, test_img_path=test_img_path, test_label_path=test_label_path)
 
     return p, r, f
+
+trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist' # 训练样本列表文件夹
+model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights\ASM+perlin' # 训练模型保存路径文件夹 *****************************
+model = UNet # 选择的训练模型
+if_norm_label = False # 是否对标签进行归一化 0/255二分类应设置为True
+classes_num = 3 # 样本类别数
+band_num = 8 # 影像的波段数
+loss = FocalLoss2d # 损失函数
+init_lr = 0.01 # 初始学习率
+label_weight_scale_factor = 1 #标签权重的指数缩放系数 1为不缩放
+target_size = 256 # 模型预测窗口大小，与训练模型一致
+test_img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_clear_for_clear_Evaluation' # 测试集影像文件夹
+test_label_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-raster_label\1-raster_label_clear_for_clear_Evaluation' # 测试集真值标签文件夹
+
+file_handle = open('ASM+perlin_clear_score.txt', mode='w', encoding='utf-8') # w写入，w+读写 # ************************************
+
+for k1 in range(1, 6):
+    '''收集数据集信息'''
+    train_list_full_name = trainListRoot + '/' + '6-trainlist_clear_mix_sim_haze_ATSC+perlin_LV2_rate_0.2_' + str(k1) + '_230505.txt' # **********************************
+    dataCollect = DataTrainInform(classes_num=classes_num, trainlistPath=train_list_full_name, band_num=band_num, 
+                                label_norm=if_norm_label, label_weight_scale_factor=label_weight_scale_factor) # 计算数据集信息
+    data_dict = dataCollect.collectDataAndSave() # 数据集信息存储于字典中
+    weight = torch.from_numpy(data_dict['classWeights']).cuda()
+    loss_d = loss(weight=weight)
+
+    for k2 in range(1, 11):
+        '''初始化模型'''
+
+        model_name = '6-UNet-clear_mix_sim_haze_ATSC+perlin_LV2_rate_0.2_' + str(k1) + '-' + str(k2) +'_230505.th' #**********************************************
+        solver = MyFrame(net=model(num_classes=classes_num, band_num = band_num), loss=loss_d, lr=init_lr) # 初始化网络，损失函数，学习率
+        model_full_path = model_path + '/' + model_name
+        if os.path.exists(model_full_path):
+            solver.load(model_full_path)
+        
+        p, r, f = GetTestIndicator(net=solver.net, data_dict=data_dict, target_size=target_size, band_num=band_num, img_type='*.tif', test_img_path=test_img_path, test_label_path=test_label_path, if_norm_label=if_norm_label)
+        
+        file_handle.write(str(p) +','+ str(r) + ',' + str(f)  +'\n')
+
+file_handle.close()
