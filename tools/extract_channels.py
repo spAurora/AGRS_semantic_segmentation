@@ -48,7 +48,7 @@ def write_img(out_path, im_proj, im_geotrans, im_data):
     new_dataset.SetGeoTransform(im_geotrans)
     new_dataset.SetProjection(im_proj)
     if im_bands == 1:
-        new_dataset.GetRasterBand(1).WriteArray(im_data)
+        new_dataset.GetRasterBand(1).WriteArray(im_data.squeeze())
     else:
         for i in range(im_bands):
             new_dataset.GetRasterBand(i + 1).WriteArray(im_data[i])
@@ -77,9 +77,10 @@ def read_img(sr_img):
 
 os.environ['GDAL_DATA'] = r'C:\Users\75198\anaconda3\envs\learn\Lib\site-packages\osgeo\data\gdal' # To prevent ERROR4
 
-img_path = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\图片\7-预测结果展示图\待预测原始影像\8波段'
-output_path = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\图片\7-预测结果展示图\待预测原始影像\3波段'
-save_channels = [8, 5, 3] # 顺序抽取的通道
+img_path = r'D:\xj_parcel_2023\output\UNet_farmland\extract_channel'
+output_path = r'D:\xj_parcel_2023\output'
+# save_channels = [8, 5, 3] # 顺序抽取的通道
+save_channels = [1] # 顺序抽取的通道
 
 listpic = fnmatch.filter(os.listdir(img_path), '*.tif')
 

@@ -121,10 +121,10 @@ class Predict():
             else:
                 '''分块读取影像并预测'''
                 # 全局整体
-                for i in tqdm(range(0, math.floor(img_width/target_size-1)*target_size, target_size)):
-                    for j in range(0, math.floor(img_height/target_size-1)*target_size, target_size):
-                        img_block = dataset.ReadAsArray(i, j, target_size, target_size) # 读取滑窗影像进内存
-                        self.Predict_wHy(img_block.copy(), dst_ds, xoff=i, yoff=j)
+                for i in tqdm(range(0, img_width-target_size, target_size)):
+                    img_block = dataset.ReadAsArray(i, 0, target_size, dataset.RasterYSize) # 读取一列影像进内存
+                    for j in range(0, img_height-target_size, target_size):
+                        self.Predict_wHy(img_block[:, j:j+target_size, :].copy(), dst_ds, xoff=0, yoff=j)
                     dst_ds.FlushCache() # 预测完每列后写入磁盘
                     
                 # 下侧边缘
@@ -150,17 +150,17 @@ class Predict():
 
 if __name__ == '__main__':
 
-    predictImgPath = r'E:\project_yu\3-predict_img-8' # 待预测影像的文件夹路径
+    predictImgPath = r'E:\testimg' # 待预测影像的文件夹路径
     Img_type = '*.tif' # 待预测影像的类型
-    trainListRoot = r'E:\project_yu\2-trainlist\trainlist_230528.txt' #与模型训练相同的训练列表路径
+    trainListRoot = r'E:\project_wafangdian\2-trainlist\trainlist_0629_1.txt' #与模型训练相同的训练列表路径
     num_class = 2 # 样本类别数
     model = UNet #模型
-    model_path = r'E:\project_yu\3-weights\UNet_230528_1.th' # 模型文件完整路径
-    output_path = r'E:\project_yu\4-preidct_result' # 输出的预测结果路径
+    model_path = r'E:\project_wafangdian\3-weights\wafangdian_UNet_0629_1.th' # 模型文件完整路径
+    output_path = r'E:\project_wafangdian\3-predict_result_test' # 输出的预测结果路径
     band_num = 3 #影像的波段数 训练与预测应一致
     label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
-    target_size = 192 # 预测滑窗大小，应与训练集应一致
-    unify_read_img = True # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
+    target_size = 512 # 预测滑窗大小，应与训练集应一致
+    unify_read_img = False # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
 
     '''收集训练集信息'''
     dataCollect = DataTrainInform(classes_num=num_class, trainlistPath=trainListRoot, band_num=band_num, label_norm=label_norm) #计算数据集信息
