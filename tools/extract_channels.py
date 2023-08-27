@@ -77,10 +77,10 @@ def read_img(sr_img):
 
 os.environ['GDAL_DATA'] = r'C:\Users\75198\anaconda3\envs\learn\Lib\site-packages\osgeo\data\gdal' # To prevent ERROR4
 
-img_path = r'D:\xj_parcel_2023\output\UNet_farmland\extract_channel'
-output_path = r'D:\xj_parcel_2023\output'
-# save_channels = [8, 5, 3] # 顺序抽取的通道
-save_channels = [1] # 顺序抽取的通道
+img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_clear'
+output_path = r'C:\Users\75198\OneDrive\论文\SCI-4-\画图\图4-语义分割示意图\清晰区域8-5-3波段'
+save_channels = [8, 5, 3] # 顺序抽取的通道
+# save_channels = [1] # 顺序抽取的通道
 
 listpic = fnmatch.filter(os.listdir(img_path), '*.tif')
 
