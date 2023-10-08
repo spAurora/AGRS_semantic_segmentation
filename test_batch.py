@@ -217,7 +217,7 @@ def GetTestIndicator(net, data_dict, target_size, band_num, img_type, test_img_p
     return p, r, f
 
 trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist' # 训练样本列表文件夹
-model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights\ASM+perlin' # 训练模型保存路径文件夹 *****************************
+model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights\rate_0' # 训练模型保存路径文件夹 *****************************
 model = UNet # 选择的训练模型
 if_norm_label = False # 是否对标签进行归一化 0/255二分类应设置为True
 classes_num = 3 # 样本类别数
@@ -226,14 +226,14 @@ loss = FocalLoss2d # 损失函数
 init_lr = 0.01 # 初始学习率
 label_weight_scale_factor = 1 #标签权重的指数缩放系数 1为不缩放
 target_size = 256 # 模型预测窗口大小，与训练模型一致
-test_img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_clear_for_clear_Evaluation' # 测试集影像文件夹
-test_label_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-raster_label\1-raster_label_clear_for_clear_Evaluation' # 测试集真值标签文件夹
+test_img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_clear' # 测试集影像文件夹
+test_label_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-raster_label\1-raster_label_clear' # 测试集真值标签文件夹
 
-file_handle = open('ASM+perlin_clear_score.txt', mode='w', encoding='utf-8') # w写入，w+读写 # ************************************
+file_handle = open('SCI2-UNet_score.txt', mode='w', encoding='utf-8') # w写入，w+读写 # ************************************
 
 for k1 in range(1, 6):
     '''收集数据集信息'''
-    train_list_full_name = trainListRoot + '/' + '6-trainlist_clear_mix_sim_haze_ATSC+perlin_LV2_rate_0.2_' + str(k1) + '_230505.txt' # **********************************
+    train_list_full_name = trainListRoot + '/' + '5-trainlist_clear_' + str(k1) + '_230502.txt' # **********************************
     dataCollect = DataTrainInform(classes_num=classes_num, trainlistPath=train_list_full_name, band_num=band_num, 
                                 label_norm=if_norm_label, label_weight_scale_factor=label_weight_scale_factor) # 计算数据集信息
     data_dict = dataCollect.collectDataAndSave() # 数据集信息存储于字典中
@@ -243,7 +243,7 @@ for k1 in range(1, 6):
     for k2 in range(1, 11):
         '''初始化模型'''
 
-        model_name = '6-UNet-clear_mix_sim_haze_ATSC+perlin_LV2_rate_0.2_' + str(k1) + '-' + str(k2) +'_230505.th' #**********************************************
+        model_name = '5-UNet-clear_' + str(k1) + '-' + str(k2) +'_230502.th' #**********************************************
         solver = MyFrame(net=model(num_classes=classes_num, band_num = band_num), loss=loss_d, lr=init_lr) # 初始化网络，损失函数，学习率
         model_full_path = model_path + '/' + model_name
         if os.path.exists(model_full_path):

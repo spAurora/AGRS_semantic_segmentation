@@ -32,6 +32,7 @@ from networks.FCN8S import FCN8S
 from networks.DABNet import DABNet
 from networks.Segformer import Segformer
 from networks.RS_Segformer import RS_Segformer
+from networks.DE_Segformer import DE_Segformer
 
 class SolverFrame():
     def __init__(self, net):
@@ -150,17 +151,17 @@ class Predict():
 
 if __name__ == '__main__':
 
-    predictImgPath = r'E:\testimg' # 待预测影像的文件夹路径
+    predictImgPath = r'D:\xj_populus_count\clip_img_230929' # 待预测影像的文件夹路径
     Img_type = '*.tif' # 待预测影像的类型
-    trainListRoot = r'E:\project_wafangdian\2-trainlist\trainlist_0629_1.txt' #与模型训练相同的训练列表路径
-    num_class = 2 # 样本类别数
+    trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\1-trainlist_clear_230401.txt' #与模型训练相同的训练列表路径
+    num_class = 3 # 样本类别数
     model = UNet #模型
-    model_path = r'E:\project_wafangdian\3-weights\wafangdian_UNet_0629_1.th' # 模型文件完整路径
-    output_path = r'E:\project_wafangdian\3-predict_result_test' # 输出的预测结果路径
-    band_num = 3 #影像的波段数 训练与预测应一致
-    label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
-    target_size = 512 # 预测滑窗大小，应与训练集应一致
-    unify_read_img = False # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
+    model_path = r'C:\Users\75198\OneDrive\论文\SCI-4 Populus counting\画图\图4-0-语义分割定量评价图\512训练集最优模型\5-UNet-clear_1-7_230502.th' # 模型文件完整路径
+    output_path = r'D:\xj_populus_count\predict_result_230929' # 输出的预测结果路径
+    band_num = 8 #影像的波段数 训练与预测应一致
+    label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
+    target_size = 256 # 预测滑窗大小，应与训练集应一致
+    unify_read_img = True # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
 
     '''收集训练集信息'''
     dataCollect = DataTrainInform(classes_num=num_class, trainlistPath=trainListRoot, band_num=band_num, label_norm=label_norm) #计算数据集信息
