@@ -39,7 +39,7 @@ class MyFrame():
             pred, _ = self.net(self.img) # 前向传递计算输出
         else:
             pred = self.net(self.img) # 前向传递计算输出
-        label = self.mask.squeeze() # label维度规整
+        label = self.mask # label维度规整可能会引发异常
         loss = self.loss(output = pred, target = label) # 计算loss
         loss.backward() # 反向传播梯度
         if ifStep:
