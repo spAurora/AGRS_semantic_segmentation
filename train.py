@@ -35,7 +35,7 @@ from networks.DE_Segformer import DE_Segformer
 
 
 '''参数设置'''
-trainListRoot = r'E:\project_daijiandi\2-trainlist\trainlist_231115_5pt.txt' # 训练样本列表
+trainListRoot = r'E:\project_daijiandi\2-trainlist\trainlist_231115.txt' # 训练样本列表
 save_model_path = r'E:\project_daijiandi\3-weights' # 训练模型保存路径  
 model = DLinkNet34 # 选择的训练模型
 save_model_name = 'DLinkNet34_1115.th' # 训练模型保存名
@@ -43,7 +43,7 @@ mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件
 loss = FocalLoss2d # 损失函数
 classes_num = 2 # 样本类别数
 batch_size = 8 # 计算批次大小
-init_lr = 0.0005 # 初始学习率
+init_lr = 0.001  # 初始学习率
 total_epoch = 300 # 训练次数
 band_num = 3 # 影像的波段数
 if_norm_label = True # 是否对标签进行归一化 0/255二分类应设置为True
@@ -163,7 +163,7 @@ with torch.autograd.profiler.profile(enabled=if_open_profile, use_cuda=True, rec
         if if_open_test: # 如果开启测试模型就在测试集上计算精度指标
             p, r, f = GetTestIndicator(net=solver.net, data_dict=data_dict, target_size=target_size, band_num=band_num, img_type=test_img_type, test_img_path=test_img_path, test_label_path=test_label_path, if_norm_label=if_norm_label)
 
-        print('epoch:',epoch, '  training time:', int(time.time()-tic), 's')
+        print('\nepoch:',epoch, '  training time:', int(time.time()-tic), 's')
         print('epoch average train loss:',train_epoch_loss)
         if if_open_test:
             print('epoch test indicator: precision=' + str(p) + ', recall='+ str(r) + ', f1_score=' + str(f))
