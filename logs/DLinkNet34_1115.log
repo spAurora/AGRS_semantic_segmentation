@@ -1,0 +1,49 @@
+Wed Nov 15 15:04:56 2023
+data_dict: {'mean': array([68.74835, 77.87559, 68.29096], dtype=float32), 'std': array([42.771324, 40.52032 , 38.327972], dtype=float32), 'classWeights': array([1.5263757, 4.1217947], dtype=float32), 'img_shape': (512, 512, 3)}
+epoch: 1 iter: 1 train_iter_loss: 0.086793 learn_rate: 0.000500 
+epoch: 1 iter: 2 train_iter_loss: 0.086774 learn_rate: 0.000500 
+epoch: 1 iter: 3 train_iter_loss: 0.086750 learn_rate: 0.000500 
+epoch: 1 iter: 4 train_iter_loss: 0.087099 learn_rate: 0.000500 
+epoch: 1 iter: 5 train_iter_loss: 0.086241 learn_rate: 0.000500 
+epoch: 1 iter: 6 train_iter_loss: 0.085865 learn_rate: 0.000500 
+epoch: 1 iter: 7 train_iter_loss: 0.085534 learn_rate: 0.000500 
+epoch: 1 iter: 8 train_iter_loss: 0.085807 learn_rate: 0.000500 
+epoch: 1 iter: 9 train_iter_loss: 0.084550 learn_rate: 0.000500 
+epoch: 1 iter: 10 train_iter_loss: 0.087068 learn_rate: 0.000500 
+epoch: 1 iter: 11 train_iter_loss: 0.084868 learn_rate: 0.000500 
+epoch: 1 iter: 12 train_iter_loss: 0.085231 learn_rate: 0.000500 
+epoch: 1 iter: 13 train_iter_loss: 0.082658 learn_rate: 0.000500 
+epoch: 1 iter: 14 train_iter_loss: 0.085107 learn_rate: 0.000500 
+epoch: 1 iter: 15 train_iter_loss: 0.083820 learn_rate: 0.000500 
+epoch: 1 iter: 16 train_iter_loss: 0.082062 learn_rate: 0.000500 
+epoch: 1 iter: 17 train_iter_loss: 0.079499 learn_rate: 0.000500 
+epoch: 1 iter: 18 train_iter_loss: 0.082550 learn_rate: 0.000500 
+epoch: 1 iter: 19 train_iter_loss: 0.078972 learn_rate: 0.000500 
+epoch: 1 train_epoch_loss: 0.084592 learn_rate: 0.000500 test_p: 0.452436 test_r: 0.500035 test_f: 0.459281
+epoch: 2 iter: 1 train_iter_loss: 0.084909 learn_rate: 0.000500 
+epoch: 2 iter: 2 train_iter_loss: 0.086269 learn_rate: 0.000500 
+epoch: 2 iter: 3 train_iter_loss: 0.085025 learn_rate: 0.000500 
+epoch: 2 iter: 4 train_iter_loss: 0.084305 learn_rate: 0.000500 
+epoch: 2 iter: 5 train_iter_loss: 0.084924 learn_rate: 0.000500 
+epoch: 2 iter: 6 train_iter_loss: 0.081712 learn_rate: 0.000500 
+epoch: 2 iter: 7 train_iter_loss: 0.084688 learn_rate: 0.000500 
+epoch: 2 iter: 8 train_iter_loss: 0.084851 learn_rate: 0.000500 
+epoch: 2 iter: 9 train_iter_loss: 0.082705 learn_rate: 0.000500 
+epoch: 2 iter: 10 train_iter_loss: 0.085421 learn_rate: 0.000500 
+epoch: 2 iter: 11 train_iter_loss: 0.081642 learn_rate: 0.000500 
+epoch: 2 iter: 12 train_iter_loss: 0.082589 learn_rate: 0.000500 
+epoch: 2 iter: 13 train_iter_loss: 0.079114 learn_rate: 0.000500 
+epoch: 2 iter: 14 train_iter_loss: 0.076884 learn_rate: 0.000500 
+epoch: 2 iter: 15 train_iter_loss: 0.076654 learn_rate: 0.000500 
+epoch: 2 iter: 16 train_iter_loss: 0.074252 learn_rate: 0.000500 
+epoch: 2 iter: 17 train_iter_loss: 0.066532 learn_rate: 0.000500 
+epoch: 2 iter: 18 train_iter_loss: 0.077650 learn_rate: 0.000500 
+epoch: 2 iter: 19 train_iter_loss: 0.107200 learn_rate: 0.000500 
+epoch: 2 train_epoch_loss: 0.082491 learn_rate: 0.000500 test_p: 0.250000 test_r: 0.500000 test_f: 0.333333
+epoch: 3 iter: 1 train_iter_loss: 0.066212 learn_rate: 0.000500 
+epoch: 3 iter: 2 train_iter_loss: 0.117210 learn_rate: 0.000500 
+epoch: 3 iter: 3 train_iter_loss: 0.067371 learn_rate: 0.000500 
+epoch: 3 iter: 4 train_iter_loss: 0.071685 learn_rate: 0.000500 
+epoch: 3 iter: 5 train_iter_loss: 0.072950 learn_rate: 0.000500 
+epoch: 3 iter: 6 train_iter_loss: 0.068704 learn_rate: 0.000500 
+epoch: 3 iter: 7 train_iter_loss: 0.084217 learn_rate: 0.000500 

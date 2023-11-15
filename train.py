@@ -35,15 +35,15 @@ from networks.DE_Segformer import DE_Segformer
 
 
 '''参数设置'''
-trainListRoot = r'E:\project_wafangdian\2-trainlist\trainlist_0629_1.txt' # 训练样本列表
-save_model_path = r'E:\project_wafangdian\3-weights' # 训练模型保存路径  
-model = UNet # 选择的训练模型
-save_model_name = 'test.th' # 训练模型保存名
+trainListRoot = r'E:\project_daijiandi\2-trainlist\trainlist_231115_5pt.txt' # 训练样本列表
+save_model_path = r'E:\project_daijiandi\3-weights' # 训练模型保存路径  
+model = DLinkNet34 # 选择的训练模型
+save_model_name = 'DLinkNet34_1115.th' # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
 classes_num = 2 # 样本类别数
-batch_size = 2 # 计算批次大小
-init_lr = 0.005 # 初始学习率
+batch_size = 8 # 计算批次大小
+init_lr = 0.0005 # 初始学习率
 total_epoch = 300 # 训练次数
 band_num = 3 # 影像的波段数
 if_norm_label = True # 是否对标签进行归一化 0/255二分类应设置为True
@@ -55,7 +55,7 @@ if_open_profile = False # 是否启用性能分析，启用后计算2个eopch即
 lr_mode = 0 # 学习率更新模式，0为等比下降，1为标准下降
 max_no_optim_num = 1 # 最大loss无优化次数
 lr_update_rate = 3.0 # 学习率等比下降更新率
-min_lr = 5e-5 # 最低学习率
+min_lr = 1e-6 # 最低学习率
 
 simulate_batch_size = True #是否模拟大batchsize；除非显存太小一般不开启
 simulate_batch_size_num = 4 #模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
@@ -63,8 +63,8 @@ simulate_batch_size_num = 4 #模拟batchsize倍数 最终batchsize = simulate_ba
 full_cpu_mode = True # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
 if_open_test = True # 是否开启测试模式
-test_img_path = r'E:\project_wafangdian\1-clip_img' # 测试集影像文件夹
-test_label_path = r'E:\project_wafangdian\1-raster_label' # 测试集真值标签文件夹
+test_img_path = r'E:\project_daijiandi\3-testset\image' # 测试集影像文件夹
+test_label_path = r'E:\project_daijiandi\3-testset\label' # 测试集真值标签文件夹
 target_size = 512 # 模型预测窗口大小，与训练模型一致
 test_img_type = '*.tif' # 测试集影像数据类型
 
