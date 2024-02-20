@@ -151,21 +151,27 @@ class Predict():
 
 if __name__ == '__main__':
 
-    predictImgPath = r'E:\project_daijiandi\0-other_data\image_tif' # 待预测影像的文件夹路径
+    predictImgPath = r'E:\DOM\0-test_img' # 待预测影像的文件夹路径
     Img_type = '*.tif' # 待预测影像的类型
-    trainListRoot = r'E:\project_daijiandi\2-trainlist\trainlist_231115.txt' #与模型训练相同的训练列表路径
-    num_class = 2 # 样本类别数
-    model = DLinkNet34 #模型
-    model_path = r'E:\project_daijiandi\3-weights\DLinkNet34_1115.th' # 模型文件完整路径
-    output_path = r'E:\project_daijiandi\4-predict_result' # 输出的预测结果路径
+    trainListRoot = r'E:\DOM\2-train_list\trainlist_240219.txt' #与模型训练相同的训练列表路径
+    num_class = 10 # 样本类别数
+    model = DABNet #模型
+    model_path = r'E:\DOM\3-weights\DABNet_0219.th' # 模型文件完整路径
+    output_path = r'E:\DOM\3-predict_result' # 输出的预测结果路径
     band_num = 3 #影像的波段数 训练与预测应一致
-    label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
-    target_size = 512 # 预测滑窗大小，应与训练集应一致
+    label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
+    target_size = 1024 # 预测滑窗大小，应与训练集应一致
     unify_read_img = True # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
 
     '''收集训练集信息'''
     dataCollect = DataTrainInform(classes_num=num_class, trainlistPath=trainListRoot, band_num=band_num, label_norm=label_norm) #计算数据集信息
     data_dict = dataCollect.collectDataAndSave()
+    # '''手动设置data_dict'''
+    # data_dict = {}
+    # data_dict['mean'] = [117.280266, 128.70387, 136.86803]
+    # data_dict['std'] = [43.33161, 39.06087, 34.673794]
+    # data_dict['classWeights'] = np.array([2.5911248, 3.8909917, 9.9005165, 9.21661, 7.058571, 10.126685, 3.4428556, 10.29797, 5.424672, 8.990792], dtype=np.float32)
+    # data_dict['img_shape'] = [1024, 1024, 3]
 
     print('data mean: ', data_dict['mean'])
     print('data std: ', data_dict['std'])

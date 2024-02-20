@@ -13,7 +13,7 @@ wanghaoyu191@mails.ucas.ac.cn
 import random
 
 def retain_lines(input_file, output_file, retain_percentage):
-    with open(input_file, 'r') as f:
+    with open(input_file, 'r', encoding='utf-8') as f:
         lines = f.readlines()
 
     total_lines = len(lines)
@@ -26,8 +26,8 @@ def retain_lines(input_file, output_file, retain_percentage):
     with open(output_file, 'w') as f:
         f.writelines(retained_lines)
 
-retain_percentage = 0.2 # retain percentage (e.g., 0.8 for 80% retention)
-input_file_path = r'E:\project_daijiandi\2-trainlist\trainlist_231115.txt'
-output_file_path = r'E:\project_daijiandi\2-trainlist\trainlist_231115_20pt.txt'
+retain_percentage = 0.5 # retain percentage (e.g., 0.8 for 80% retention)
+input_file_path = r'E:\DOM\2-train_list\trainlist_240219.txt'
+output_file_path = r'E:\DOM\2-train_list\trainlist_240219_50_percent.txt'
 
 retain_lines(input_file_path, output_file_path, retain_percentage)

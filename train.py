@@ -35,18 +35,18 @@ from networks.DE_Segformer import DE_Segformer
 
 
 '''参数设置'''
-trainListRoot = r'E:\project_daijiandi\2-trainlist\trainlist_231115.txt' # 训练样本列表
-save_model_path = r'E:\project_daijiandi\3-weights' # 训练模型保存路径  
-model = DLinkNet34 # 选择的训练模型
-save_model_name = 'DLinkNet34_1115.th' # 训练模型保存名
+trainListRoot = r'E:\DOM\2-train_list\trainlist_240219.txt' # 训练样本列表
+save_model_path = r'E:\DOM\3-weights' # 训练模型保存路径  
+model = UNet # 选择的训练模型
+save_model_name = 'UNet_0220.th' # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
-classes_num = 2 # 样本类别数
-batch_size = 8 # 计算批次大小
+classes_num = 10 # 样本类别数
+batch_size = 1 # 计算批次大小
 init_lr = 0.001  # 初始学习率
 total_epoch = 300 # 训练次数
 band_num = 3 # 影像的波段数
-if_norm_label = True # 是否对标签进行归一化 0/255二分类应设置为True
+if_norm_label = False # 是否对标签进行归一化 0/255二分类应设置为True
 label_weight_scale_factor = 1 #标签权重的指数缩放系数 1为不缩放
 
 if_vis = False # 是否输出中间可视化信息 一般设置为False，设置为True需要模型支持
@@ -58,14 +58,14 @@ lr_update_rate = 3.0 # 学习率等比下降更新率
 min_lr = 1e-6 # 最低学习率
 
 simulate_batch_size = True #是否模拟大batchsize；除非显存太小一般不开启
-simulate_batch_size_num = 4 #模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
+simulate_batch_size_num = 32 #模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
 
 full_cpu_mode = True # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
 if_open_test = True # 是否开启测试模式
-test_img_path = r'E:\project_daijiandi\3-testset\image' # 测试集影像文件夹
-test_label_path = r'E:\project_daijiandi\3-testset\label' # 测试集真值标签文件夹
-target_size = 512 # 模型预测窗口大小，与训练模型一致
+test_img_path = r'E:\DOM\0-test_img' # 测试集影像文件夹
+test_label_path = r'E:\DOM\0-test_label' # 测试集真值标签文件夹
+target_size = 768 # 模型预测窗口大小，与训练模型一致
 test_img_type = '*.tif' # 测试集影像数据类型
 
 '''全负荷使用CPU'''
@@ -93,12 +93,12 @@ print('Current device: ', torch.cuda.current_device()) # 当前计算的显卡id
 dataCollect = DataTrainInform(classes_num=classes_num, trainlistPath=trainListRoot, band_num=band_num, 
                             label_norm=if_norm_label, label_weight_scale_factor=label_weight_scale_factor) # 计算数据集信息
 data_dict = dataCollect.collectDataAndSave() # 数据集信息存储于字典中
-'''手动设置data_dict'''
-#data_dict = {}
-#data_dict['mean'] = [125.304955, 127.38818,  114.94185]
-#data_dict['std'] = [40.3933, 35.64181, 37.925995]
-#data_dict['classWeights'] = np.ones(2, dtype=np.float32)
-#data_dict['img_shape'] = (256, 256, 3)
+# '''手动设置data_dict'''
+# data_dict = {}
+# data_dict['mean'] = [117.280266, 128.70387, 136.86803]
+# data_dict['std'] = [43.33161, 39.06087, 34.673794]
+# data_dict['classWeights'] = np.array([2.5911248, 3.8909917, 9.9005165, 9.21661, 7.058571, 10.126685, 3.4428556, 10.29797, 5.424672, 8.990792], dtype=np.float32)
+# data_dict['img_shape'] = [1024, 1024, 3]
 
 if data_dict is None:
     print("error while pickling data. Please check.")

@@ -134,10 +134,10 @@ def clipp(int_path,out_path,use_band,size):
                                 print("=============已成功写入第{}个矩形===============".format(num))
                                 del out_ds
             del in_ds
-img_filepath = r"C:\Users\13607\Desktop\3-raster_label\Image"
-out_filepath = r"C:\Users\13607\Desktop\3-raster_label\3-clip_img"
-band_num = 8
-rectangle_size = 512
+img_filepath = r"E:\DOM分类标签数据\1_打标签数据(未切片)\data"
+out_filepath = r"E:\DOM分类标签数据\1-clip_img"
+band_num = 3
+rectangle_size = 4096
 if len(sys.argv) > 2:
     img_filepath = sys.argv[1]
     out_filepath = sys.argv[2]

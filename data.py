@@ -23,7 +23,7 @@ class MyDataLoader(data.Dataset):
         self.std = data_dict['std'] # 数据集标准差
         self.band_num = band_num # 波段数
 
-        with open(self.root, 'r') as f:
+        with open(self.root, 'r', encoding='utf-8') as f:
             self.filelist = f.readlines() # 返回一个列表，其中包含文件中的每一行作为列表项
     
     def __len__(self):
@@ -106,7 +106,7 @@ class DataTrainInform:
 
         no_files = 0
 
-        with open(trainlistPath, 'r') as f:
+        with open(trainlistPath, 'r', encoding='utf-8') as f:
             textFile = f.readlines()
             
             img_file, label_file = textFile[0].split()
