@@ -1,6 +1,6 @@
 """
 对一个目录下的所有影像进行下采样, 转移到一个新的目录里
-异步加速
+异步加速 python>=3.7
 ~~~~~~~~~~~~~~~~
 code by Zhang Chi
 Aerospace Information Research Institute, Chinese Academy of Sciences
@@ -28,9 +28,9 @@ async def process_tif(input_file_path, output_file_path, ratio_percentage):
     await process.wait()
 
 async def main():
-    ratio = 0.2
-    src_folder = "/Users/xianyu/code/downsampling/ToZC"  # 源文件夹路径
-    dest_folder = "/Users/xianyu/code/downsampling/output"  # 目标文件夹路径
+    ratio = 0.25
+    src_folder = r"E:\project_populus_UAV\2-enhance_img\1-pretrain_enhanceimg_240307"  # 源文件夹路径
+    dest_folder = r"E:\project_populus_UAV\2-enhance_img\1-pretrain_enhanceimg_ds025_240307"  # 目标文件夹路径
 
     ratio_percentage = f"{int(ratio*100)}%"
 

@@ -10,9 +10,9 @@ zhangchi233@mails.ucas.ac.cn
 import os
 import subprocess
 
-ratio = 0.2
-src_folder = "/Users/xianyu/code/random/ToZC"  # 源文件夹路径
-dest_folder = "/Users/xianyu/code/random/output"  # 目标文件夹路径
+ratio = 0.25
+src_folder = r"E:\project_populus_UAV\2-enhance_label\1-pretrain_enhancelabel_240307"  # 源文件夹路径
+dest_folder = r"E:\project_populus_UAV\2-enhance_label\1-pretrain_enhancelabel_ds025_240307"  # 目标文件夹路径
 
 ratio_percentage = f"{int(ratio*100)}%"
 

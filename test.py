@@ -180,7 +180,9 @@ class TestFrame():
                 im_data_true = im_data_true/255
 
             im_data_pre = list(im_data_pre.reshape(-1)) # 展平为一维
-            im_data_true = list(im_data_true.reshape(-1)) # 展平为一维
+            im_data_true = list(im_data_true.reshape(-1).astype(np.uint8)) # 展平为一维
+
+            #print(type(im_data_pre[0]), type(im_data_true[0]))
 
             '''精度评定'''
             cm = confusion_matrix(im_data_true, im_data_pre, normalize='true') # 首先计算归一化混淆矩阵
@@ -192,7 +194,7 @@ class TestFrame():
             '''一次循环的后处理'''
             input_gt = None
             input_pre = None
-            os.remove('temp.tif')
+            # os.remove('temp.tif')
             cnt += 1
         
         '''循环完毕后返回各项指标'''

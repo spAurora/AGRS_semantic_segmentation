@@ -12,6 +12,7 @@ wanghaoyu191@mails.ucas.ac.cn
 import torch
 import torch.nn as nn
 from torch.nn.modules.loss import _WeightedLoss
+import numpy as np
 
 class CrossEntropyLoss2d(_WeightedLoss):
     """
@@ -44,7 +45,6 @@ class FocalLoss2d(nn.Module):
         self.ce_fn = nn.CrossEntropyLoss(weight=self.weight, ignore_index=self.ignore_index)
 
     def forward(self, output, target):
-
         if output.dim()>2:
             output = output.contiguous().view(output.size(0), output.size(1), -1)
             output = output.transpose(1,2)

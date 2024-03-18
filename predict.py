@@ -151,16 +151,16 @@ class Predict():
 
 if __name__ == '__main__':
 
-    predictImgPath = r'E:\DOM\0-test_img' # 待预测影像的文件夹路径
+    predictImgPath = r'E:\project_populus_UAV\1-clip_img\1-pretrain_img_ds025_240307' # 待预测影像的文件夹路径
     Img_type = '*.tif' # 待预测影像的类型
-    trainListRoot = r'E:\DOM\2-train_list\trainlist_240219.txt' #与模型训练相同的训练列表路径
-    num_class = 10 # 样本类别数
-    model = DABNet #模型
-    model_path = r'E:\DOM\3-weights\DABNet_0219.th' # 模型文件完整路径
-    output_path = r'E:\DOM\3-predict_result' # 输出的预测结果路径
-    band_num = 3 #影像的波段数 训练与预测应一致
-    label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
-    target_size = 1024 # 预测滑窗大小，应与训练集应一致
+    trainListRoot = r'E:\project_populus_UAV\2-train_list\trainlist_pretrain_ds025_240307_1.txt' #与模型训练相同的训练列表路径
+    num_class = 2 # 样本类别数
+    model = UNet #模型
+    model_path = r'E:\project_populus_UAV\3-weights\UNet_populus_ds025_0307_1.th' # 模型文件完整路径
+    output_path = r'E:\project_populus_UAV\4-predict_result' # 输出的预测结果路径
+    band_num = 4 #影像的波段数 训练与预测应一致
+    label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
+    target_size = 256 # 预测滑窗大小，应与训练集应一致
     unify_read_img = True # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
 
     '''收集训练集信息'''
