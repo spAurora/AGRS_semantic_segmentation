@@ -94,12 +94,14 @@ class TestFrame():
         predict_result = np.argmax(predict_out, axis=2) # 返回第三维度最大值的下标
         dst_ds.GetRasterBand(1).WriteArray(predict_result, xoff, yoff) # 预测结果写入gdal_dataset
 
-    def Test_Main(self, target_size, img_type, test_img_path, test_label_path):
+    def Test_Main(self, target_size, img_type, test_img_path, test_label_path, test_output_path):
         '''读取待测试影像'''
         listpic = fnmatch.filter(os.listdir(test_img_path), img_type) # 过滤对应文件类型
         list_pic_full_path = []
+        list_pre_full_path = []
         for i in range(len(listpic)):
             list_pic_full_path.append(os.path.join(test_img_path + '/' + listpic[i]))
+            list_pre_full_path.append(os.path.join(test_output_path + '/' + listpic[i][:-4] + '_test.tif'))
         
         if not listpic:
             print('test pic is none')
@@ -109,7 +111,9 @@ class TestFrame():
         r = 0
         f = 0
         cnt = 0
-        for one_path in list_pic_full_path:
+        for i in range(len(listpic)):
+            one_path = list_pic_full_path[i]
+            pre_full_path = list_pre_full_path[i]
             dataset = gdal.Open(one_path) # GDAL打开待测试影像
             if dataset == None:
                 print("failed to open img")
@@ -123,9 +127,8 @@ class TestFrame():
 
             format = "GTiff"
             driver = gdal.GetDriverByName(format)  # 数据格式
-            name = 'temp.tif'  # 输出文件名
 
-            dst_ds = driver.Create(name, dataset.RasterXSize, dataset.RasterYSize,
+            dst_ds = driver.Create(pre_full_path, dataset.RasterXSize, dataset.RasterYSize,
                                 1, gdal.GDT_Byte)  # 创建预测结果写入文件
             dst_ds.SetGeoTransform(geotransform)  # 写入地理坐标
             dst_ds.SetProjection(projinfo)  # 写入投影
@@ -163,7 +166,7 @@ class TestFrame():
                 print('check: ' + gt_full_path)
                 return -1
             
-            input_pre = gdal.Open('temp.tif')
+            input_pre = gdal.Open(pre_full_path)
             input_gt = gdal.Open(gt_full_path)
 
             # 定义裁剪窗口大小
@@ -194,16 +197,16 @@ class TestFrame():
             '''一次循环的后处理'''
             input_gt = None
             input_pre = None
-            # os.remove('temp.tif')
+            # os.remove(pre_full_path)
             cnt += 1
         
         '''循环完毕后返回各项指标'''
         return p/len(listpic), r/len(listpic), f/len(listpic)
 
 
-def GetTestIndicator(net, data_dict, target_size, band_num, img_type, test_img_path, test_label_path, if_norm_label):        
+def GetTestIndicator(net, data_dict, target_size, band_num, img_type, test_img_path, test_label_path, if_norm_label, test_output_path):        
     '''执行预测'''
     test_instantiation = TestFrame(net=net, data_dict=data_dict, band_num=band_num, if_norm_label=if_norm_label) # 初始化预测
-    p, r, f = test_instantiation.Test_Main(target_size=target_size, img_type=img_type, test_img_path=test_img_path, test_label_path=test_label_path)
+    p, r, f = test_instantiation.Test_Main(target_size=target_size, img_type=img_type, test_img_path=test_img_path, test_label_path=test_label_path, test_output_path=test_output_path)
 
     return p, r, f

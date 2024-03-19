@@ -66,6 +66,7 @@ full_cpu_mode = True # 是否全负荷使用CPU，默认pytroch使用cpu一半�
 if_open_test = True # 是否开启测试模式
 test_img_path = r'E:\project_populus_UAV\1-clip_img\1-pretrain_img_ds025_240307' # 测试集影像文件夹
 test_label_path = r'E:\project_populus_UAV\1-raster_label\1-pretrain_rasterlabel_ds025_240307' # 测试集真值标签文件夹
+test_output_path = r'E:\project_populus_UAV\4-predict_result'
 target_size = 256 # 模型预测窗口大小，与训练模型一致
 test_img_type = '*.tif' # 测试集影像数据类型
 
@@ -162,7 +163,7 @@ with torch.autograd.profiler.profile(enabled=if_open_profile, use_cuda=True, rec
         train_epoch_loss /= len(data_loader_iter) # 计算该epoch的平均loss
 
         if if_open_test: # 如果开启测试模型就在测试集上计算精度指标
-            p, r, f = GetTestIndicator(net=solver.net, data_dict=data_dict, target_size=target_size, band_num=band_num, img_type=test_img_type, test_img_path=test_img_path, test_label_path=test_label_path, if_norm_label=if_norm_label)
+            p, r, f = GetTestIndicator(net=solver.net, data_dict=data_dict, target_size=target_size, band_num=band_num, img_type=test_img_type, test_img_path=test_img_path, test_label_path=test_label_path, if_norm_label=if_norm_label, test_output_path=test_output_path)
 
         print('\nepoch:',epoch, '  training time:', int(time.time()-tic), 's')
         print('epoch average train loss:',train_epoch_loss)
