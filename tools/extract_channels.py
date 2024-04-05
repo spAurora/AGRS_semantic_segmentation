@@ -77,8 +77,8 @@ def read_img(sr_img):
 
 os.environ['GDAL_DATA'] = r'C:\Users\75198\anaconda3\envs\learn\Lib\site-packages\osgeo\data\gdal' # To prevent ERROR4
 
-img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-enhance_img\1-enhance_img_clear_230401'
-output_path = r'C:\Users\75198\OneDrive\论文\SCI-4 Populus counting\3-TGRS大修\大修稿图片\0-R2Q3\1-enahce_img_853'
+img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_haze_lv3'
+output_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_haze_lv3_853'
 save_channels = [8, 5, 3] # 顺序抽取的通道
 # save_channels = [1] # 顺序抽取的通道
 

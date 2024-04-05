@@ -36,18 +36,18 @@ from networks.UNetFormer import UNetFormer
 
 
 '''参数设置'''
-trainListRoot = r'E:\project_populus_UAV\2-train_list\trainlist_pretrain_ds025_240307_1.txt' # 训练样本列表
-save_model_path = r'E:\project_populus_UAV\3-weights' # 训练模型保存路径  
-model = UNetFormer # 选择的训练模型
-save_model_name = 'UNetFormer.th' # 训练模型保存名
+trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\1-trainlist_clear_240401.txt' # 训练样本列表
+save_model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights' # 训练模型保存路径  
+model = UNet # 选择的训练模型
+save_model_name = '1-Unet-huyang_only_clear_240401.th' # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
-classes_num = 2 # 样本类别数
+classes_num = 3 # 样本类别数
 batch_size = 8 # 计算批次大小
 init_lr = 0.001  # 初始学习率
 total_epoch = 300 # 训练次数
-band_num = 4 # 影像的波段数
-if_norm_label = True # 是否对标签进行归一化 0/255二分类应设置为True
+band_num = 3 # 影像的波段数
+if_norm_label = False # 是否对标签进行归一化 0/255二分类应设置为True
 label_weight_scale_factor = 1 #标签权重的指数缩放系数 1为不缩放
 
 if_vis = False # 是否输出中间可视化信息 一般设置为False，设置为True需要模型支持
@@ -64,9 +64,9 @@ simulate_batch_size_num = 4 #模拟batchsize倍数 最终batchsize = simulate_ba
 full_cpu_mode = True # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
 if_open_test = True # 是否开启测试模式
-test_img_path = r'E:\project_populus_UAV\1-clip_img\1-pretrain_img_ds025_240307' # 测试集影像文件夹
-test_label_path = r'E:\project_populus_UAV\1-raster_label\1-pretrain_rasterlabel_ds025_240307' # 测试集真值标签文件夹
-test_output_path = r'E:\project_populus_UAV\4-predict_result'
+test_img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_clear_for_clear_Evaluation_853' # 测试集影像文件夹
+test_label_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-raster_label\1-raster_label_clear_for_clear_Evaluation' # 测试集真值标签文件夹
+test_output_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-predict_result\0-test_temp'
 target_size = 256 # 模型预测窗口大小，与训练模型一致
 test_img_type = '*.tif' # 测试集影像数据类型
 
