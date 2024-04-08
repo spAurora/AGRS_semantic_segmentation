@@ -101,10 +101,6 @@ class Predict():
             if unify_read_img:
                 '''集中读取影像并预测'''
                 img_block = dataset.ReadAsArray() # 影像一次性读入内存
-                # 全局整体
-                for i in tqdm(range(0, img_width-target_size, step)):
-                    for j in range(0, img_height-target_size, step):
-                        self.Predict_wHy(img_block[:, j:j+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=j, overlap_rate=overlap_rate)
 
                 # 上侧边缘
                 row_begin = 0
@@ -128,16 +124,15 @@ class Predict():
 
                 # 右下角
                 self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, col_begin:col_begin+target_size].copy(), dst_ds, img_width-target_size, img_height-target_size)
-                
+
+                # 全局整体
+                for i in tqdm(range(0, img_width-target_size, step)):
+                    for j in range(0, img_height-target_size, step):
+                        self.Predict_wHy(img_block[:, j:j+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=j, overlap_rate=overlap_rate)
+
                 dst_ds.FlushCache() # 全部预测完毕后统一写入磁盘
             else:
                 '''分块读取影像并预测'''
-                # 全局整体
-                for i in tqdm(range(0, img_width-target_size, step)):
-                    img_block = dataset.ReadAsArray(i, 0, target_size, dataset.RasterYSize) # 读取一列影像进内存
-                    for j in range(0, img_height-target_size, step):
-                        self.Predict_wHy(img_block[:, j:j+target_size, :].copy(), dst_ds, xoff=i, yoff=j, overlap_rate=overlap_rate)
-                    dst_ds.FlushCache() # 预测完每列后写入磁盘
                 
                 # 上侧边缘
                 row_begin = 0
@@ -171,6 +166,13 @@ class Predict():
                 img_block = dataset.ReadAsArray(img_width-target_size, img_height-target_size, target_size, target_size)
                 self.Predict_wHy(img_block.copy(), dst_ds, img_width-target_size, img_height-target_size)
                 dst_ds.FlushCache()
+
+                # 全局整体
+                for i in tqdm(range(0, img_width-target_size, step)):
+                    img_block = dataset.ReadAsArray(i, 0, target_size, dataset.RasterYSize) # 读取一列影像进内存
+                    for j in range(0, img_height-target_size, step):
+                        self.Predict_wHy(img_block[:, j:j+target_size, :].copy(), dst_ds, xoff=i, yoff=j, overlap_rate=overlap_rate)
+                    dst_ds.FlushCache() # 预测完每列后写入磁盘
 
             print('预测耗费时间: %0.1f(s).' % (time.time() - t0))
 
