@@ -1,0 +1,56 @@
+Thu Apr 11 00:37:46 2024
+data_dict: {'mean': array([55.188217, 61.66017 , 67.54262 , 73.843124, 77.338745, 76.09013 ,
+       82.51336 , 68.599525], dtype=float32), 'std': array([ 3.2057374,  5.3662305,  7.3917594,  9.235081 , 10.719669 ,
+        7.46902  ,  8.004333 ,  6.497079 ], dtype=float32), 'classWeights': array([1.4657078, 5.9477997, 7.7063737], dtype=float32), 'img_shape': (256, 256, 8)}
+epoch: 1 iter: 1 train_iter_loss: 0.067423 learn_rate: 0.000100 
+epoch: 1 iter: 2 train_iter_loss: 0.068255 learn_rate: 0.000100 
+epoch: 1 iter: 3 train_iter_loss: 0.067054 learn_rate: 0.000100 
+epoch: 1 iter: 4 train_iter_loss: 0.065172 learn_rate: 0.000100 
+epoch: 1 iter: 5 train_iter_loss: 0.067774 learn_rate: 0.000100 
+epoch: 1 iter: 6 train_iter_loss: 0.065684 learn_rate: 0.000100 
+epoch: 1 iter: 7 train_iter_loss: 0.066203 learn_rate: 0.000100 
+epoch: 1 iter: 8 train_iter_loss: 0.066455 learn_rate: 0.000100 
+epoch: 1 iter: 9 train_iter_loss: 0.066910 learn_rate: 0.000100 
+epoch: 1 iter: 10 train_iter_loss: 0.066617 learn_rate: 0.000100 
+epoch: 1 iter: 11 train_iter_loss: 0.065747 learn_rate: 0.000100 
+epoch: 1 iter: 12 train_iter_loss: 0.073469 learn_rate: 0.000100 
+epoch: 1 train_epoch_loss: 0.067230 learn_rate: 0.000100 test_p: 0.622554 test_r: 0.557109 test_f: 0.586357
+epoch: 2 iter: 1 train_iter_loss: 0.064739 learn_rate: 0.000100 
+epoch: 2 iter: 2 train_iter_loss: 0.063423 learn_rate: 0.000100 
+epoch: 2 iter: 3 train_iter_loss: 0.066033 learn_rate: 0.000100 
+epoch: 2 iter: 4 train_iter_loss: 0.067747 learn_rate: 0.000100 
+epoch: 2 iter: 5 train_iter_loss: 0.068194 learn_rate: 0.000100 
+epoch: 2 iter: 6 train_iter_loss: 0.067707 learn_rate: 0.000100 
+epoch: 2 iter: 7 train_iter_loss: 0.067578 learn_rate: 0.000100 
+epoch: 2 iter: 8 train_iter_loss: 0.068147 learn_rate: 0.000100 
+epoch: 2 iter: 9 train_iter_loss: 0.068501 learn_rate: 0.000100 
+epoch: 2 iter: 10 train_iter_loss: 0.066391 learn_rate: 0.000100 
+epoch: 2 iter: 11 train_iter_loss: 0.065609 learn_rate: 0.000100 
+epoch: 2 iter: 12 train_iter_loss: 0.068050 learn_rate: 0.000100 
+epoch: 2 train_epoch_loss: 0.066843 learn_rate: 0.000100 test_p: 0.623209 test_r: 0.560518 test_f: 0.588569
+epoch: 3 iter: 1 train_iter_loss: 0.067289 learn_rate: 0.000100 
+epoch: 3 iter: 2 train_iter_loss: 0.065055 learn_rate: 0.000100 
+epoch: 3 iter: 3 train_iter_loss: 0.067204 learn_rate: 0.000100 
+epoch: 3 iter: 4 train_iter_loss: 0.066260 learn_rate: 0.000100 
+epoch: 3 iter: 5 train_iter_loss: 0.068724 learn_rate: 0.000100 
+epoch: 3 iter: 6 train_iter_loss: 0.065913 learn_rate: 0.000100 
+epoch: 3 iter: 7 train_iter_loss: 0.065592 learn_rate: 0.000100 
+epoch: 3 iter: 8 train_iter_loss: 0.066143 learn_rate: 0.000100 
+epoch: 3 iter: 9 train_iter_loss: 0.068164 learn_rate: 0.000100 
+epoch: 3 iter: 10 train_iter_loss: 0.065466 learn_rate: 0.000100 
+epoch: 3 iter: 11 train_iter_loss: 0.067893 learn_rate: 0.000100 
+epoch: 3 iter: 12 train_iter_loss: 0.068995 learn_rate: 0.000100 
+epoch: 3 train_epoch_loss: 0.066891 learn_rate: 0.000100 test_p: 0.624860 test_r: 0.562820 test_f: 0.590634
+epoch: 4 iter: 1 train_iter_loss: 0.068075 learn_rate: 0.000100 
+epoch: 4 iter: 2 train_iter_loss: 0.065778 learn_rate: 0.000100 
+epoch: 4 iter: 3 train_iter_loss: 0.066839 learn_rate: 0.000100 
+epoch: 4 iter: 4 train_iter_loss: 0.067279 learn_rate: 0.000100 
+epoch: 4 iter: 5 train_iter_loss: 0.067162 learn_rate: 0.000100 
+epoch: 4 iter: 6 train_iter_loss: 0.066065 learn_rate: 0.000100 
+epoch: 4 iter: 7 train_iter_loss: 0.066783 learn_rate: 0.000100 
+epoch: 4 iter: 8 train_iter_loss: 0.065670 learn_rate: 0.000100 
+epoch: 4 iter: 9 train_iter_loss: 0.067088 learn_rate: 0.000100 
+epoch: 4 iter: 10 train_iter_loss: 0.066268 learn_rate: 0.000100 
+epoch: 4 iter: 11 train_iter_loss: 0.067176 learn_rate: 0.000100 
+epoch: 4 iter: 12 train_iter_loss: 0.066794 learn_rate: 0.000100 
+epoch: 4 train_epoch_loss: 0.066748 learn_rate: 0.000100 test_p: 0.626358 test_r: 0.561357 test_f: 0.590418

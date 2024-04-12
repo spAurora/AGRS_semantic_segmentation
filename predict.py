@@ -68,7 +68,10 @@ class Predict():
 
         predict_out = predict_out.transpose(1, 2, 0) # (c, h, w) -> (h, w, c)
         predict_result = np.argmax(predict_out, axis=2) # 返回第三维度最大值的下标
-        dst_ds.GetRasterBand(1).WriteArray(predict_result[int(block_width*overlap_rate):int(block_width*(1-overlap_rate)), int(block_width*overlap_rate):int(block_width*(1-overlap_rate))], xoff+int(block_width*overlap_rate), yoff+int(block_width*overlap_rate)) # 预测结果写入gdal_dataset
+        
+        # dst_ds.GetRasterBand(1).WriteArray(predict_result[int(block_width*overlap_rate):int(block_width*(1-overlap_rate)), int(block_width*overlap_rate):int(block_width*(1-overlap_rate))], xoff+int(block_width*overlap_rate), yoff+int(block_width*overlap_rate)) # 预测结果写入gdal_dataset
+
+        return predict_result
 
     def Main(self, allpath, outpath, target_size=256, unify_read_img = False, overlap_rate = 0):  
         print('start predict...')
@@ -89,7 +92,8 @@ class Predict():
 
             format = "GTiff"
             driver = gdal.GetDriverByName(format)  # 数据格式
-            name = n[:-4] + '_result' + '.tif'  # 输出文件名
+            name = n[:-4] + '.tif'
+            # name = n[:-4] + '_result' + '.tif'  # 输出文件名
 
             dst_ds = driver.Create(os.path.join(outpath, name), dataset.RasterXSize, dataset.RasterYSize,
                                 1, gdal.GDT_Byte)  # 创建预测结果写入文件
@@ -102,38 +106,42 @@ class Predict():
                 '''集中读取影像并预测'''
                 img_block = dataset.ReadAsArray() # 影像一次性读入内存
 
+                predict_result_all = np.zeros((img_height, img_width), dtype=np.uint8)
+
                 # 上侧边缘
                 row_begin = 0
                 for i in tqdm(range(0, img_width - target_size, target_size)):
-                    self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=row_begin)
+                    predict_result_all[row_begin:row_begin+target_size, i:i+target_size] = self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=row_begin)
 
                 # 下侧边缘
                 row_begin = img_height - target_size
                 for i in tqdm(range(0, img_width - target_size, target_size)):
-                    self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=row_begin)
+                    predict_result_all[row_begin:row_begin+target_size, i:i+target_size] = self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=row_begin)
 
                 # 右侧边缘
                 col_begin = 0
                 for j in tqdm(range(0, img_height - target_size, target_size)):
-                    self.Predict_wHy(img_block[:, j:j+target_size, col_begin:col_begin+target_size].copy(), dst_ds, xoff=col_begin, yoff=j)
+                    predict_result_all[j:j+target_size, col_begin:col_begin+target_size] = self.Predict_wHy(img_block[:, j:j+target_size, col_begin:col_begin+target_size].copy(), dst_ds, xoff=col_begin, yoff=j)
 
                 # 右侧边缘
                 col_begin = img_width - target_size
                 for j in tqdm(range(0, img_height - target_size, target_size)):
-                    self.Predict_wHy(img_block[:, j:j+target_size, col_begin:col_begin+target_size].copy(), dst_ds, xoff=col_begin, yoff=j)
+                    predict_result_all[j:j+target_size, col_begin:col_begin+target_size] = self.Predict_wHy(img_block[:, j:j+target_size, col_begin:col_begin+target_size].copy(), dst_ds, xoff=col_begin, yoff=j)
 
                 # 右下角
-                self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, col_begin:col_begin+target_size].copy(), dst_ds, img_width-target_size, img_height-target_size)
-
+                predict_result_all[row_begin:row_begin+target_size, col_begin:col_begin+target_size] = self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, col_begin:col_begin+target_size].copy(), dst_ds, img_width-target_size, img_height-target_size)
+                
                 # 全局整体
                 for i in tqdm(range(0, img_width-target_size, step)):
                     for j in range(0, img_height-target_size, step):
-                        self.Predict_wHy(img_block[:, j:j+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=j, overlap_rate=overlap_rate)
-
-                dst_ds.FlushCache() # 全部预测完毕后统一写入磁盘
-            else:
-                '''分块读取影像并预测'''
+                        predict_result = self.Predict_wHy(img_block[:, j:j+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=j, overlap_rate=overlap_rate)
+                        predict_result_all[j+int(target_size*overlap_rate):j+int(target_size*(1-overlap_rate)), i+int(target_size*overlap_rate):i+int(target_size*(1-overlap_rate))] = predict_result[int(target_size*overlap_rate):int(target_size*(1-overlap_rate)), int(target_size*overlap_rate):int(target_size*(1-overlap_rate))]
                 
+                dst_ds.GetRasterBand(1).WriteArray(predict_result_all, 0, 0)
+                dst_ds.FlushCache() # 全部预测完毕后统一写入磁盘
+
+            else:
+                '''分块读取影像并预测'''                
                 # 上侧边缘
                 row_begin = 0
                 for i in tqdm(range(0, img_width - target_size, target_size)):
@@ -174,21 +182,22 @@ class Predict():
                         self.Predict_wHy(img_block[:, j:j+target_size, :].copy(), dst_ds, xoff=i, yoff=j, overlap_rate=overlap_rate)
                     dst_ds.FlushCache() # 预测完每列后写入磁盘
 
+
             print('预测耗费时间: %0.1f(s).' % (time.time() - t0))
 
 if __name__ == '__main__':
 
-    predictImgPath = r'E:\project_manas\0-src_img\test' # 待预测影像的文件夹路径
-    Img_type = '*.dat' # 待预测影像的类型
-    trainListRoot = r'E:\project_manas\farmland\2-trainlist\D34-manans_farmland_0802_add_negative.txt' #与模型训练相同的训练列表路径
+    predictImgPath = r'I:\胡杨林保护区GF2_mosaic' # 待预测影像的文件夹路径
+    Img_type = '*.img' # 待预测影像的类型
+    trainListRoot = r'I:\project_populus_GF2\2-train_list\trainlist_total_240410.txt' #与模型训练相同的训练列表路径
     num_class = 2 # 样本类别数
-    model = DLinkNet34 #模型
-    model_path = r'E:\project_manas\farmland\3-weights\DinkNet34-manans_farmland_addnage.th' # 模型文件完整路径
-    output_path = r'E:\project_manas\0-src_img\test\result' # 输出的预测结果路径
+    model = UNet #模型
+    model_path = r'I:\project_populus_GF2\3-weights\UNet_0410.th' # 模型文件完整路径
+    output_path = r'I:\project_populus_GF2\4-predict_result\0411_full' # 输出的预测结果路径
     band_num = 4 #影像的波段数 训练与预测应一致
     label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
     target_size = 256 # 预测滑窗大小，应与训练集应一致
-    unify_read_img = False # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
+    unify_read_img = True # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
     overlap_rate = 0.1 # 滑窗间的重叠率
 
     '''收集训练集信息'''
