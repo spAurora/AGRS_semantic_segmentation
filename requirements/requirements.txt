@@ -1,6 +1,0 @@
-torchsummary
-hiddenlayer
-IPython
-scikit-image
-matplotlib
-einops

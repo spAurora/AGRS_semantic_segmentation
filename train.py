@@ -33,19 +33,19 @@ from networks.Segformer import Segformer
 from networks.RS_Segformer import RS_Segformer
 from networks.DE_Segformer import DE_Segformer
 from networks.UNetFormer import UNetFormer
-
+from networks.UNetPlusPlus import UNetPlusPlus
 
 '''参数设置'''
 trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\3-trainlist_clear_mix_sim_haze_ATSC_LV3_rate_0.2_230425.txt' # 训练样本列表
 save_model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights' # 训练模型保存路径  
-model = Unet # 选择的训练模型
-save_model_name = 'n-Unet-huyang_ASM_LV3_240411.th' # 训练模型保存名
+model = UNetPlusPlus # 选择的训练模型
+save_model_name = '7-UNetPlusPlus-huyang_ASM_LV3_240413.th' # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
 classes_num = 3 # 样本类别数
-batch_size = 32 # 计算批次大小
-init_lr = 0.0001  # 初始学习率
-total_epoch = 30 # 训练次数
+batch_size = 8 # 计算批次大小
+init_lr = 0.001  # 初始学习率
+total_epoch = 50 # 训练次数
 band_num = 8 # 影像的波段数
 if_norm_label = False # 是否对标签进行归一化 0/255二分类应设置为True
 label_weight_scale_factor = 1 #标签权重的指数缩放系数 1为不缩放

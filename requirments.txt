@@ -1,0 +1,12 @@
+tqdm
+torchsummary
+scikit-image
+scikit-learn
+hiddenlayer
+matplotlib
+IPython
+einops
+timm
+nnunet
+
+gdal==2.4.1
