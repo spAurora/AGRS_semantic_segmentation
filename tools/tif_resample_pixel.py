@@ -1,3 +1,14 @@
+# -*- coding: utf-8 -*-
+
+"""
+批量修改图片大小
+~~~~~~~~~~~~~~~~
+code by wHy
+Aerospace Information Research Institute, Chinese Academy of Sciences
+Ghent University
+Haoyu.Wang@ugent.be
+"""
+
 from PIL import Image
 import fnmatch
 import os
