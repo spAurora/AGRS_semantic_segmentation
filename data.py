@@ -14,6 +14,7 @@ import torch.utils.data as data
 import skimage.io
 import numpy as np
 from tqdm import tqdm
+from numba import njit
 
 class MyDataLoader(data.Dataset):
     def __init__(self,data_dict, root='', normalized_Label = False, band_num = 3):
@@ -82,7 +83,7 @@ class DataTrainInform:
         self.label_norm = label_norm
         self.img_shape = (-1, -1, -1)
         self.label_weight_scale_factor = label_weight_scale_factor
-
+    
     def compute_class_weights(self, histogram):
         """to compute the class weights
         Args:

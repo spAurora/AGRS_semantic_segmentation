@@ -8,5 +8,6 @@ IPython
 einops
 timm
 nnunet
+numba
 
 gdal==2.4.1

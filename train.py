@@ -34,22 +34,25 @@ from networks.RS_Segformer import RS_Segformer
 from networks.DE_Segformer import DE_Segformer
 from networks.UNetFormer import UNetFormer
 from networks.UNetPlusPlus import UNetPlusPlus
+from networks.HRNet import HRNet
+# from networks.BEiT import BEiT
 
 '''参数设置'''
-trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\3-trainlist_clear_mix_sim_haze_ATSC_LV3_rate_0.2_230425.txt' # 训练样本列表
+trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\1-trainlist_clear_230401.txt' # 训练样本列表
 save_model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights' # 训练模型保存路径  
-model = UNetPlusPlus # 选择的训练模型
-save_model_name = '7-UNetPlusPlus-huyang_ASM_LV3_240413.th' # 训练模型保存名
+model = HRNet # 选择的训练模型
+save_model_name = '7-HRNet-huyang_clear_240422.th' # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
 classes_num = 3 # 样本类别数
-batch_size = 8 # 计算批次大小
+batch_size = 4 # 计算批次大小
 init_lr = 0.001  # 初始学习率
-total_epoch = 50 # 训练次数
+total_epoch = 300 # 训练次数
 band_num = 8 # 影像的波段数
 if_norm_label = False # 是否对标签进行归一化 0/255二分类应设置为True
 label_weight_scale_factor = 1 #标签权重的指数缩放系数 1为不缩放
 
+if_print_model_summary = False # 是否输出模型参数信息 部分模型不可用（HRNet）
 if_vis = False # 是否输出中间可视化信息 一般设置为False，设置为True需要模型支持
 if_open_profile = False # 是否启用性能分析，启用后计算2个eopch即终止训练并打印报告，仅供硬件负载分析和性能优化使用
 
@@ -64,8 +67,8 @@ simulate_batch_size_num = 4 #模拟batchsize倍数 最终batchsize = simulate_ba
 full_cpu_mode = True # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
 if_open_test = True # 是否开启测试模式
-test_img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_haze_lv3' # 测试集影像文件夹
-test_label_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-raster_label\1-raster_label_haze_lv3' # 测试集真值标签文件夹
+test_img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_clear_for_clear_Evaluation' # 测试集影像文件夹
+test_label_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-raster_label\1-raster_label_clear_for_clear_Evaluation' # 测试集真值标签文件夹
 test_output_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-predict_result\0-test_temp'
 target_size = 256 # 模型预测窗口大小，与训练模型一致
 test_img_type = '*.tif' # 测试集影像数据类型
@@ -117,9 +120,9 @@ weight = torch.from_numpy(data_dict['classWeights']).cuda()
 loss = loss(weight=weight) 
 
 if if_vis:
-    solver = MyFrame(net=model(num_classes=classes_num, band_num = band_num, ifVis=if_vis), loss=loss, lr=init_lr) # 初始化网络，损失函数，学习率
+    solver = MyFrame(net=model(num_classes=classes_num, band_num=band_num, ifVis=if_vis), loss=loss, lr=init_lr) # 初始化网络，损失函数，学习率
 else:
-    solver = MyFrame(net=model(num_classes=classes_num, band_num = band_num), loss=loss, lr=init_lr) # 初始化网络，损失函数，学习率
+    solver = MyFrame(net=model(num_classes=classes_num, band_num=band_num), loss=loss, lr=init_lr) # 初始化网络，损失函数，学习率
 
 save_model_full_path = save_model_path + '/' + save_model_name
 if os.path.exists(save_model_full_path):
@@ -131,10 +134,12 @@ else:
 '''输出模型信息'''
 torch_shape = np.array(data_dict['img_shape'])
 torch_shape = [torch_shape[2], torch_shape[0], torch_shape[1]]
-summary((solver.net), input_size = tuple(torch_shape), batch_size=batch_size)
+if if_print_model_summary is True:
+    summary((solver.net), input_size=tuple(torch_shape), batch_size=batch_size)
+
 
 '''初始化dataloader'''
-dataset = MyDataLoader(root = trainListRoot, normalized_Label=if_norm_label, data_dict=data_dict, band_num=band_num) # 读取训练数据集
+dataset = MyDataLoader(root=trainListRoot, normalized_Label=if_norm_label, data_dict=data_dict, band_num=band_num) # 读取训练数据集
 data_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0, pin_memory=True) # 定义训练数据装载器 开启锁页内存
 print('Number of Iterations: ', int(len(dataset)/batch_size))
 

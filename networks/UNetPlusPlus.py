@@ -12,6 +12,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+'''
+我觉得这个代码写的有些问题，有一些低级的写法
+注意要设置convolutional_upsampling=True, 否则上采样后通道数无法对齐
+'''
 
 from copy import deepcopy
 from nnunet.utilities.nd_softmax import softmax_helper
@@ -152,7 +156,8 @@ def print_module_training_status(module):
             or isinstance(module, nn.InstanceNorm2d) or isinstance(module, nn.InstanceNorm1d) \
             or isinstance(module, nn.BatchNorm2d) or isinstance(module, nn.BatchNorm3d) or isinstance(module,
                                                                                                       nn.BatchNorm1d):
-        print(str(module), module.training)
+        # print(str(module), module.training)
+        pass
 
 
 class Upsample(nn.Module):
@@ -185,7 +190,7 @@ class UNetPlusPlus(SegmentationNetwork):
     use_this_for_batch_size_computation_2D = 19739648
     use_this_for_batch_size_computation_3D = 520000000 * 2  # 505789440
 
-    def __init__(self, band_num, num_classes, base_num_features=30, num_pool=5, num_conv_per_stage=2,
+    def __init__(self, band_num, num_classes, base_num_features=64, num_pool=5, num_conv_per_stage=2,
                  feat_map_mul_on_downscale=2, conv_op=nn.Conv2d,
                  norm_op=nn.BatchNorm2d, norm_op_kwargs=None,
                  dropout_op=nn.Dropout2d, dropout_op_kwargs=None,
