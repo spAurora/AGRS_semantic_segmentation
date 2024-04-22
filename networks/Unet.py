@@ -1,101 +1,114 @@
+"""
+ref: https://blog.csdn.net/Gu_NN/article/details/125350058
+"""
 import torch
 import torch.nn as nn
-from torch.autograd import Variable as V
+import torch.nn.functional as F
 
-class Unet(nn.Module):
-    def __init__(self, num_classes=1, band_num=3, ifVis=False):
-        super(Unet, self).__init__()
+'''模块定义'''
+class DoubleConv(nn.Module):
+    """(convolution => [BN] => ReLU) * 2"""
 
-        self.ifVis = ifVis
-        
-        self.down1 = self.conv_stage(band_num, 8)
-        self.down2 = self.conv_stage(8, 16)
-        self.down3 = self.conv_stage(16, 32)
-        self.down4 = self.conv_stage(32, 64)
-        self.down5 = self.conv_stage(64, 128)
-        self.down6 = self.conv_stage(128, 256)
-        self.down7 = self.conv_stage(256, 512)
-        
-        self.center = self.conv_stage(512, 1024)
-        #self.center_res = self.resblock(1024)
-        
-        self.up7 = self.conv_stage(1024, 512)
-        self.up6 = self.conv_stage(512, 256)
-        self.up5 = self.conv_stage(256, 128)
-        self.up4 = self.conv_stage(128, 64)
-        self.up3 = self.conv_stage(64, 32)
-        self.up2 = self.conv_stage(32, 16)
-        self.up1 = self.conv_stage(16, 8)
-        
-        self.trans7 = self.upsample(1024, 512)
-        self.trans6 = self.upsample(512, 256)
-        self.trans5 = self.upsample(256, 128)
-        self.trans4 = self.upsample(128, 64)
-        self.trans3 = self.upsample(64, 32)
-        self.trans2 = self.upsample(32, 16)
-        self.trans1 = self.upsample(16, 8)
-        
-        self.conv_last = nn.Sequential(
-            nn.Conv2d(8, num_classes, 3, 1, 1),
+    def __init__(self, in_channels, out_channels, mid_channels=None):
+        super().__init__()
+        if not mid_channels:
+            mid_channels = out_channels
+        self.double_conv = nn.Sequential(
+            nn.Conv2d(in_channels, mid_channels, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(mid_channels),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(mid_channels, out_channels, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True)
+        )
+
+    def forward(self, x):
+        return self.double_conv(x)
+
+class Down(nn.Module):
+    """Downscaling with maxpool then double conv"""
+
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+        self.maxpool_conv = nn.Sequential(
+            nn.MaxPool2d(2),
+            DoubleConv(in_channels, out_channels)
+        )
+
+    def forward(self, x):
+        return self.maxpool_conv(x)
+
+class Up(nn.Module):
+    """Upscaling then double conv"""
+
+    def __init__(self, in_channels, out_channels, bilinear=True):
+        super().__init__()
+
+        # if bilinear, use the normal convolutions to reduce the number of channels
+        if bilinear:
+            self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+            self.conv = DoubleConv(in_channels, out_channels, in_channels // 2)
+        else:
+            self.up = nn.ConvTranspose2d(in_channels, in_channels // 2, kernel_size=2, stride=2)
+            self.conv = DoubleConv(in_channels, out_channels)
+
+    def forward(self, x1, x2):
+        x1 = self.up(x1)
+        # input is CHW
+        diffY = x2.size()[2] - x1.size()[2]
+        diffX = x2.size()[3] - x1.size()[3]
+
+        x1 = F.pad(x1, [diffX // 2, diffX - diffX // 2,
+                        diffY // 2, diffY - diffY // 2])
+        x = torch.cat([x2, x1], dim=1)
+        return self.conv(x)
+
+class OutConv(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(OutConv, self).__init__()
+        self.conv = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, kernel_size=1),
             nn.Sigmoid()
         )
-        
-        self.max_pool = nn.MaxPool2d(2)
-        
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d) or isinstance(m, nn.ConvTranspose2d):
-                if m.bias is not None:
-                    m.bias.data.zero_()
 
-    def conv_stage(self, dim_in, dim_out, kernel_size=3, stride=1, padding=1, bias=True, useBN=False):
-        if useBN:
-            return nn.Sequential(
-              nn.Conv2d(dim_in, dim_out, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias),
-              nn.BatchNorm2d(dim_out),
-              #nn.LeakyReLU(0.1),
-              nn.ReLU(),
-              nn.Conv2d(dim_out, dim_out, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias),
-              nn.BatchNorm2d(dim_out),
-              #nn.LeakyReLU(0.1),
-              nn.ReLU(),
-            )
-        else:
-            return nn.Sequential(
-              nn.Conv2d(dim_in, dim_out, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias),
-              nn.ReLU(),
-              nn.Conv2d(dim_out, dim_out, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias),
-              nn.ReLU()
-            )
-
-    def upsample(self, ch_coarse, ch_fine):
-        return nn.Sequential(
-            nn.ConvTranspose2d(ch_coarse, ch_fine, 4, 2, 1, bias=False),
-            nn.ReLU()
-        )
-    
     def forward(self, x):
-        conv1_out = self.down1(x)
-        conv2_out = self.down2(self.max_pool(conv1_out))
-        conv3_out = self.down3(self.max_pool(conv2_out))
-        conv4_out = self.down4(self.max_pool(conv3_out))
-        conv5_out = self.down5(self.max_pool(conv4_out))
-        conv6_out = self.down6(self.max_pool(conv5_out))
-        conv7_out = self.down7(self.max_pool(conv6_out))
-        
-        out = self.center(self.max_pool(conv7_out))
-        #out = self.center_res(out)
+        return self.conv(x)
 
-        out = self.up7(torch.cat((self.trans7(out), conv7_out), 1))
-        out = self.up6(torch.cat((self.trans6(out), conv6_out), 1))
-        out = self.up5(torch.cat((self.trans5(out), conv5_out), 1))
-        out = self.up4(torch.cat((self.trans4(out), conv4_out), 1))
-        out = self.up3(torch.cat((self.trans3(out), conv3_out), 1))
-        out = self.up2(torch.cat((self.trans2(out), conv2_out), 1))
-        out = self.up1(torch.cat((self.trans1(out), conv1_out), 1))
+'''模型组装'''
+class UNet(nn.Module):
+    def __init__(self, band_num, num_classes, bilinear=True, ifVis=False):
+        super(UNet, self).__init__()
 
-        out = self.conv_last(out)
+        self.ifVis = ifVis
 
+        self.n_channels = band_num
+        self.n_classes = num_classes
+        self.bilinear = bilinear
+
+        self.inc = DoubleConv(band_num, 64)
+        self.down1 = Down(64, 128)
+        self.down2 = Down(128, 256)
+        self.down3 = Down(256, 512)
+        factor = 2 if bilinear else 1
+        self.down4 = Down(512, 1024 // factor)
+        self.up1 = Up(1024, 512 // factor, bilinear)
+        self.up2 = Up(512, 256 // factor, bilinear)
+        self.up3 = Up(256, 128 // factor, bilinear)
+        self.up4 = Up(128, 64, bilinear)
+        self.outc = OutConv(64, num_classes)
+
+    def forward(self, x):
+        x1 = self.inc(x)
+        x2 = self.down1(x1)
+        x3 = self.down2(x2)
+        x4 = self.down3(x3)
+        x5 = self.down4(x4)
+        x = self.up1(x5, x4)
+        x = self.up2(x, x3)
+        x = self.up3(x, x2)
+        x = self.up4(x, x1)
+        logits = self.outc(x)
         if self.ifVis:
-            return out, conv3_out  # 协同输出可视化信息
+            return logits, x3  # 协同输出可视化信息
         else:
-            return out
+            return logits

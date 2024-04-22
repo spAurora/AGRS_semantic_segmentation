@@ -26,7 +26,7 @@ from framework import MyFrame
 from loss import CrossEntropyLoss2d, FocalLoss2d
 from data import MyDataLoader, DataTrainInform
 
-from networks.Unet_new import UNet
+from networks.UNet import UNet
 
 from statistics import mean
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
