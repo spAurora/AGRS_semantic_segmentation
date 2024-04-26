@@ -38,17 +38,17 @@ from networks.HRNet import HRNet
 # from networks.BEiT import BEiT
 
 '''参数设置'''
-trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\1-trainlist_clear_230401.txt' # 训练样本列表
+trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\8-trainlist_clear_240401.txt' # 训练样本列表
 save_model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights' # 训练模型保存路径  
-model = HRNet # 选择的训练模型
-save_model_name = '7-HRNet-huyang_clear_240422.th' # 训练模型保存名
+model = UNetFormer # 选择的训练模型
+save_model_name = '8-UNetFormer-huyang_clear_240422.th' # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w') # 日志文件   
 loss = FocalLoss2d # 损失函数
 classes_num = 3 # 样本类别数
 batch_size = 4 # 计算批次大小
 init_lr = 0.001  # 初始学习率
 total_epoch = 300 # 训练次数
-band_num = 8 # 影像的波段数
+band_num = 3 # 影像的波段数
 if_norm_label = False # 是否对标签进行归一化 0/255二分类应设置为True
 label_weight_scale_factor = 1 #标签权重的指数缩放系数 1为不缩放
 
@@ -67,7 +67,7 @@ simulate_batch_size_num = 4 #模拟batchsize倍数 最终batchsize = simulate_ba
 full_cpu_mode = True # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
 if_open_test = True # 是否开启测试模式
-test_img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_clear_for_clear_Evaluation' # 测试集影像文件夹
+test_img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_clear_for_clear_Evaluation_853' # 测试集影像文件夹
 test_label_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-raster_label\1-raster_label_clear_for_clear_Evaluation' # 测试集真值标签文件夹
 test_output_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-predict_result\0-test_temp'
 target_size = 256 # 模型预测窗口大小，与训练模型一致

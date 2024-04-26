@@ -353,7 +353,7 @@ class UNetFormer(nn.Module):
                  decode_channels=64,
                  dropout=0.1,
                  backbone_name='swsl_resnet18',
-                 pretrained=True,
+                 pretrained=False,
                  window_size=8,
                  num_classes=6,
                  band_num = 3

@@ -35,6 +35,7 @@ from networks.RS_Segformer import RS_Segformer
 from networks.DE_Segformer import DE_Segformer
 from networks.HRNet import HRNet
 from networks.UNetPlusPlus import UNetPlusPlus
+from networks.UNetFormer import UNetFormer
 
 class SolverFrame():
     def __init__(self, net):
@@ -140,7 +141,9 @@ class Predict():
                         predict_result_all[j+int(target_size*overlap_rate):j+int(target_size*(1-overlap_rate)), i+int(target_size*overlap_rate):i+int(target_size*(1-overlap_rate))] = predict_result[int(target_size*overlap_rate):int(target_size*(1-overlap_rate)), int(target_size*overlap_rate):int(target_size*(1-overlap_rate))]
                 
                 dst_ds.GetRasterBand(1).WriteArray(predict_result_all, 0, 0)
+                time.sleep(1)
                 dst_ds.FlushCache() # 全部预测完毕后统一刷新磁盘缓存
+                time.sleep(1)
 
             else:
                 '''分块读取影像并预测'''
@@ -197,49 +200,57 @@ class Predict():
 
 if __name__ == '__main__':
 
-    predictImgPath = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\240408补充实验\全部除云算法\LV3\0-ori' # 待预测影像的文件夹路径
-    Img_type = '*.tif' # 待预测影像的类型
-    trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\8-trainlist_clear_240401.txt' #与模型训练相同的训练列表路径
-    num_class = 3 # 样本类别数
-    model = Segformer #模型
-    model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights\8-Segformer-huyang_clear_240422.th' # 模型文件完整路径
-    output_path = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\240408补充实验\全部除云算法\LV3\0-ori\predict_result_Segformer' # 输出的预测结果路径
-    band_num = 3 #影像的波段数 训练与预测应一致
-    label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
-    target_size = 256 # 预测滑窗大小，应与训练集应一致
-    unify_read_img = True # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
-    overlap_rate = 0 # 滑窗间的重叠率
+    model_names = ['DABNet', 'DE_Segformer', 'DeepLabv3_plus', 'FCN8S', 'HRNet', 'Segformer', 'UNetFormer', 'UNetPlusPlus']
+    used_models = [DABNet, DE_Segformer, DeepLabv3_plus, FCN8S, HRNet, Segformer, UNetFormer, UNetPlusPlus]
+    cloud_removal_methods = ['0-ori', 'ChaIR', 'clahe', 'dark_channel_prior', 'SpA-GAN-dehaze']
 
-    '''收集训练集信息'''
-    dataCollect = DataTrainInform(classes_num=num_class, trainlistPath=trainListRoot, band_num=band_num, label_norm=label_norm) #计算数据集信息
-    data_dict = dataCollect.collectDataAndSave()
-    # '''手动设置data_dict'''
-    # data_dict = {}
-    # data_dict['mean'] = [117.280266, 128.70387, 136.86803]
-    # data_dict['std'] = [43.33161, 39.06087, 34.673794]
-    # data_dict['classWeights'] = np.array([2.5911248, 3.8909917, 9.9005165, 9.21661, 7.058571, 10.126685, 3.4428556, 10.29797, 5.424672, 8.990792], dtype=np.float32)
-    # data_dict['img_shape'] = [1024, 1024, 3]
+    for lv in range(2, 4):
+        for j in range(len(used_models)):
+            for cloud_removal_method in cloud_removal_methods:
 
-    print('data mean: ', data_dict['mean'])
-    print('data std: ', data_dict['std'])
+                predictImgPath = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\240408补充实验\全部除云算法\LV' + str(lv)+'/' + cloud_removal_method # 待预测影像的文件夹路径
+                Img_type = '*.tif' # 待预测影像的类型
+                trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\8-trainlist_clear_240401.txt' #与模型训练相同的训练列表路径
+                num_class = 3 # 样本类别数
+                model = used_models[j] #模型
+                model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights\8-' + model_names[j] +'-huyang_clear_240422.th' # 模型文件完整路径
+                output_path = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\240408补充实验\全部除云算法\LV'+ str(lv)+ '/' + cloud_removal_method +'/' + 'predict_result_' + model_names[j] # 输出的预测结果路径
+                band_num = 3 #影像的波段数 训练与预测应一致
+                label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
+                target_size = 256 # 预测滑窗大小，应与训练集应一致
+                unify_read_img = True # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
+                overlap_rate = 0 # 滑窗间的重叠率
 
-    '''初始化模型'''
-    solver = SolverFrame(net = model(num_classes=num_class, band_num=band_num))
-    solver.load(model_path) # 加载模型
-    if not os.path.exists(output_path):
-        os.mkdir(output_path)
+                '''收集训练集信息'''
+                dataCollect = DataTrainInform(classes_num=num_class, trainlistPath=trainListRoot, band_num=band_num, label_norm=label_norm) #计算数据集信息
+                data_dict = dataCollect.collectDataAndSave()
+                # '''手动设置data_dict'''
+                # data_dict = {}
+                # data_dict['mean'] = [117.280266, 128.70387, 136.86803]
+                # data_dict['std'] = [43.33161, 39.06087, 34.673794]
+                # data_dict['classWeights'] = np.array([2.5911248, 3.8909917, 9.9005165, 9.21661, 7.058571, 10.126685, 3.4428556, 10.29797, 5.424672, 8.990792], dtype=np.float32)
+                # data_dict['img_shape'] = [1024, 1024, 3]
 
-    '''读取待预测影像'''
-    listpic = fnmatch.filter(os.listdir(predictImgPath), Img_type) # 过滤对应文件类型
-    for i in range(len(listpic)):
-        listpic[i] = os.path.join(predictImgPath + '/' + listpic[i])
-    
-    if not listpic:
-        print('listpic is none')
-        exit(1)
-    else:
-        print(listpic)
+                print('data mean: ', data_dict['mean'])
+                print('data std: ', data_dict['std'])
 
-    '''执行预测'''
-    predict_instantiation = Predict(net=solver.net, class_number=num_class, band_num=band_num) # 初始化预测
-    predict_instantiation.Main(listpic, output_path, target_size, unify_read_img=unify_read_img, overlap_rate=overlap_rate) # 预测主体
+                '''初始化模型'''
+                solver = SolverFrame(net = model(num_classes=num_class, band_num=band_num))
+                solver.load(model_path) # 加载模型
+                if not os.path.exists(output_path):
+                    os.mkdir(output_path)
+
+                '''读取待预测影像'''
+                listpic = fnmatch.filter(os.listdir(predictImgPath), Img_type) # 过滤对应文件类型
+                for i in range(len(listpic)):
+                    listpic[i] = os.path.join(predictImgPath + '/' + listpic[i])
+                
+                if not listpic:
+                    print('listpic is none')
+                    exit(1)
+                else:
+                    print(listpic)
+
+                '''执行预测'''
+                predict_instantiation = Predict(net=solver.net, class_number=num_class, band_num=band_num) # 初始化预测
+                predict_instantiation.Main(listpic, output_path, target_size, unify_read_img=unify_read_img, overlap_rate=overlap_rate) # 预测主体
