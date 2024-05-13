@@ -76,7 +76,7 @@ class Predict():
 
         return predict_result
 
-    def Main(self, allpath, outpath, target_size=256, unify_read_img = False, overlap_rate = 0, if_mask=False, mask_path=''):  
+    def Main(self, allpath, outpath, target_size=256, unify_read_img = False, overlap_rate = 0):  
         print('start predict...')
         for one_path in allpath:
             t0 = time.time()
@@ -110,101 +110,41 @@ class Predict():
                 img_block = dataset.ReadAsArray() # 影像一次性读入内存
 
                 predict_result_all = np.zeros((img_height, img_width), dtype=np.uint8)
-                
-                if if_mask: # 读取掩膜
-                    mask_full_path = mask_path + '/' + n[:-4] + '.npz'
-                    if os.path.exists(mask_full_path):
-                        mask = np.load(mask_path + '/' + n[:-4] + '.npz')
-                    else:
-                        print('does not exist: ' + mask_full_path)
-                        continue # 如果mask文件不存在直接跳过该文件
 
                 # 上侧边缘
                 row_begin = 0
                 for i in tqdm(range(0, img_width - target_size, target_size)):
-                    if if_mask: # 掩膜模式
-                        mask_patch = mask[row_begin:row_begin+target_size, i:i+target_size].copy()
-                        if np.all(mask_patch == 0): # 如果掩膜为空，直接跳过
-                            continue
-                        else:
-                            predict_patch = self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=row_begin)
-                            predict_patch = predict_patch * mask_patch # 掩膜处理
-                            predict_result_all[row_begin:row_begin+target_size, i:i+target_size] = predict_patch.copy()
-                    else: # 非掩膜模式
-                        predict_result_all[row_begin:row_begin+target_size, i:i+target_size] = self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=row_begin)
+                    predict_result_all[row_begin:row_begin+target_size, i:i+target_size] = self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=row_begin)
 
                 # 下侧边缘
                 row_begin = img_height - target_size
                 for i in tqdm(range(0, img_width - target_size, target_size)):
-                    if if_mask: # 掩膜模式
-                        mask_patch = mask[row_begin:row_begin+target_size, i:i+target_size].copy()
-                        if np.all(mask_patch == 0): # 如果掩膜为空，直接跳过
-                            continue
-                        else:
-                            predict_patch = self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=row_begin)
-                            predict_patch = predict_patch * mask_patch # 掩膜处理
-                            predict_result_all[row_begin:row_begin+target_size, i:i+target_size] = predict_patch.copy()
-                    else: # 非掩膜模式
-                        predict_result_all[row_begin:row_begin+target_size, i:i+target_size] = self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=row_begin)
+                    predict_result_all[row_begin:row_begin+target_size, i:i+target_size] = self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=row_begin)
 
-                # 左侧边缘
+                # 右侧边缘
                 col_begin = 0
                 for j in tqdm(range(0, img_height - target_size, target_size)):
-                    if if_mask: # 掩膜模式
-                        mask_patch = mask[j:j+target_size, col_begin:col_begin+target_size].copy()
-                        if np.all(mask_patch == 0): # 如果掩膜为空，直接跳过
-                            continue
-                        else:
-                            predict_patch = self.Predict_wHy(img_block[:, j:j+target_size, col_begin:col_begin+target_size].copy(), dst_ds, xoff=col_begin, yoff=j)
-                            predict_patch = predict_patch * mask_patch # 掩膜处理
-                            predict_result_all[j:j+target_size, col_begin:col_begin+target_size] = predict_patch.copy()
-                    else: # 非掩膜模式
-                        predict_result_all[j:j+target_size, col_begin:col_begin+target_size] = self.Predict_wHy(img_block[:, j:j+target_size, col_begin:col_begin+target_size].copy(), dst_ds, xoff=col_begin, yoff=j)
-                    
+                    predict_result_all[j:j+target_size, col_begin:col_begin+target_size] = self.Predict_wHy(img_block[:, j:j+target_size, col_begin:col_begin+target_size].copy(), dst_ds, xoff=col_begin, yoff=j)
+
                 # 右侧边缘
                 col_begin = img_width - target_size
                 for j in tqdm(range(0, img_height - target_size, target_size)):
-                    if if_mask: # 掩膜模式
-                        mask_patch = mask[j:j+target_size, col_begin:col_begin+target_size].copy()
-                        if np.all(mask_patch == 0): # 如果掩膜为空，直接跳过
-                            continue
-                        else:
-                            predict_patch = self.Predict_wHy(img_block[:, j:j+target_size, col_begin:col_begin+target_size].copy(), dst_ds, xoff=col_begin, yoff=j)
-                            predict_patch = predict_patch * mask_patch # 掩膜处理
-                            predict_result_all[j:j+target_size, col_begin:col_begin+target_size] = predict_patch.copy()
-                    else: # 非掩膜模式
-                        predict_result_all[j:j+target_size, col_begin:col_begin+target_size] = self.Predict_wHy(img_block[:, j:j+target_size, col_begin:col_begin+target_size].copy(), dst_ds, xoff=col_begin, yoff=j)
+                    predict_result_all[j:j+target_size, col_begin:col_begin+target_size] = self.Predict_wHy(img_block[:, j:j+target_size, col_begin:col_begin+target_size].copy(), dst_ds, xoff=col_begin, yoff=j)
 
                 # 右下角
-                if if_mask: # 掩膜模式
-                    mask_patch = mask[row_begin:row_begin+target_size, col_begin:col_begin+target_size].copy()
-                    predict_patch = self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, col_begin:col_begin+target_size].copy(), dst_ds, img_width-target_size, img_height-target_size)
-                    predict_patch = predict_patch * mask_patch # 直接掩膜处理
-                    predict_result_all[row_begin:row_begin+target_size, col_begin:col_begin+target_size] = predict_patch.copy()
-                else:
-                    predict_result_all[row_begin:row_begin+target_size, col_begin:col_begin+target_size] = self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, col_begin:col_begin+target_size].copy(), dst_ds, img_width-target_size, img_height-target_size)
+                predict_result_all[row_begin:row_begin+target_size, col_begin:col_begin+target_size] = self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, col_begin:col_begin+target_size].copy(), dst_ds, img_width-target_size, img_height-target_size)
                 
                 # 全局整体
                 for i in tqdm(range(0, img_width-target_size, step)):
                     for j in range(0, img_height-target_size, step):
-                        if if_mask: # 掩膜模式
-                            mask_patch = mask[j:j+target_size, i:i+target_size].copy()
-                            if np.all(mask_patch == 0): # 如果掩膜为空，直接跳过
-                                continue
-                            else:
-                                predict_patch = self.Predict_wHy(img_block[:, j:j+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=j, overlap_rate=overlap_rate)
-                                predict_patch = predict_patch * mask_patch # 掩膜处理
-                                predict_result_all[j+int(target_size*overlap_rate):j+int(target_size*(1-overlap_rate)), i+int(target_size*overlap_rate):i+int(target_size*(1-overlap_rate))] = predict_patch[int(target_size*overlap_rate):int(target_size*(1-overlap_rate)), int(target_size*overlap_rate):int(target_size*(1-overlap_rate))]
-                        else: # 非掩膜模式
-                            predict_patch = self.Predict_wHy(img_block[:, j:j+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=j, overlap_rate=overlap_rate)
-                            predict_result_all[j+int(target_size*overlap_rate):j+int(target_size*(1-overlap_rate)), i+int(target_size*overlap_rate):i+int(target_size*(1-overlap_rate))] = predict_patch[int(target_size*overlap_rate):int(target_size*(1-overlap_rate)), int(target_size*overlap_rate):int(target_size*(1-overlap_rate))]
-                    
+                        predict_result = self.Predict_wHy(img_block[:, j:j+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=j, overlap_rate=overlap_rate)
+                        predict_result_all[j+int(target_size*overlap_rate):j+int(target_size*(1-overlap_rate)), i+int(target_size*overlap_rate):i+int(target_size*(1-overlap_rate))] = predict_result[int(target_size*overlap_rate):int(target_size*(1-overlap_rate)), int(target_size*overlap_rate):int(target_size*(1-overlap_rate))]
+                
                 dst_ds.GetRasterBand(1).WriteArray(predict_result_all, 0, 0)
                 dst_ds.FlushCache() # 全部预测完毕后统一刷新磁盘缓存
 
             else:
                 '''分块读取影像并预测'''
-                '''设备内存过小或者影像过大时应用该模式'''
                 predict_result_col = np.zeros((img_height, target_size), dtype=np.uint8)
                 predict_result_row = np.zeros((target_size, img_width), dtype=np.uint8)                
                 # 上侧边缘
@@ -271,9 +211,6 @@ if __name__ == '__main__':
     unify_read_img = True # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
     overlap_rate = 0.1 # 滑窗间的重叠率
 
-    if_mask = False # 是否开启mask模式；mask模式仅在unify_read_img==True时有效
-    mask_path = r'E:\hami\mask' # mask路径 路径下需要有*.npz掩膜（./tools/generate_mask_by_moasic_line.py生成）
-
     '''收集训练集信息'''
     dataCollect = DataTrainInform(classes_num=num_class, trainlistPath=trainListRoot, band_num=band_num, label_norm=label_norm) #计算数据集信息
     data_dict = dataCollect.collectDataAndSave()
@@ -306,4 +243,4 @@ if __name__ == '__main__':
 
     '''执行预测'''
     predict_instantiation = Predict(net=solver.net, class_number=num_class, band_num=band_num) # 初始化预测
-    predict_instantiation.Main(listpic, output_path, target_size, unify_read_img=unify_read_img, overlap_rate=overlap_rate, if_mask=if_mask, mask_path=mask_path) # 预测主体
+    predict_instantiation.Main(listpic, output_path, target_size, unify_read_img=unify_read_img, overlap_rate=overlap_rate) # 预测主体

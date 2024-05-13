@@ -21,6 +21,9 @@ import fnmatch
 import sys
 import math
 
+sys.path.append('.') # https://blog.csdn.net/Johnsonjjj/article/details/103366985
+print(sys.path)
+
 from data import DataTrainInform
 
 from networks.DLinknet import DLinkNet34, DLinkNet50, DLinkNet101
@@ -76,7 +79,7 @@ class Predict():
 
         return predict_result
 
-    def Main(self, allpath, outpath, target_size=256, unify_read_img = False, overlap_rate = 0):  
+    def Main(self, allpath, outpath, target_size=256, unify_read_img = False, overlap_rate = 0, STCI_method = 'real_cloud', model_name='DABNet', lv=0):  
         print('start predict...')
         for one_path in allpath:
             t0 = time.time()
@@ -95,7 +98,9 @@ class Predict():
 
             format = "GTiff"
             driver = gdal.GetDriverByName(format)  # 数据格式
-            name = n[:-4] + '.tif'
+            # name = n[:-4] + '.tif' # 原始
+            name = STCI_method + '_' +  model_name + '_lv' + str(lv) + '.tif'
+
             # name = n[:-4] + '_result' + '.tif'  # 输出文件名
 
             dst_ds = driver.Create(os.path.join(outpath, name), dataset.RasterXSize, dataset.RasterYSize,
@@ -206,17 +211,21 @@ if __name__ == '__main__':
     # STCI_methods = ['real_cloud', 'ASM', 'ASM_NL']
     STCI_methods = ['SpA_GAN-haze']
 
+    ###########注意预测结果可视化的时候输出图片名改了，在上面预测Main函数里
+
     for lv in range(1, 4):
         for j in range(len(used_models)):
             for STCI_method in STCI_methods:
 
-                predictImgPath = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\240408补充实验\3波段STCI\LV' + str(lv) # 待预测影像的文件夹路径
+                # predictImgPath = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\240408补充实验\3波段STCI\LV' + str(lv) # 待预测影像的文件夹路径
+                predictImgPath = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\image\7-predict_result_show\3bands\lv' + str(lv) # 待预测影像的文件夹路径
                 Img_type = '*.tif' # 待预测影像的类型
                 trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\9-trainlist_clear+'+ STCI_method + '_853_240426.txt' #与模型训练相同的训练列表路径
                 num_class = 3 # 样本类别数
                 model = used_models[j] #模型
                 model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights\9-' + model_names[j] + '-huyang_clear+' + STCI_method + '_240426.th' # 模型文件完整路径
-                output_path = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\240408补充实验\8波段STCI\LV'+ str(lv)+ '/' + STCI_method +'/' + 'predict_result_' + model_names[j] # 输出的预测结果路径
+                # output_path = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\image\7-predict_result_show\240506STCI'+ str(lv)+ '/' + STCI_method +'/' + 'predict_result_' + model_names[j] # 输出的预测结果路径
+                output_path = r'C:\Users\75198\OneDrive\论文\SCI-3-3 Remote sensing data augmentation\image\7-predict_result_show\240506STCI'  # 输出的预测结果路径
                 band_num = 3 #影像的波段数 训练与预测应一致
                 label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
                 target_size = 256 # 预测滑窗大小，应与训练集应一致
@@ -255,4 +264,4 @@ if __name__ == '__main__':
 
                 '''执行预测'''
                 predict_instantiation = Predict(net=solver.net, class_number=num_class, band_num=band_num) # 初始化预测
-                predict_instantiation.Main(listpic, output_path, target_size, unify_read_img=unify_read_img, overlap_rate=overlap_rate) # 预测主体
+                predict_instantiation.Main(listpic, output_path, target_size, unify_read_img=unify_read_img, overlap_rate=overlap_rate, STCI_method=STCI_method, model_name=model_names[j], lv=lv) # 预测主体
