@@ -22,6 +22,8 @@ import fnmatch
 import sys
 import math
 
+sys.path.append('.')
+
 from framework import MyFrame
 from loss import CrossEntropyLoss2d, FocalLoss2d
 from data import MyDataLoader, DataTrainInform

@@ -19,6 +19,7 @@ import torch
 from torch.autograd import Variable
 import fnmatch
 import sys
+sys.path.append('.')
 import math
 
 from data import DataTrainInform

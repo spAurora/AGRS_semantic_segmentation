@@ -22,6 +22,9 @@ from loss import CrossEntropyLoss2d, FocalLoss2d
 from data import MyDataLoader, DataTrainInform
 from test import GetTestIndicator
 
+import sys
+sys.path.append('.')
+
 from networks.DLinknet import DLinkNet34, DLinkNet50, DLinkNet101   
 from networks.UNet_Light import UNet_Light
 from networks.UNet import UNet

@@ -198,22 +198,25 @@ class U_ConvNeXt(nn.Module):
         super(U_ConvNeXt, self).__init__()
         self.n_channels = band_num
         self.num_classes = num_classes
+        self.max_channels = 512 # 最大特征图数量
 
-        self.backbone = ConvNeXt(in_chans=self.n_channels, num_classes=num_classes)
+        C = self.max_channels
+
+        self.backbone = ConvNeXt(in_chans=self.n_channels, num_classes=num_classes, dims=[C//8, C//4, C//2, C])
 
         self.up1 = nn.Upsample(scale_factor=2, mode='nearest')
-        self.conv1 = DoubleConv(1024, 512)
+        self.conv1 = DoubleConv(C, C//2)
 
         self.up2 = nn.Upsample(scale_factor=2, mode='nearest')
-        self.conv2 = DoubleConv(1024, 256)
+        self.conv2 = DoubleConv(C, C//4)
 
         self.up3 = nn.Upsample(scale_factor=2, mode='nearest')
-        self.conv3 = DoubleConv(512, 128)
+        self.conv3 = DoubleConv(C//2, C//8)
 
         self.up4 = nn.Upsample(scale_factor=2, mode='nearest')
-        self.conv4 = DoubleConv(256, 64)
+        self.conv4 = DoubleConv(C//4, C//16)
 
-        self.oup = nn.Conv2d(64, num_classes, kernel_size=1)
+        self.oup = nn.Conv2d(C//16, num_classes, kernel_size=1)
 
     def forward(self, x):
         x0, x1, x2, x3 = self.backbone(x)
@@ -223,20 +226,20 @@ class U_ConvNeXt(nn.Module):
         P3 = self.up1(P3)
         P3 = self.conv1(P3)
 
-        P2 = x2
-        P2 = torch.cat([P2, P3], axis=1)    # P2 1024
+        P2 = x2 # P2 C//2
+        P2 = torch.cat([P2, P3], axis=1)    # P2 C
         P2 = self.up2(P2)
-        P2 = self.conv2(P2) # P2 256
+        P2 = self.conv2(P2) # P2 C//4
 
         P1 = x1
-        P1 = torch.cat([P2, P1], axis=1) # P1 512
+        P1 = torch.cat([P2, P1], axis=1) # P1 C//2
         P1 = self.up3(P1)
-        P1 = self.conv3(P1) # P1 128
+        P1 = self.conv3(P1) # P1 C//8
 
         P0 = x0
-        P0 = torch.cat([P1, P0], axis=1) # P0 256
+        P0 = torch.cat([P1, P0], axis=1) # P0 C//4
         P0 = self.up4(P0)
-        P0 = self.conv4(P0) # P0 64
+        P0 = self.conv4(P0) # P0 C//16
 
         out = self.oup(P0)
 
