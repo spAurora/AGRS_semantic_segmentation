@@ -9,5 +9,6 @@ einops
 timm
 nnunet
 numba
+pytroch_wavelets
 
 gdal==2.4.1

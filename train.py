@@ -39,12 +39,14 @@ from networks.FCN import FCN_ResNet50, FCN_ResNet101
 from networks.U_MobileNet import U_MobileNet
 from networks.SegNet import SegNet
 from networks.U_ConvNeXt import U_ConvNeXt
+from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD
+from networks.U_ConvNeXt_HWD_DS import U_ConvNeXt_HWD_DS
 
 '''参数设置'''
 trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\8-trainlist_clear_240401.txt'  # 训练样本列表
 save_model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights'  # 训练模型保存路径
-model = U_ConvNeXt  # 选择的训练模型
-save_model_name = '8-U_ConvNeXt-huyang_clear_240513.th'  # 训练模型保存名
+model = U_ConvNeXt_HWD_DS  # 选择的训练模型
+save_model_name = '8-U_ConvNeXt_HWD_DS-huyang_clear_240513.th'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 3  # 样本类别数
@@ -77,7 +79,7 @@ target_size = 256  # 模型预测窗口大小，与训练模型一致
 test_img_type = '*.tif'  # 测试集影像数据类型
 
 if_print_model_summary = True
-if model.__name__ in ['HRNet', 'FCN_ResNet50', 'FCN_ResNet101', 'SegNet']:  # 是否输出模型参数信息 部分模型不可用
+if model.__name__ in ['HRNet', 'FCN_ResNet50', 'FCN_ResNet101', 'SegNet', 'U_ConvNeXt_HWD', 'U_ConvNeXt_HWD_DS']:  # 是否输出模型参数信息 部分模型不可用
     if_print_model_summary = False
 else:
     pass
