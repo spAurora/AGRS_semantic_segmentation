@@ -114,7 +114,8 @@ class Predict():
                 if if_mask: # 读取掩膜
                     mask_full_path = mask_path + '/' + n[:-4] + '.npz'
                     if os.path.exists(mask_full_path):
-                        mask = np.load(mask_path + '/' + n[:-4] + '.npz')
+                        m_data = np.load(mask_path + '/' + n[:-4] + '.npz')
+                        mask = m_data['mask']
                     else:
                         print('does not exist: ' + mask_full_path)
                         continue # 如果mask文件不存在直接跳过该文件

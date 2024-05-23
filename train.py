@@ -43,10 +43,10 @@ from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD
 from networks.U_ConvNeXt_HWD_DS import U_ConvNeXt_HWD_DS
 
 '''参数设置'''
-trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\8-trainlist_clear_240401.txt'  # 训练样本列表
-save_model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights'  # 训练模型保存路径
+trainListRoot = r'E:\project_bai\2-trainlist\train_list_240523-1.txt'  # 训练样本列表
+save_model_path = r'E:\project_bai\3-weights'  # 训练模型保存路径
 model = U_ConvNeXt_HWD_DS  # 选择的训练模型
-save_model_name = '8-U_ConvNeXt_HWD_DS-huyang_clear_240513.th'  # 训练模型保存名
+save_model_name = 'U_ConvNeXt_HWD_DS_240523-1.th'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 3  # 样本类别数
@@ -72,11 +72,11 @@ simulate_batch_size_num = 4
 full_cpu_mode = True  # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
 if_open_test = True  # 是否开启测试模式
-test_img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_clear_for_clear_Evaluation_853'  # 测试集影像文件夹
-test_label_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-raster_label\1-raster_label_clear_for_clear_Evaluation'  # 测试集真值标签文件夹
-test_output_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-predict_result\0-test_temp'
-target_size = 256  # 模型预测窗口大小，与训练模型一致
-test_img_type = '*.tif'  # 测试集影像数据类型
+test_img_path = r'E:\project_bai\0-test_img'  # 测试集影像文件夹
+test_label_path = r'E:\project_bai\0-test_label'  # 测试集真值标签文件夹
+test_output_path = r'E:\project_bai\4-predict_result\test_output'
+target_size = 224  # 模型预测窗口大小，与训练模型一致
+test_img_type = '*.png'  # 测试集影像数据类型
 
 if_print_model_summary = True
 if model.__name__ in ['HRNet', 'FCN_ResNet50', 'FCN_ResNet101', 'SegNet', 'U_ConvNeXt_HWD', 'U_ConvNeXt_HWD_DS']:  # 是否输出模型参数信息 部分模型不可用
