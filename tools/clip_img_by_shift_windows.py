@@ -67,9 +67,9 @@ def cut_img(
 
 if __name__ == "__main__":
 
-    input_img_dir = r"E:\project_hami_limuceng\0-RF_result"
+    input_img_dir = r"E:\project_hami_limuceng\000-空间分析数据及结果\哈密砾幕层_随机森林"
     output_img_dir = r"E:\project_hami_limuceng\0-RF_result\clip_img"
-    block_size = 10000
+    block_size = 5000
     overlap = 0
 
     listpic = fnmatch.filter(os.listdir(input_img_dir), '*.tif')

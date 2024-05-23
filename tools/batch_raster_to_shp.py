@@ -3,24 +3,25 @@
 
 """
 批量栅格转矢量
-gdal的栅格转矢量存在问题，大影像建议使用arcgis
+gdal的栅格转矢量存在问题, 大影像建议使用arcgis
+
+240523: 最新版的gdal 3.9可以大幅提高轉換速度, 對應python3.8
+安裝命令: conda install -c conda-forge gdal
 ~~~~~~~~~~~~~~~~
 code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
 wanghaoyu191@mails.ucas.ac.cn
 """
 from pathlib import Path
-import gdal
 import os
-import ogr
-import osr
-import sys
-import math
-from osgeo.ogr import Geometry, Layer
 from tqdm import tqdm
-import numpy as np
 import fnmatch
-
+# import gdal # gdal 2.4.1
+# import ogr
+# import osr
+from osgeo import gdal # gdal 3.9
+from osgeo import ogr
+from osgeo import osr
 
 def smoothing(inShp, fname, bdistance=0.001):
     """
