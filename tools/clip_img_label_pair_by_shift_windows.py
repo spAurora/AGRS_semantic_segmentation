@@ -136,7 +136,7 @@ def main(
 
 if __name__ == "__main__":
 
-    os.environ['GDAL_DATA'] = r'C:\Users\75198\.conda\envs\learn\Lib\site-packages\GDAL-2.4.1-py3.6-win-amd64.egg-info\gata-data' #防止报error4错误
+    # os.environ['GDAL_DATA'] = r'C:\Users\75198\.conda\envs\learn\Lib\site-packages\GDAL-2.4.1-py3.6-win-amd64.egg-info\gata-data' #防止报error4错误
 
     input_img_dir = Path(r"E:\project_daijiandi\0-other_data\image_tif")
     input_label_dir = Path(r"E:\project_daijiandi\0-other_data\label_tif")

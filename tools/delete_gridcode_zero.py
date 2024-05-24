@@ -20,7 +20,7 @@ from tqdm import tqdm
 import numpy as np
 import fnmatch
 
-os.environ['GDAL_DATA'] = r'C:\Users\75198\.conda\envs\learn\Lib\site-packages\GDAL-2.4.1-py3.6-win-amd64.egg-info\gata-data' #防止报error4错误
+# os.environ['GDAL_DATA'] = r'C:\Users\75198\.conda\envs\learn\Lib\site-packages\GDAL-2.4.1-py3.6-win-amd64.egg-info\gata-data' #防止报error4错误
 
 gdal.SetConfigOption("GDAL_FILENAME_IS_UTF8", "YES")
 gdal.SetConfigOption("SHAPE_ENCODING", "GBK")

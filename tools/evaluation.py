@@ -18,7 +18,7 @@ import gdal
 import ogr
 
 
-os.environ['GDAL_DATA'] = r'C:\Users\75198\.conda\envs\learn\Lib\site-packages\GDAL-2.4.1-py3.6-win-amd64.egg-info\gata-data' #防止报error4错误
+# os.environ['GDAL_DATA'] = r'C:\Users\75198\.conda\envs\learn\Lib\site-packages\GDAL-2.4.1-py3.6-win-amd64.egg-info\gata-data' #防止报error4错误
 
 ground_truth_path = r'E:\project_UAV\1-raster_label' # 存储待评定真值标签的文件夹
 predict_shp_path = r'E:\project_UAV\1-artificial_shp' # 存储预测矢量的文件

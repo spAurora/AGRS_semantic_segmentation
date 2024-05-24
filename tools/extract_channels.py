@@ -75,7 +75,7 @@ def read_img(sr_img):
 
     return im_data, im_proj, im_geotrans
 
-os.environ['GDAL_DATA'] = r'C:\Users\75198\anaconda3\envs\learn\Lib\site-packages\osgeo\data\gdal' # To prevent ERROR4
+# os.environ['GDAL_DATA'] = r'C:\Users\75198\anaconda3\envs\learn\Lib\site-packages\osgeo\data\gdal' # To prevent ERROR4
 
 img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_haze_lv3'
 output_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_haze_lv3_853'
