@@ -229,15 +229,13 @@ class ConvNeXt(nn.Module):
                  head_init_scale: float = 1.):
         super().__init__()
         self.downsample_layers = nn.ModuleList()  # stem and 3 intermediate downsampling conv layers
-        # 下采样：convd2d k4 s4  + LN
-        stem = nn.Sequential(Down_wt(in_chans, dims[0]), # 替换为HWD下采样
-                             LayerNorm(dims[0], eps=1e-6, data_format="channels_first")) # 四倍下采样
+        # 第一层整理通道
+        stem = nn.Sequential(Down_wt(in_chans, dims[0]))
         self.downsample_layers.append(stem)
 
-        # 对应stage2-stage4前的3个downsample：LN + conv2d k2 s2
+        # 对应stage2-stage4前的3个downsample
         for i in range(3):
-            downsample_layer = nn.Sequential(LayerNorm(dims[i], eps=1e-6, data_format="channels_first"),
-                                             nn.Conv2d(dims[i], dims[i+1], kernel_size=2, stride=2))
+            downsample_layer = nn.Sequential(Down_wt(dims[i], dims[i+1]))
             self.downsample_layers.append(downsample_layer)
 
         self.stages = nn.ModuleList()  # 4 feature resolution stages, each consisting of multiple blocks
@@ -326,21 +324,20 @@ class U_ConvNeXt_HWD_DS(nn.Module):
         P3 = self.up1(P3)
         P3 = self.conv1(P3)
 
-        P2 = x2 # P2 C//2
-        P2 = torch.cat([P2, P3], axis=1)    # P2 C
+        P2 = x2 
+        P2 = torch.cat([P2, P3], axis=1)
         P2 = self.up2(P2)
-        P2 = self.conv2(P2) # P2 C//4
+        P2 = self.conv2(P2)
 
         P1 = x1
-        P1 = torch.cat([P2, P1], axis=1) # P1 C//2
+        P1 = torch.cat([P2, P1], axis=1)
         P1 = self.up3(P1)
-        P1 = self.conv3(P1) # P1 C//8
+        P1 = self.conv3(P1)
 
         P0 = x0
-        P0 = torch.cat([P1, P0], axis=1) # P0 C//4
+        P0 = torch.cat([P1, P0], axis=1)
         P0 = self.up4(P0)
-        P0 = self.conv4(P0) # P0 C//16
+        P0 = self.conv4(P0)
 
         out = self.oup(P0)
-
         return out
