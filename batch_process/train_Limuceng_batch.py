@@ -2,67 +2,84 @@
 
 """
 AGRS_semantic_segmentation
-Batch Model Training
-批量模型训练
+Model Training
+模型训练
+仅针对砾幕层论文批量训练
 ~~~~~~~~~~~~~~~~
 code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
 wanghaoyu191@mails.ucas.ac.cn
 """
-from networks.DLinknet import DLinkNet34, DLinkNet50, DLinkNet101
-from networks.DE_Segformer import DE_Segformer
-from networks.RS_Segformer import RS_Segformer
-from networks.Segformer import Segformer
-from networks.DABNet import DABNet
-from networks.FCN8S import FCN8S
-from networks.Deeplab_v3_plus import DeepLabv3_plus
-from networks.Dunet import Dunet
-from networks.UNet import UNet
-from networks.UNet_Light import UNet_Light
-from test import GetTestIndicator
-from data import MyDataLoader, DataTrainInform
-from loss import CrossEntropyLoss2d, FocalLoss2d
-from framework import MyFrame
-from torchsummary import summary
-from multiprocessing import cpu_count
-from tqdm import tqdm
-import numpy as np
-import time
+
 import torch
 import os
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+import time
+import numpy as np
+from tqdm import tqdm
+from multiprocessing import cpu_count
+from torchsummary import summary
 
+import sys
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
 sys.path.append('.')
+sys.path.append('..')
 
+from framework import MyFrame
+from loss import CrossEntropyLoss2d, FocalLoss2d
+from data import MyDataLoader, DataTrainInform
+from test import GetTestIndicator
 
-for k1 in range(1, 6):
-    for k2 in range(1, 11):
-        if k1 == 1 and k2 < 5:
-            continue
-        '''参数设置'''
-        trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\5-trainlist_clear_mix_sim_haze_ATSC+convw+perlin_LV2_rate_0.5_' + \
-            str(k1) + '_230502.txt'  # 训练样本列表
-        save_model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights'  # 训练模型保存路径
-        model = UNet  # 选择的训练模型
-        save_model_name = '5-UNet-clear_mix_sim_haze_ATSC+convw+perlin_LV2_rate_0.5_' + \
-            str(k1) + '-' + str(k2) + '_230502.th'  # 训练模型保存名
+from networks.DLinknet import DLinkNet34, DLinkNet50, DLinkNet101
+from networks.UNet_Light import UNet_Light
+from networks.UNet import UNet
+from networks.DUNet import DUNet
+from networks.Deeplab_v3_plus import DeepLabv3_plus
+from networks.FCN8S import FCN8S
+from networks.DABNet import DABNet
+from networks.Segformer import Segformer
+from networks.RS_Segformer import RS_Segformer
+from networks.DE_Segformer import DE_Segformer
+from networks.UNetFormer import UNetFormer
+from networks.UNetPlusPlus import UNetPlusPlus
+from networks.HRNet import HRNet
+from networks.FCN import FCN_ResNet50, FCN_ResNet101
+from networks.U_MobileNet import U_MobileNet
+from networks.SegNet import SegNet
+from networks.U_ConvNeXt import U_ConvNeXt
+from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD
+from networks.U_ConvNeXt_HWD_DS import U_ConvNeXt_HWD_DS
+
+'''参数设置'''
+model_names = ['DABNet', 'DE_Segformer', 'DeepLabv3_plus', 'FCN8S', 'HRNet', 'Segformer', 'UNetFormer', 'UNetPlusPlus', 'DUNet', 'UNet', 'DLinkNet34', 'SegNet', 'U_ConvNeXt', 'U_ConvNeXt_HWD', 'U_ConvNeXt_HWD_DS']
+used_models = [DABNet, DE_Segformer, DeepLabv3_plus, FCN8S, HRNet, Segformer, UNetFormer, UNetPlusPlus, DUNet, UNet, DLinkNet34, SegNet, U_ConvNeXt, U_ConvNeXt_HWD, U_ConvNeXt_HWD_DS]
+
+for batch_index in range(5): 
+    for model_index in range(len(model_names)):
+
+        trainListRoot = r'E:\project_hami_limuceng\2-trainlist\train_list_240603.txt'  # 训练样本列表
+        save_model_path = r'E:\project_hami_limuceng\3-weights'  # 训练模型保存路径
+        model = used_models[model_index]  # 选择的训练模型
+        save_model_name = model_names[model_index] + '-hami_limuceng_' + str(batch_index) + '_240603.th'  # 训练模型保存名
         mylog = open('logs/'+save_model_name[:-3]+'.log', 'w')  # 日志文件
         loss = FocalLoss2d  # 损失函数
-        classes_num = 3  # 样本类别数
-        batch_size = 8  # 计算批次大小
-        init_lr = 0.01  # 初始学习率
+        classes_num = 2  # 样本类别数
+        batch_size = 32  # 计算批次大小
+        init_lr = 0.001  # 初始学习率
         total_epoch = 300  # 训练次数
-        band_num = 8  # 影像的波段数
-        if_norm_label = False  # 是否对标签进行归一化 0/255二分类应设置为True
+        band_num = 4  # 影像的波段数
+        if_norm_label = True  # 是否对标签进行归一化 0/255二分类应设置为True
         label_weight_scale_factor = 1  # 标签权重的指数缩放系数 1为不缩放
 
+        if_print_model_summary = False  # 是否输出模型参数信息 部分模型不可用（HRNet）
         if_vis = False  # 是否输出中间可视化信息 一般设置为False，设置为True需要模型支持
         if_open_profile = False  # 是否启用性能分析，启用后计算2个eopch即终止训练并打印报告，仅供硬件负载分析和性能优化使用
 
         lr_mode = 0  # 学习率更新模式，0为等比下降，1为标准下降
         max_no_optim_num = 1  # 最大loss无优化次数
         lr_update_rate = 3.0  # 学习率等比下降更新率
-        min_lr = 6e-5  # 最低学习率
+        min_lr = 1e-6  # 最低学习率
 
         simulate_batch_size = False  # 是否模拟大batchsize；除非显存太小一般不开启
         # 模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
@@ -71,9 +88,20 @@ for k1 in range(1, 6):
         full_cpu_mode = True  # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
         if_open_test = True  # 是否开启测试模式
-        test_img_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_haze_lv2'  # 测试集影像文件夹
-        test_label_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\1-raster_label\1-raster_label_haze_lv2'  # 测试集真值标签文件夹
-        target_size = 256  # 模型预测窗口大小，与训练模型一致
+        test_img_path = r'E:\project_hami_limuceng\1-clip_img_8bit'  # 测试集影像文件夹
+        test_label_path = r'E:\project_hami_limuceng\1-raster_label'  # 测试集真值标签文件夹
+        test_output_path = r'E:\project_hami_limuceng\4-predict_result\0-test_temp/' + save_model_name[:-3]
+        target_size = 192  # 模型预测窗口大小，与训练模型一致
+        test_img_type = '*.tif'  # 测试集影像数据类型
+
+        if not os.path.exists(test_output_path):
+            os.mkdir(test_output_path)
+
+        if_print_model_summary = True
+        if model.__name__ in ['HRNet', 'FCN_ResNet50', 'FCN_ResNet101', 'SegNet', 'U_ConvNeXt_HWD', 'U_ConvNeXt_HWD_DS']:  # 是否输出模型参数信息 部分模型不可用
+            if_print_model_summary = False
+        else:
+            pass
 
         '''全负荷使用CPU'''
         if full_cpu_mode:
@@ -98,14 +126,14 @@ for k1 in range(1, 6):
 
         '''收集数据集信息'''
         dataCollect = DataTrainInform(classes_num=classes_num, trainlistPath=trainListRoot, band_num=band_num,
-                                      label_norm=if_norm_label, label_weight_scale_factor=label_weight_scale_factor)  # 计算数据集信息
+                                    label_norm=if_norm_label, label_weight_scale_factor=label_weight_scale_factor)  # 计算数据集信息
         data_dict = dataCollect.collectDataAndSave()  # 数据集信息存储于字典中
-        '''手动设置data_dict'''
+        # '''手动设置data_dict'''
         # data_dict = {}
-        # data_dict['mean'] = [125.304955, 127.38818,  114.94185]
-        # data_dict['std'] = [40.3933, 35.64181, 37.925995]
-        # data_dict['classWeights'] = np.ones(2, dtype=np.float32)
-        # data_dict['img_shape'] = (256, 256, 3)
+        # data_dict['mean'] = [117.280266, 128.70387, 136.86803]
+        # data_dict['std'] = [43.33161, 39.06087, 34.673794]
+        # data_dict['classWeights'] = np.array([2.5911248, 3.8909917, 9.9005165, 9.21661, 7.058571, 10.126685, 3.4428556, 10.29797, 5.424672, 8.990792], dtype=np.float32)
+        # data_dict['img_shape'] = [1024, 1024, 3]
 
         if data_dict is None:
             print("error while pickling data. Please check.")
@@ -123,10 +151,10 @@ for k1 in range(1, 6):
 
         if if_vis:
             solver = MyFrame(net=model(num_classes=classes_num, band_num=band_num,
-                             ifVis=if_vis), loss=loss, lr=init_lr)  # 初始化网络，损失函数，学习率
+                                    ifVis=if_vis), loss=loss, lr=init_lr)  # 初始化网络，损失函数，学习率
         else:
-            solver = MyFrame(net=model(
-                num_classes=classes_num, band_num=band_num), loss=loss, lr=init_lr)  # 初始化网络，损失函数，学习率
+            solver = MyFrame(net=model(num_classes=classes_num,
+                                    band_num=band_num), loss=loss, lr=init_lr)  # 初始化网络，损失函数，学习率
 
         save_model_full_path = save_model_path + '/' + save_model_name
         if os.path.exists(save_model_full_path):
@@ -138,12 +166,13 @@ for k1 in range(1, 6):
         '''输出模型信息'''
         torch_shape = np.array(data_dict['img_shape'])
         torch_shape = [torch_shape[2], torch_shape[0], torch_shape[1]]
-        summary((solver.net), input_size=tuple(
-            torch_shape), batch_size=batch_size)
+        if if_print_model_summary is True:
+            summary((solver.net), input_size=tuple(
+                torch_shape), batch_size=batch_size)
 
         '''初始化dataloader'''
         dataset = MyDataLoader(root=trainListRoot, normalized_Label=if_norm_label,
-                               data_dict=data_dict, band_num=band_num)  # 读取训练数据集
+                            data_dict=data_dict, band_num=band_num)  # 读取训练数据集
         data_loader = torch.utils.data.DataLoader(
             dataset, batch_size=batch_size, shuffle=True, num_workers=0, pin_memory=True)  # 定义训练数据装载器 开启锁页内存
         print('Number of Iterations: ', int(len(dataset)/batch_size))
@@ -163,8 +192,7 @@ for k1 in range(1, 6):
                     solver.set_input(img, mask)  # 设置batch的影像和标签输入
                     if simulate_batch_size:
                         if (cnt % simulate_batch_size_num == 0):  # 模拟大batchsize
-                            train_loss = solver.optimize(
-                                ifStep=True, ifVis=if_vis)
+                            train_loss = solver.optimize(ifStep=True, ifVis=if_vis)
                         else:
                             train_loss = solver.optimize(
                                 ifStep=False, ifVis=if_vis)
@@ -177,17 +205,17 @@ for k1 in range(1, 6):
                 train_epoch_loss /= len(data_loader_iter)  # 计算该epoch的平均loss
 
                 if if_open_test:  # 如果开启测试模型就在测试集上计算精度指标
-                    p, r, f = GetTestIndicator(net=solver.net, data_dict=data_dict, target_size=target_size, band_num=band_num,
-                                               img_type='*.tif', test_img_path=test_img_path, test_label_path=test_label_path, if_norm_label=if_norm_label)
+                    p, r, f = GetTestIndicator(net=solver.net, data_dict=data_dict, target_size=target_size, band_num=band_num, img_type=test_img_type,
+                                            test_img_path=test_img_path, test_label_path=test_label_path, if_norm_label=if_norm_label, test_output_path=test_output_path)
 
-                print('epoch:', epoch, '  training time:',
-                      int(time.time()-tic), 's')
+                print('\nepoch:', epoch, '  training time:',
+                    int(time.time()-tic), 's')
                 print('epoch average train loss:', train_epoch_loss)
                 if if_open_test:
                     print('epoch test indicator: precision=' + str(p) +
-                          ', recall=' + str(r) + ', f1_score=' + str(f))
-                print('current learn rate: ', solver.optimizer.state_dict()[
-                      'param_groups'][0]['lr'])
+                        ', recall=' + str(r) + ', f1_score=' + str(f))
+                print('current learn rate: ', solver.optimizer.state_dict()
+                    ['param_groups'][0]['lr'])
                 print('---------')
 
                 if if_open_test:
@@ -205,8 +233,7 @@ for k1 in range(1, 6):
                         train_epoch_best_loss = train_epoch_loss  # 保留当前epoch的loss
                         solver.save(save_model_full_path)  # 保留当前epoch的模型
                     if no_optim > 9:  # 若过多epoch后loss仍不下降则终止训练
-                        print(mylog, 'early stop at %d epoch' %
-                              epoch)  # 打印信息至日志
+                        print(mylog, 'early stop at %d epoch' % epoch)  # 打印信息至日志
                         print('early stop at %d epoch' % epoch)
                         break
                     if no_optim > max_no_optim_num:  # 多轮epoch后loss不下降则更新学习率

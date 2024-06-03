@@ -1,0 +1,9 @@
+Mon Jun  3 20:23:42 2024
+data_dict: {'mean': array([51.911552, 52.964615, 50.89379 , 48.591324], dtype=float32), 'std': array([26.158657, 28.019958, 27.519169, 26.810673], dtype=float32), 'classWeights': array([2.7680335, 1.7603546], dtype=float32), 'img_shape': (192, 192, 4)}
+epoch: 1 iter: 1 train_iter_loss: 0.072879 learn_rate: 0.001000 
+epoch: 1 iter: 2 train_iter_loss: 0.093071 learn_rate: 0.001000 
+epoch: 1 iter: 3 train_iter_loss: 0.068326 learn_rate: 0.001000 
+epoch: 1 iter: 4 train_iter_loss: 0.035185 learn_rate: 0.001000 
+epoch: 1 iter: 5 train_iter_loss: 0.037647 learn_rate: 0.001000 
+epoch: 1 iter: 6 train_iter_loss: 0.034172 learn_rate: 0.001000 
+epoch: 1 iter: 7 train_iter_loss: 0.026763 learn_rate: 0.001000 

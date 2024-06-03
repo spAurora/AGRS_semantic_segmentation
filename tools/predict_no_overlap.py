@@ -27,7 +27,7 @@ from data import DataTrainInform
 from networks.DLinknet import DLinkNet34, DLinkNet50, DLinkNet101
 from networks.UNet_Light import Unet
 from networks.UNet import UNet
-from networks.Dunet import Dunet
+from networks.DUNet import DUNet
 from networks.Deeplab_v3_plus import DeepLabv3_plus
 from networks.FCN8S import FCN8S
 from networks.DABNet import DABNet

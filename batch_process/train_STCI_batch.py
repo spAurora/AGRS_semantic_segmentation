@@ -4,6 +4,7 @@
 AGRS_semantic_segmentation
 Model Training
 模型训练
+仅针对论文1的模拟云训练
 ~~~~~~~~~~~~~~~~
 code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
@@ -17,18 +18,22 @@ from tqdm import tqdm
 from multiprocessing import cpu_count
 from torchsummary import summary
 
+import sys
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
+sys.path.append('.')
+sys.path.append('..')
+
 from framework import MyFrame
 from loss import CrossEntropyLoss2d, FocalLoss2d
 from data import MyDataLoader, DataTrainInform
 from test import GetTestIndicator
 
-import sys
-sys.path.append('.')
-
-from networks.DLinknet import DLinkNet34, DLinkNet50, DLinkNet101   
+from networks.DLinknet import DLinkNet34, DLinkNet50, DLinkNet101
 from networks.UNet_Light import UNet_Light
 from networks.UNet import UNet
-from networks.Dunet import Dunet
+from networks.DUNet import DUNet
 from networks.Deeplab_v3_plus import DeepLabv3_plus
 from networks.FCN8S import FCN8S
 from networks.DABNet import DABNet
