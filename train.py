@@ -84,6 +84,9 @@ if model.__name__ in ['HRNet', 'FCN_ResNet50', 'FCN_ResNet101', 'SegNet', 'U_Con
 else:
     pass
 
+if not os.path.exists(test_output_path):
+    os.mkdir(test_output_path)
+
 '''全负荷使用CPU'''
 if full_cpu_mode:
     cpu_num = cpu_count()  # 自动获取最大核心数目
