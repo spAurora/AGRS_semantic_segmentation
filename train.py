@@ -43,10 +43,10 @@ from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD
 from networks.U_ConvNeXt_HWD_DS import U_ConvNeXt_HWD_DS
 
 '''参数设置'''
-trainListRoot = r'E:\project_hami_limuceng\2-trainlist\train_list_240529.txt'  # 训练样本列表
+trainListRoot = r'E:\project_hami_limuceng\2-trainlist\train_list_240617.txt'  # 训练样本列表
 save_model_path = r'E:\project_hami_limuceng\3-weights'  # 训练模型保存路径
-model = DUNet  # 选择的训练模型
-save_model_name = 'DUNet_240529.th'  # 训练模型保存名
+model = U_ConvNeXt_HWD_DS  # 选择的训练模型
+save_model_name = 'U_ConvNeXt_HWD_DS_240617.th'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 2  # 样本类别数
@@ -72,7 +72,7 @@ simulate_batch_size_num = 4
 full_cpu_mode = True  # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
 if_open_test = True  # 是否开启测试模式
-test_img_path = r'E:\project_hami_limuceng\1-clip_img_8bit'  # 测试集影像文件夹
+test_img_path = r'E:\project_hami_limuceng\1-clip_img'  # 测试集影像文件夹
 test_label_path = r'E:\project_hami_limuceng\1-raster_label'  # 测试集真值标签文件夹
 test_output_path = r'E:\project_hami_limuceng\4-predict_result\0-test_temp'
 target_size = 192  # 模型预测窗口大小，与训练模型一致
