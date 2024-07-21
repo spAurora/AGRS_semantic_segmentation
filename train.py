@@ -33,7 +33,6 @@ from networks.Segformer import Segformer
 from networks.RS_Segformer import RS_Segformer
 from networks.DE_Segformer import DE_Segformer
 from networks.UNetFormer import UNetFormer
-# from networks.UNetPlusPlus import UNetPlusPlus # 调用该模型会自动弹信息
 from networks.HRNet import HRNet
 from networks.FCN import FCN_ResNet50, FCN_ResNet101
 from networks.U_MobileNet import U_MobileNet

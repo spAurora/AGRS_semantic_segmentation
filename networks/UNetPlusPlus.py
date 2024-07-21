@@ -15,6 +15,8 @@
 '''
 我觉得这个代码写的有些问题，有一些低级的写法
 注意要设置convolutional_upsampling=True, 否则上采样后通道数无法对齐
+
+该模型不建议使用
 '''
 
 from copy import deepcopy
