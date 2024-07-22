@@ -42,17 +42,17 @@ from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD
 from networks.U_ConvNeXt_HWD_DS import U_ConvNeXt_HWD_DS
 
 '''参数设置'''
-trainListRoot = r'E:\project_hami_limuceng\2-trainlist\train_list_240617.txt'  # 训练样本列表
-save_model_path = r'E:\project_hami_limuceng\3-weights'  # 训练模型保存路径
-model = U_ConvNeXt_HWD_DS  # 选择的训练模型
-save_model_name = 'U_ConvNeXt_HWD_DS_240617.th'  # 训练模型保存名
+trainListRoot = r'F:\0-project_backup\project_wafangdian_pre\2-train_list\trainlist_0722.txt'  # 训练样本列表
+save_model_path = r'F:\0-project_backup\project_wafangdian_pre\3-weights'  # 训练模型保存路径
+model = UNet  # 选择的训练模型
+save_model_name = 'UNet_wafangdian_building_240722.th'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 2  # 样本类别数
 batch_size = 8  # 计算批次大小
 init_lr = 0.001  # 初始学习率
 total_epoch = 300  # 训练次数
-band_num = 4  # 影像的波段数
+band_num = 3  # 影像的波段数
 if_norm_label = True  # 是否对标签进行归一化 0/255二分类应设置为True
 label_weight_scale_factor = 1  # 标签权重的指数缩放系数 1为不缩放
 
@@ -71,10 +71,10 @@ simulate_batch_size_num = 4
 full_cpu_mode = True  # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
 if_open_test = True  # 是否开启测试模式
-test_img_path = r'E:\project_hami_limuceng\1-clip_img'  # 测试集影像文件夹
-test_label_path = r'E:\project_hami_limuceng\1-raster_label'  # 测试集真值标签文件夹
-test_output_path = r'E:\project_hami_limuceng\4-predict_result\0-test_temp'
-target_size = 192  # 模型预测窗口大小，与训练模型一致
+test_img_path = r'F:\0-project_backup\project_wafangdian_pre\1-clip_img'  # 测试集影像文件夹
+test_label_path = r'F:\0-project_backup\project_wafangdian_pre\1-raster_label'  # 测试集真值标签文件夹
+test_output_path = r'F:\0-project_backup\project_wafangdian_pre\3-predict_result\0-test_temp'
+target_size = 512  # 模型预测窗口大小，与训练模型一致
 test_img_type = '*.tif'  # 测试集影像数据类型
 
 if_print_model_summary = True
