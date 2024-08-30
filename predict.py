@@ -213,7 +213,8 @@ class Predict():
                 '''分块读取影像并预测'''
                 '''设备内存过小或者影像过大时应用该模式'''
                 predict_result_col = np.zeros((img_height, target_size), dtype=np.uint8)
-                predict_result_row = np.zeros((target_size, img_width), dtype=np.uint8)                
+                predict_result_row = np.zeros((target_size, img_width), dtype=np.uint8)
+
                 # 上侧边缘
                 row_begin = 0
                 img_block = dataset.ReadAsArray(0, row_begin, dataset.RasterXSize, target_size)
@@ -230,6 +231,30 @@ class Predict():
                 dst_ds.GetRasterBand(1).WriteArray(predict_result_row, 0, row_begin)
                 dst_ds.FlushCache()
 
+                # 右下角
+                img_block = dataset.ReadAsArray(img_width-target_size, img_height-target_size, target_size, target_size)
+                predict_result = self.Predict_wHy(img_block.copy(), dst_ds, img_width-target_size, img_height-target_size)
+                dst_ds.GetRasterBand(1).WriteArray(predict_result, img_width-target_size, img_height-target_size)
+                dst_ds.FlushCache()
+
+                # 全局整体(按行读取, 与按列读取冲突，影像为压缩tif带金字塔时使用)
+                for j in range(0, img_height-target_size, step):
+                    img_block = dataset.ReadAsArray(0, j, dataset.RasterXSize, target_size) # 读取一行影像进内存
+                    for i in tqdm(range(0, img_width-target_size, step)):
+                        predict_result = self.Predict_wHy(img_block[:, :, i:i+target_size].copy(), dst_ds, xoff=i, yoff=j, overlap_rate=overlap_rate)
+                        predict_result_row[int(target_size*overlap_rate):int(target_size*(1-overlap_rate)), i+int(target_size*overlap_rate):i+int(target_size*(1-overlap_rate))] = predict_result[int(target_size*overlap_rate):int(target_size*(1-overlap_rate)), int(target_size*overlap_rate):int(target_size*(1-overlap_rate))]
+                    dst_ds.GetRasterBand(1).WriteArray(predict_result_row[int(target_size*overlap_rate):int(target_size*(1-overlap_rate)), int(target_size*overlap_rate):img_width-int(target_size*overlap_rate)], int(target_size*overlap_rate), j+int(target_size*overlap_rate))
+                dst_ds.FlushCache() # 最后刷新磁盘缓存
+
+                # # 全局整体(按列读取，与按行读取冲突)
+                # for i in tqdm(range(0, img_width-target_size, step)):
+                #     img_block = dataset.ReadAsArray(i, 0, target_size, dataset.RasterYSize) # 读取一列影像进内存
+                #     for j in range(0, img_height-target_size, step):
+                #         predict_result = self.Predict_wHy(img_block[:, j:j+target_size, :].copy(), dst_ds, xoff=i, yoff=j, overlap_rate=overlap_rate)
+                #         predict_result_col[j+int(target_size*overlap_rate):j+int(target_size*(1-overlap_rate)), int(target_size*overlap_rate):int(target_size*(1-overlap_rate))] = predict_result[int(target_size*overlap_rate):int(target_size*(1-overlap_rate)), int(target_size*overlap_rate):int(target_size*(1-overlap_rate))]
+                #     dst_ds.GetRasterBand(1).WriteArray(predict_result_col[int(target_size*overlap_rate):img_height-int(target_size*overlap_rate) ,int(target_size*overlap_rate):int(target_size*(1-overlap_rate))], i+int(target_size*overlap_rate), int(target_size*overlap_rate))
+                # dst_ds.FlushCache() # 最后刷新磁盘缓存
+
                 # 左侧边缘
                 col_begin = 0
                 img_block = dataset.ReadAsArray(col_begin, 0, target_size, dataset.RasterYSize)
@@ -239,43 +264,28 @@ class Predict():
                 dst_ds.FlushCache()
 
                 # 右侧边缘
-                col_begin = 0
+                col_begin = img_width - target_size
                 img_block = dataset.ReadAsArray(col_begin, 0, target_size, dataset.RasterYSize)
                 for j in tqdm(range(0, img_height - target_size, target_size)):
                     predict_result_col[j:j+target_size, :] = self.Predict_wHy(img_block[:,j:j+target_size,:].copy(), dst_ds, xoff=col_begin, yoff=j)
                 dst_ds.GetRasterBand(1).WriteArray(predict_result_col, col_begin, 0)
                 dst_ds.FlushCache()
 
-                # 右下角
-                img_block = dataset.ReadAsArray(img_width-target_size, img_height-target_size, target_size, target_size)
-                predict_result = self.Predict_wHy(img_block.copy(), dst_ds, img_width-target_size, img_height-target_size)
-                dst_ds.GetRasterBand(1).WriteArray(predict_result, img_width-target_size, img_height-target_size)
-                dst_ds.FlushCache()
-
-                # 全局整体
-                for i in tqdm(range(0, img_width-target_size, step)):
-                    img_block = dataset.ReadAsArray(i, 0, target_size, dataset.RasterYSize) # 读取一列影像进内存
-                    for j in range(0, img_height-target_size, step):
-                        predict_result = self.Predict_wHy(img_block[:, j:j+target_size, :].copy(), dst_ds, xoff=i, yoff=j, overlap_rate=overlap_rate)
-                        predict_result_col[j+int(target_size*overlap_rate):j+int(target_size*(1-overlap_rate)), int(target_size*overlap_rate):int(target_size*(1-overlap_rate))] = predict_result[int(target_size*overlap_rate):int(target_size*(1-overlap_rate)), int(target_size*overlap_rate):int(target_size*(1-overlap_rate))]
-                    dst_ds.GetRasterBand(1).WriteArray(predict_result_col[int(target_size*overlap_rate):img_height-int(target_size*overlap_rate) ,int(target_size*overlap_rate):int(target_size*(1-overlap_rate))], i+int(target_size*overlap_rate), int(target_size*overlap_rate))
-                dst_ds.FlushCache() # 最后刷新磁盘缓存
-
             print('预测耗费时间: %0.1f(s).' % (time.time() - t0))
 
 if __name__ == '__main__':
 
-    predictImgPath = r'E:\project_hami_limuceng\0-srimg\8bit' # 待预测影像的文件夹路径
+    predictImgPath = r'E:\project_GH_water\0-srimg' # 待预测影像的文件夹路径
     Img_type = '*.tif' # 待预测影像的类型
-    trainListRoot = r'E:\project_hami_limuceng\2-trainlist\train_list_240617.txt' #与模型训练相同的训练列表路径
+    trainListRoot = r'E:\project_GH_water\2-train_list\trainlist_0825.txt' #与模型训练相同的训练列表路径
     num_class = 2 # 样本类别数
-    model = U_ConvNeXt_HWD_DS #模型
-    model_path = r'E:\project_hami_limuceng\3-weights\U_ConvNeXt_HWD_DS_240617.th' # 模型文件完整路径
-    output_path = r'E:\project_hami_limuceng\4-predict_result' # 输出的预测结果路径
-    band_num = 4 #影像的波段数 训练与预测应一致
-    label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
-    target_size = 192 # 预测滑窗大小，应与训练集应一致
-    unify_read_img = True # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
+    model = UNet #模型
+    model_path = r'E:\project_GH_water\3-weights\UNet_wafangdian_water_240825.th' # 模型文件完整路径
+    output_path = r'E:\project_GH_water\4-predict_result' # 输出的预测结果路径
+    band_num = 3 #影像的波段数 训练与预测应一致
+    label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
+    target_size = 512 # 预测滑窗大小，应与训练集应一致
+    unify_read_img = False # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
     overlap_rate = 0.1 # 滑窗间的重叠率
 
     if_mask = False # 是否开启mask模式；mask模式仅在unify_read_img==True时有效
