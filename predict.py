@@ -238,9 +238,9 @@ class Predict():
                 dst_ds.FlushCache()
 
                 # 全局整体(按行读取, 与按列读取冲突，影像为压缩tif带金字塔时使用)
-                for j in range(0, img_height-target_size, step):
+                for j in tqdm(range(0, img_height-target_size, step)):
                     img_block = dataset.ReadAsArray(0, j, dataset.RasterXSize, target_size) # 读取一行影像进内存
-                    for i in tqdm(range(0, img_width-target_size, step)):
+                    for i in range(0, img_width-target_size, step):
                         predict_result = self.Predict_wHy(img_block[:, :, i:i+target_size].copy(), dst_ds, xoff=i, yoff=j, overlap_rate=overlap_rate)
                         predict_result_row[int(target_size*overlap_rate):int(target_size*(1-overlap_rate)), i+int(target_size*overlap_rate):i+int(target_size*(1-overlap_rate))] = predict_result[int(target_size*overlap_rate):int(target_size*(1-overlap_rate)), int(target_size*overlap_rate):int(target_size*(1-overlap_rate))]
                     dst_ds.GetRasterBand(1).WriteArray(predict_result_row[int(target_size*overlap_rate):int(target_size*(1-overlap_rate)), int(target_size*overlap_rate):img_width-int(target_size*overlap_rate)], int(target_size*overlap_rate), j+int(target_size*overlap_rate))
@@ -277,10 +277,10 @@ if __name__ == '__main__':
 
     predictImgPath = r'E:\project_GH_water\0-srimg' # 待预测影像的文件夹路径
     Img_type = '*.tif' # 待预测影像的类型
-    trainListRoot = r'E:\project_GH_water\2-train_list\trainlist_0825.txt' #与模型训练相同的训练列表路径
+    trainListRoot = r'E:\project_GH_water\2-train_list\trainlist_0901.txt' #与模型训练相同的训练列表路径
     num_class = 2 # 样本类别数
     model = UNet #模型
-    model_path = r'E:\project_GH_water\3-weights\UNet_wafangdian_water_240825.th' # 模型文件完整路径
+    model_path = r'E:\project_GH_water\3-weights\UNet_wafangdian_water_240901.th' # 模型文件完整路径
     output_path = r'E:\project_GH_water\4-predict_result' # 输出的预测结果路径
     band_num = 3 #影像的波段数 训练与预测应一致
     label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致

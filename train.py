@@ -42,15 +42,15 @@ from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD
 from networks.U_ConvNeXt_HWD_DS import U_ConvNeXt_HWD_DS
 
 '''参数设置'''
-trainListRoot = r'E:\project_GH_water\2-train_list\trainlist_0825.txt'  # 训练样本列表
+trainListRoot = r'E:\project_GH_water\2-train_list\trainlist_0901.txt'  # 训练样本列表
 save_model_path = r'E:\project_GH_water\3-weights'  # 训练模型保存路径
 model = UNet  # 选择的训练模型
-save_model_name = 'UNet_wafangdian_water_240825.th'  # 训练模型保存名
+save_model_name = 'UNet_wafangdian_water_240901.th'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 2  # 样本类别数
 batch_size = 8  # 计算批次大小
-init_lr = 0.001  # 初始学习率
+init_lr = 0.0003  # 初始学习率
 total_epoch = 300  # 训练次数
 band_num = 3  # 影像的波段数
 if_norm_label = False  # 是否对标签进行归一化 0/255二分类应设置为True
