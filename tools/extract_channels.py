@@ -77,9 +77,9 @@ def read_img(sr_img):
 
 # os.environ['GDAL_DATA'] = r'C:\Users\75198\anaconda3\envs\learn\Lib\site-packages\osgeo\data\gdal' # To prevent ERROR4
 
-img_path = r'E:\240525实验\enahnce_img'
-output_path = r'E:\240525实验\enahnce_img\853'
-save_channels = [8, 5, 3] # 顺序抽取的通道
+img_path = r'E:\project_populus_GF2_and_UAV\0-clip_polygon_img\GF2'
+output_path = r'E:\project_populus_GF2_and_UAV\0-clip_polygon_img\GF2-3-band'
+save_channels = [4, 3, 2] # 顺序抽取的通道
 # save_channels = [1] # 顺序抽取的通道
 
 listpic = fnmatch.filter(os.listdir(img_path), '*.tif')
