@@ -58,7 +58,7 @@ def cut_img(
 
         out_img_data = src_data[:, i: i + block_size, j: j + block_size]
 
-        out_img_path = output_img_dir + '/' + output_file_name + '_' + str(k) + '.png'
+        out_img_path = output_img_dir + '/' + output_file_name + '_' + str(k) + 'x8.png'
         with rio.open(out_img_path, "w", **src_profile) as out_src:
             out_src.write(out_img_data)
 
