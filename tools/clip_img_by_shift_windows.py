@@ -41,10 +41,10 @@ def cut_img(
     blocks = []
     for i in range(0, height, block_size - overlap):
         for j in range(0, width, block_size - overlap):
-            # if height - i < block_size: # 右侧及下侧
-            #     i = height - block_size
-            # if width - j < block_size:
-            #     j = width - block_size
+            if height - i < block_size: # 右侧及下侧
+                i = height - block_size
+            if width - j < block_size:
+                j = width - block_size
 
             blocks.append((i, j))
 
@@ -58,7 +58,7 @@ def cut_img(
 
         out_img_data = src_data[:, i: i + block_size, j: j + block_size]
 
-        out_img_path = output_img_dir + '/' + output_file_name + '_' + str(k) + '.tif'
+        out_img_path = output_img_dir + '/' + output_file_name + '_' + str(k) + '.png'
         with rio.open(out_img_path, "w", **src_profile) as out_src:
             out_src.write(out_img_data)
 
@@ -67,10 +67,10 @@ def cut_img(
 
 if __name__ == "__main__":
 
-    input_img_dir = r"E:\project_hami_limuceng\000-空间分析数据及结果\哈密砾幕层_随机森林"
-    output_img_dir = r"E:\project_hami_limuceng\0-RF_result\clip_img"
-    block_size = 5000
-    overlap = 0
+    input_img_dir = r"E:\project_populus_GF2_and_UAV\0-clip_polygon_img\GF2-3-band"
+    output_img_dir = r"E:\project_populus_GF2_and_UAV\0-clip_polygon_img\GF2-3-band-clip"
+    block_size = 100
+    overlap = 0.5
 
     listpic = fnmatch.filter(os.listdir(input_img_dir), '*.tif')
 
