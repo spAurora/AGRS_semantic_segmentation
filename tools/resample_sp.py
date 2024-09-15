@@ -63,7 +63,7 @@ def resample_to_match(input_dir_a, reference_dir_b, output_dir_c, resample_facto
 
 input_dir_a = r"E:\project_populus_GF2_and_UAV\0-clip_polygon_img\UAV-321-8bit"  # A路径下的图像
 reference_dir_b = r"E:\project_populus_GF2_and_UAV\0-clip_polygon_img\GF2-3-band"  # B路径下的参考图像
-output_dir_c = r"E:\project_populus_GF2_and_UAV\0-clip_polygon_img\UAV-321-resample"  # C路径为输出路径
-resample_factor = 8
+output_dir_c = r"E:\project_populus_GF2_and_UAV\0-clip_polygon_img\UAV-321-resample-X2"  # C路径为输出路径
+resample_factor = 2
 
 resample_to_match(input_dir_a, reference_dir_b, output_dir_c, resample_factor=resample_factor)
