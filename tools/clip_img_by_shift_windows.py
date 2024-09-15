@@ -58,7 +58,7 @@ def cut_img(
 
         out_img_data = src_data[:, i: i + block_size, j: j + block_size]
 
-        out_img_path = output_img_dir + '/' + output_file_name + '_' + str(k) + 'x8.png'
+        out_img_path = output_img_dir + '/' + output_file_name + '_' + str(k) + '.tif'
         with rio.open(out_img_path, "w", **src_profile) as out_src:
             out_src.write(out_img_data)
 
@@ -67,10 +67,10 @@ def cut_img(
 
 if __name__ == "__main__":
 
-    input_img_dir = r"E:\project_populus_GF2_and_UAV\0-clip_polygon_img\GF2-3-band"
-    output_img_dir = r"E:\project_populus_GF2_and_UAV\0-clip_polygon_img\GF2-3-band-clip"
-    block_size = 100
-    overlap = 0.5
+    input_img_dir = r"E:\BaiduNetdiskDownload\新建文件夹\image_enhance"
+    output_img_dir = r"E:\BaiduNetdiskDownload\新建文件夹\clip_img"
+    block_size = 1000
+    overlap = 0
 
     listpic = fnmatch.filter(os.listdir(input_img_dir), '*.tif')
 
