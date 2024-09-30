@@ -42,15 +42,15 @@ from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD
 from networks.U_ConvNeXt_HWD_DS import U_ConvNeXt_HWD_DS
 
 '''参数设置'''
-trainListRoot = r'E:\project_GH_water\2-train_list\trainlist_0901.txt'  # 训练样本列表
+trainListRoot = r'E:\project_GH_water\2-train_list\trainlist_0928.txt'  # 训练样本列表
 save_model_path = r'E:\project_GH_water\3-weights'  # 训练模型保存路径
 model = UNet  # 选择的训练模型
-save_model_name = 'UNet_wafangdian_water_240901.th'  # 训练模型保存名
+save_model_name = 'UNet_wafangdian_water_240928.th'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 2  # 样本类别数
 batch_size = 8  # 计算批次大小
-init_lr = 0.0003  # 初始学习率
+init_lr = 0.0005  # 初始学习率
 total_epoch = 300  # 训练次数
 band_num = 3  # 影像的波段数
 if_norm_label = False  # 是否对标签进行归一化 0/255二分类应设置为True
@@ -71,8 +71,8 @@ simulate_batch_size_num = 4
 full_cpu_mode = True  # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
 if_open_test = True  # 是否开启测试模式
-test_img_path = r'E:\project_GH_water\1-clip_img'  # 测试集影像文件夹
-test_label_path = r'E:\project_GH_water\1-raster_label'  # 测试集真值标签文件夹
+test_img_path = r'E:\project_GH_water\1-clip_img_col'  # 测试集影像文件夹
+test_label_path = r'E:\project_GH_water\1-raster_label_col'  # 测试集真值标签文件夹
 test_output_path = r'E:\project_GH_water\4-predict_result\0-test_temp'
 target_size = 512  # 模型预测窗口大小，与训练模型一致
 test_img_type = '*.tif'  # 测试集影像数据类型

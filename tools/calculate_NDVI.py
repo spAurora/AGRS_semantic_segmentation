@@ -52,6 +52,6 @@ def calculate_ndvi(input_folder, output_folder):
             print(f"成功处理并保存 NDVI 图像: {output_filepath}")
 
 # 示例用法
-input_folder = r"E:\paper_lishuo_new\new-fig-5\0-clip_img\1-clip_img"  # 替换为实际的输入文件夹路径
-output_folder = r"E:\paper_lishuo_new\new-fig-5\0-clip_img\4-clip_img_ndvi"  # 替换为实际的输出文件夹路径
+input_folder = r"E:\paper_lishuo_new\new-fig-5\0-clip_img\1-clip_img\2"  # 替换为实际的输入文件夹路径
+output_folder = r"E:\paper_lishuo_new\new-fig-5\0-clip_img\4-clip_img_ndvi\2"  # 替换为实际的输出文件夹路径
 calculate_ndvi(input_folder, output_folder)

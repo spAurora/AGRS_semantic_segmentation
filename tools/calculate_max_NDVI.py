@@ -58,6 +58,6 @@ def calculate_max_ndvi(input_folder, output_filepath):
     print(f"成功生成并保存最大NDVI图像: {output_filepath}")
 
 # 示例用法
-input_folder = r"E:\paper_lishuo_new\new-fig-5\0-clip_img\1-clip_img"  # 替换为实际的输入文件夹路径
-output_filepath = r"E:\paper_lishuo_new\new-fig-5\0-clip_img\5-clip_img_max_ndvi\1_MAX_NDVI.tif"  # 替换为实际的输出文件路径
+input_folder = r"E:\paper_lishuo_new\new-fig-5\0-clip_img\1-clip_img\2"  # 替换为实际的输入文件夹路径
+output_filepath = r"E:\paper_lishuo_new\new-fig-5\0-clip_img\5-clip_img_max_ndvi\2_MAX_NDVI.tif"  # 替换为实际的输出文件路径
 calculate_max_ndvi(input_folder, output_filepath)
