@@ -104,8 +104,20 @@ class Predict():
             name = n[:-4] + '.tif'
             # name = n[:-4] + '_result' + '.tif'  # 输出文件名
 
-            dst_ds = driver.Create(os.path.join(outpath, name), dataset.RasterXSize, dataset.RasterYSize,
-                                1, gdal.GDT_Byte)  # 创建预测结果写入文件
+            dst_ds = driver.Create(
+                os.path.join(outpath, name),
+                dataset.RasterXSize,
+                dataset.RasterYSize,
+                1,
+                gdal.GDT_Byte,
+                options=[
+                    "TILED=YES",  # 启用平铺
+                    "BLOCKXSIZE=1024",  # 设置平铺的宽度
+                    "BLOCKYSIZE=1024",  # 设置平铺的高度
+                    "COMPRESS=DEFLATE",  # 设置使用DEFLATE压缩算法
+                ],
+            )  # 创建预测结果写入文件
+            dst_ds.GetRasterBand(1).SetNoDataValue(0)  # 将背景值设置为NODATA
             dst_ds.SetGeoTransform(geotransform)  # 写入地理坐标
             dst_ds.SetProjection(projinfo)  # 写入投影
 
