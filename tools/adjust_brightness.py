@@ -67,9 +67,9 @@ def match_images_brightness(A_folder, B_folder, C_folder):
             print(f"Adjusted brightness for {file_name} and saved to {C_img_path}")
 
 # 设置 A、B 和 C 文件夹路径
-A_folder = r'E:\project_populus_GF2_and_UAV\0-clip_polygon_img/02-GF2-3-band'
-B_folder = r'E:\project_populus_GF2_and_UAV\0-clip_polygon_img\14-UAV-321-resample-X2'
-C_folder = r'E:\project_populus_GF2_and_UAV\0-clip_polygon_img/03-GF2-3-band-LA'
+A_folder = r'E:\project_UAV_GF2_2\2-clip_img_GF2_432'
+B_folder = r'E:\project_UAV_GF2_2\3-clip_img_UAV_321_8bit_enhanced'
+C_folder = r'E:\project_UAV_GF2_2\3-clip_img_GF2_432_enhanced'
 
 # 调用函数
 match_images_brightness(A_folder, B_folder, C_folder)

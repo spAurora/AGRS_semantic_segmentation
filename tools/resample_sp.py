@@ -61,9 +61,9 @@ def resample_to_match(input_dir_a, reference_dir_b, output_dir_c, resample_facto
             else:
                 print(f"参考图像 {reference_path} 不存在，跳过 {filename}.")
 
-input_dir_a = r"E:\project_populus_GF2_and_UAV\0-clip_polygon_img\UAV-321-8bit"  # A路径下的图像
-reference_dir_b = r"E:\project_populus_GF2_and_UAV\0-clip_polygon_img\GF2-3-band"  # B路径下的参考图像
-output_dir_c = r"E:\project_populus_GF2_and_UAV\0-clip_polygon_img\UAV-321-resample-X2"  # C路径为输出路径
+input_dir_a = r"E:\project_UAV_GF2_2\3-clip_img_UAV_321_8bit_enhanced"  # A路径下的图像
+reference_dir_b = r"E:\project_UAV_GF2_2\3-clip_img_GF2_432_enhanced"  # B路径下的参考图像
+output_dir_c = r"E:\project_UAV_GF2_2\4-clip_img_UAV_321_8bit_enhanced-X2"  # C路径为输出路径
 resample_factor = 2
 
 resample_to_match(input_dir_a, reference_dir_b, output_dir_c, resample_factor=resample_factor)
