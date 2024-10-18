@@ -6,7 +6,7 @@ https://github.com/facebookresearch/ConvNeXt
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from pytorch_wavelets import DWTForward
+from .pytorch_wavelets import DWTForward
 
 
 class Down_wt(nn.Module):
