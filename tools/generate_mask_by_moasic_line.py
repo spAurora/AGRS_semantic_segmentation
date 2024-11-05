@@ -2,6 +2,7 @@
 
 """
 基于接缝线生成对应的mask掩膜
+强烈建议使用GDAL3.X版本，可极大提高生成速度
 ~~~~~~~~~~~~~~~~
 code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
