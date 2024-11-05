@@ -13,8 +13,7 @@ import os
 import sys
 import fnmatch
 import numpy as np
-import gdal
-import ogr
+from osgeo import gdal, ogr
 
 def read_img(sr_img):
     """read img
