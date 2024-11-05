@@ -1,3 +1,4 @@
+# pip install -r requirements.txt
 tqdm
 torchsummary
 scikit-image
@@ -7,8 +8,7 @@ matplotlib
 IPython
 einops
 timm
-nnunet
 numba
 pywavelets
 
-gdal==2.4.1
+# conda install -c conda-forge gdal
