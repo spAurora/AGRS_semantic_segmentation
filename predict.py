@@ -20,6 +20,7 @@ from torch.autograd import Variable
 import fnmatch
 import sys
 import math
+import mmap
 
 from data import DataTrainInform
 
@@ -86,7 +87,34 @@ class Predict():
         print('start predict...')
         for one_path in allpath:
             t0 = time.time()
-            dataset = gdal.Open(one_path) # GDAL打开待预测影像
+
+            if if_vismem:
+                # 获取影像文件名前缀（不包括扩展名）
+                filename_prefix = os.path.splitext(os.path.basename(one_path))[0]
+
+                input_dir = os.path.dirname(one_path)
+                # 搜索配套文件（除主影像文件外其他相同前缀的文件）
+                auxiliary_files = [
+                    f for f in os.listdir(input_dir)
+                    if f.startswith(filename_prefix) and f != os.path.basename(one_path)
+                ]
+
+                # 将主影像文件映射到内存
+                with open(one_path, "rb") as f:
+                    mmapped_main_file = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+                    gdal.FileFromMemBuffer("/vsimem/" + os.path.basename(one_path), mmapped_main_file[:])
+
+                # 将配套文件映射到内存
+                for aux_file in auxiliary_files:
+                    aux_path = os.path.join(input_dir, aux_file)
+                    with open(aux_path, "rb") as f_aux:
+                        mmapped_aux_file = mmap.mmap(f_aux.fileno(), 0, access=mmap.ACCESS_READ)
+                        gdal.FileFromMemBuffer(f"/vsimem/{aux_file}", mmapped_aux_file[:])
+
+                dataset = gdal.Open("/vsimem/" + os.path.basename(one_path), gdal.GA_ReadOnly) # GDAL打开待预测影像
+            else:
+                dataset = gdal.Open(one_path, gdal.GA_ReadOnly) # GDAL打开待预测影像
+            
             if dataset == None:
                 print("failed to open img")
                 sys.exit(1)
@@ -283,7 +311,13 @@ class Predict():
                 dst_ds.GetRasterBand(1).WriteArray(predict_result_col, col_begin, 0)
                 dst_ds.FlushCache()
 
-            print('预测耗费时间: %0.1f(s).' % (time.time() - t0))
+            # 清理内存文件
+            if if_vismem:
+                gdal.Unlink("/vsimem/" + os.path.basename(one_path))
+                for aux_file in auxiliary_files:
+                    gdal.Unlink(f"/vsimem/{aux_file}")
+
+            print('预测耗时: %0.1f(s).' % (time.time() - t0))
 
 if __name__ == '__main__':
 
@@ -302,6 +336,8 @@ if __name__ == '__main__':
 
     if_mask = False # 是否开启mask模式；mask模式仅在unify_read_img==True时有效
     mask_path = r'E:\hami\mask' # mask路径 路径下需要有*.npz掩膜（./tools/generate_mask_by_moasic_line.py生成）
+
+    if_vismem = True # 是否开启虚拟文件系统; 开启后可大幅提高机械硬盘中的影像读取速度，但需要保证内存充足
 
     '''收集训练集信息'''
     dataCollect = DataTrainInform(classes_num=num_class, trainlistPath=trainListRoot, band_num=band_num, label_norm=label_norm) #计算数据集信息
