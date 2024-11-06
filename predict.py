@@ -86,6 +86,16 @@ class Predict():
     def Main(self, allpath, outpath, target_size=256, unify_read_img = False, overlap_rate = 0, if_mask=False, mask_path=''):  
         print('start predict...')
         for one_path in allpath:
+
+            if if_mask: # 读取掩膜
+                mask_full_path = mask_path + '/' + os.path.basename(one_path)[:-4] + '.npz'
+                if os.path.exists(mask_full_path):
+                    m_data = np.load(mask_path + '/' + os.path.basename(one_path)[:-4] + '.npz')
+                    mask = m_data['mask']
+                else:
+                    print('Mask file does not exist: ' + mask_full_path)
+                    continue # 如果mask文件不存在直接跳过该文件
+
             t0 = time.time()
 
             if if_vismem:
@@ -153,18 +163,10 @@ class Predict():
 
             if unify_read_img:
                 '''集中读取影像并预测'''
+
                 img_block = dataset.ReadAsArray() # 影像一次性读入内存
 
                 predict_result_all = np.zeros((img_height, img_width), dtype=np.uint8)
-                
-                if if_mask: # 读取掩膜
-                    mask_full_path = mask_path + '/' + n[:-4] + '.npz'
-                    if os.path.exists(mask_full_path):
-                        m_data = np.load(mask_path + '/' + n[:-4] + '.npz')
-                        mask = m_data['mask']
-                    else:
-                        print('does not exist: ' + mask_full_path)
-                        continue # 如果mask文件不存在直接跳过该文件
 
                 # 上侧边缘
                 row_begin = 0
