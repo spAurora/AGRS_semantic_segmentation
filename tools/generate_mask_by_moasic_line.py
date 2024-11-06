@@ -30,19 +30,20 @@ def read_img(sr_img):
     im_proj = im_dataset.GetProjection()
     im_width = im_dataset.RasterXSize
     im_height = im_dataset.RasterYSize
-    im_data = im_dataset.ReadAsArray(0, 0, im_width, im_height)
+    # im_data = im_dataset.ReadAsArray(0, 0, im_width, im_height)
+    im_data = 0
     del im_dataset
 
     return im_data, im_proj, im_geotrans, im_width, im_height
 
 
-image_path = r'E:\hami\image'
+image_path = r'H:\PROJECT_GLOBAL_POPULUS_DATA_03\FQ-China_qinghai_gansu_neimenggu\IMAGE-FUSE\GF2'
 image_type = '*.img'
-mosaic_line_full_path = r'E:\hami\mosaic_line\Mosaic line edited.shp' # 镶嵌线文件绝对路径，注意镶嵌线文件其实是个polygon
-ouput_path = r'E:\hami\mask'
+mosaic_line_full_path = r'H:\PROJECT_GLOBAL_POPULUS_DATA_03\FQ-China_qinghai_gansu_neimenggu\MOSAIC-LINE\GF2-MOSAIC-LINE.shp' # 镶嵌线文件绝对路径，注意镶嵌线文件其实是个polygon
+output_path = r'H:\PROJECT_GLOBAL_POPULUS_DATA_03\FQ-China_qinghai_gansu_neimenggu\MASK'
 
-if not os.path.exists(ouput_path):
-    os.mkdir(ouput_path)
+if not os.path.exists(output_path):
+    os.mkdir(output_path)
 
 # 读取镶嵌线文件
 vector = ogr.Open(mosaic_line_full_path)
@@ -57,7 +58,7 @@ for image in image_list:
     print('processing ' + image)
 
     image_full_path = image_path + '/' + image
-    output_full_path = ouput_path + '/' + image[:-4] + '.tif'
+    output_full_path = output_path + '/' + image[:-4] + '.tif'
 
     im_data, im_proj, im_geotrans, im_width, im_height = read_img(image_full_path)
 
@@ -80,4 +81,3 @@ for image in image_list:
 vector.Destroy()
 
 print('done')
-    
