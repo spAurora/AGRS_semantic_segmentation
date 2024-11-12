@@ -3,7 +3,7 @@
 
 """
 删除空白图像or标签
-标签路径和图像路径可以颠倒，适合不同情况
+！！！标签路径和图像路径可以颠倒，适合不同情况！！！
 ~~~~~~~~~~~~~~~~
 code by ZC
 Aerospace Information Research Institute, Chinese Academy of Sciences
