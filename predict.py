@@ -41,8 +41,8 @@ from networks.FCN import FCN_ResNet50, FCN_ResNet101
 from networks.U_MobileNet import U_MobileNet
 from networks.SegNet import SegNet
 from networks.U_ConvNeXt import U_ConvNeXt
-from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD
-from networks.U_ConvNeXt_HWD_DS import U_ConvNeXt_HWD_DS
+# from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD
+# from networks.U_ConvNeXt_HWD_DS import U_ConvNeXt_HWD_DS
 
 class SolverFrame():
     def __init__(self, net):
