@@ -45,7 +45,7 @@ from networks.U_ConvNeXt import U_ConvNeXt
 trainListRoot = r'E:\project_GH_water\2-train_list\trainlist_0928.txt'  # 训练样本列表
 save_model_path = r'E:\project_GH_water\3-weights'  # 训练模型保存路径
 model = UNet  # 选择的训练模型
-save_model_name = 'UNet_wafangdian_water_240928.th'  # 训练模型保存名
+save_model_name = 'UNet_wafangdian_water_240929.th'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 2  # 样本类别数
