@@ -44,7 +44,7 @@ from networks.U_ConvNeXt import U_ConvNeXt
 from networks.MAE_Seg import MAEViTSegmentation
 
 '''参数设置'''
-trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_241111_0.05.txt'  # 训练样本列表
+trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_241111.txt'  # 训练样本列表
 save_model_path = r'D:\MAE_populus\3-weights'  # 训练模型保存路径
 model = MAEViTSegmentation  # 选择的训练模型
 save_model_name = 'MAE_340_241129.pth'  # 训练模型保存名
