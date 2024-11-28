@@ -77,6 +77,8 @@ test_output_path = r'E:\project_GH_water\4-predict_result\0-test_temp'
 target_size = 512  # 模型预测窗口大小，与训练模型一致
 test_img_type = '*.tif'  # 测试集影像数据类型
 
+if_MAE_finetune = True # 是否为MAE微调模式 
+
 if_print_model_summary = True
 if model.__name__ in ['HRNet', 'FCN_ResNet50', 'FCN_ResNet101', 'SegNet', 'U_ConvNeXt_HWD', 'U_ConvNeXt_HWD_DS']:  # 是否输出模型参数信息 部分模型不可用
     if_print_model_summary = False
@@ -141,7 +143,7 @@ else:
 
 save_model_full_path = save_model_path + '/' + save_model_name
 if os.path.exists(save_model_full_path):
-    solver.load(save_model_full_path)
+    solver.load(save_model_full_path, if_MAE_finetune)
     print('---------\n***Resume Training***\n---------')
 else:
     print('---------\n***New Training***\n---------')

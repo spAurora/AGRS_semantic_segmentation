@@ -57,8 +57,12 @@ class MyFrame():
     def save(self, path):
         torch.save(self.net.state_dict(), path) # 模型保存
         
-    def load(self, path):
-        self.net.load_state_dict(torch.load(path)) # 模型读取
+    def load(self, path, if_MAE_finetune):
+        if if_MAE_finetune:
+            self.net.encoder.load_state_dict(torch.load(path), strict=False) # MAE微调仅读取编码器
+            self.net.freeze_encoder() # 冻结编码器权重
+        else:
+            self.net.load_state_dict(torch.load(path)) # 模型读取
 
     def update_lr_geometric_decline(self, rate, mylog, factor=False, log_print = False): # 学习率等比下降更新
         if factor:
