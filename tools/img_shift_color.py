@@ -1,3 +1,14 @@
+#!/.conda/envs/dp python
+# -*- coding: utf-8 -*-
+
+"""
+图片色彩偏移（亮度调整、波段偏移）
+~~~~~~~~~~~~~~~~
+code by wHy
+Aerospace Information Research Institute, Chinese Academy of Sciences
+wanghaoyu191@mails.ucas.ac.cn
+"""
+
 from osgeo import gdal
 import numpy as np
 
