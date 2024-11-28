@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from MAE import MaskedAutoencoderViT  # 假设 MAE-ViT 的实现文件名为 mae.py
+from networks.MAE import MaskedAutoencoderViT  # 假设 MAE-ViT 的实现文件名为 mae.py
 
 class SemanticSegmentationDecoder(nn.Module):
     def __init__(self, embed_dim, patch_size, in_chans, num_classes):
