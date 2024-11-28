@@ -34,6 +34,7 @@ class SemanticSegmentationDecoder(nn.Module):
 
     def forward(self, x):
         # 去掉 cls_token
+        x = x[0]
         x = x[:, 1:, :]
 
         # 线性变换 + unpatchify
@@ -45,13 +46,13 @@ class SemanticSegmentationDecoder(nn.Module):
         x = F.relu(self.conv2(x))
         x = self.conv3(x)  # 输出类别概率
 
-        return nn.Sigmoid(x)
+        return x
 
 class MAEViTSegmentation(nn.Module):
     def __init__(self, 
                  img_size=256, 
                  patch_size=16, 
-                 in_chans=4, 
+                 band_num=4, 
                  embed_dim=1280, 
                  depth=32, 
                  num_heads=16, 
@@ -63,7 +64,7 @@ class MAEViTSegmentation(nn.Module):
         self.encoder = MaskedAutoencoderViT(
             img_size=img_size,
             patch_size=patch_size,
-            in_chans=in_chans,
+            in_chans=band_num,
             embed_dim=embed_dim,
             depth=depth,
             num_heads=num_heads,
@@ -78,7 +79,7 @@ class MAEViTSegmentation(nn.Module):
         self.decoder = SemanticSegmentationDecoder(
             embed_dim=embed_dim,
             patch_size=patch_size,
-            in_chans=in_chans,
+            in_chans=band_num,
             num_classes=num_classes
         )
 

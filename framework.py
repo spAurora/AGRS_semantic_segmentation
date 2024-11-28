@@ -59,8 +59,8 @@ class MyFrame():
         
     def load(self, path, if_MAE_finetune):
         if if_MAE_finetune:
-            self.net.encoder.load_state_dict(torch.load(path), strict=False) # MAE微调仅读取编码器
-            self.net.freeze_encoder() # 冻结编码器权重
+            self.net.module.load_state_dict(torch.load(path), strict=False) # MAE微调仅读取编码器
+            self.net.module.freeze_encoder() # 冻结编码器权重
         else:
             self.net.load_state_dict(torch.load(path)) # 模型读取
 

@@ -154,7 +154,7 @@ class MaskedAutoencoderViT(nn.Module):
 
         return x_masked, mask, ids_restore
 
-    def forward_encoder(self, x, mask_ratio):
+    def forward_encoder(self, x, mask_ratio=0):
         # embed patches
         x = self.patch_embed(x)
 

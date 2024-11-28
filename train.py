@@ -44,18 +44,18 @@ from networks.U_ConvNeXt import U_ConvNeXt
 from networks.MAE_Seg import MAEViTSegmentation
 
 '''参数设置'''
-trainListRoot = r'E:\project_GH_water\2-train_list\trainlist_0928.txt'  # 训练样本列表
-save_model_path = r'E:\project_GH_water\3-weights'  # 训练模型保存路径
+trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_241111_0.05.txt'  # 训练样本列表
+save_model_path = r'D:\MAE_populus\3-weights'  # 训练模型保存路径
 model = MAEViTSegmentation  # 选择的训练模型
-save_model_name = 'UNet_wafangdian_water_240929.th'  # 训练模型保存名
+save_model_name = 'MAE_340_241129.pth'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 2  # 样本类别数
-batch_size = 8  # 计算批次大小
+batch_size = 16  # 计算批次大小
 init_lr = 0.0005  # 初始学习率
 total_epoch = 300  # 训练次数
-band_num = 3  # 影像的波段数
-if_norm_label = False  # 是否对标签进行归一化 0/255二分类应设置为True
+band_num = 4  # 影像的波段数
+if_norm_label = True  # 是否对标签进行归一化 0/255二分类应设置为True
 label_weight_scale_factor = 1  # 标签权重的指数缩放系数 1为不缩放
 
 if_vis = False  # 是否输出中间可视化信息 一般设置为False，设置为True需要模型支持
@@ -73,22 +73,23 @@ simulate_batch_size_num = 4
 full_cpu_mode = True  # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
 if_open_test = True  # 是否开启测试模式
-test_img_path = r'E:\project_GH_water\1-clip_img_col'  # 测试集影像文件夹
-test_label_path = r'E:\project_GH_water\1-raster_label_col'  # 测试集真值标签文件夹
-test_output_path = r'E:\project_GH_water\4-predict_result\0-test_temp'
-target_size = 512  # 模型预测窗口大小，与训练模型一致
+test_img_path = r'D:\MAE_populus\4-predict_result\0-test_img'  # 测试集影像文件夹
+test_label_path = r'D:\MAE_populus\4-predict_result\0-test_label'  # 测试集真值标签文件夹
+test_output_path = r'D:\MAE_populus\4-predict_result\0-test_output'
+target_size = 256  # 模型预测窗口大小，与训练模型一致
 test_img_type = '*.tif'  # 测试集影像数据类型
 
 if_MAE_finetune = True # 是否为MAE微调模式 
 
 if_print_model_summary = True
-if model.__name__ in ['HRNet', 'FCN_ResNet50', 'FCN_ResNet101', 'SegNet', 'U_ConvNeXt_HWD', 'U_ConvNeXt_HWD_DS']:  # 是否输出模型参数信息 部分模型不可用
+if model.__name__ in ['HRNet', 'FCN_ResNet50', 'FCN_ResNet101', 'SegNet', 'U_ConvNeXt_HWD', 'U_ConvNeXt_HWD_DS', 'MAEViTSegmentation']:  # 是否输出模型参数信息 部分模型不可用
     if_print_model_summary = False
 else:
     pass
 
-if not os.path.exists(test_output_path):
-    os.mkdir(test_output_path)
+if if_open_test:
+    if not os.path.exists(test_output_path):
+        os.mkdir(test_output_path)
 
 '''全负荷使用CPU'''
 if full_cpu_mode:
