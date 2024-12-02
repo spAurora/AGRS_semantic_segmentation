@@ -9,25 +9,29 @@ class MAESSDecoderNaive(nn.Module):
         self.num_classes = num_classes
 
         # 将编码器的输出还原为每个 patch 的空间分布
-        self.linear_proj = nn.Linear(embed_dim, patch_size * patch_size * in_chans)
+        self.linear_proj = nn.Sequential(
+            nn.Linear(embed_dim, embed_dim),
+            nn.GELU(),
+            nn.Linear(embed_dim, patch_size * patch_size * in_chans)
+        )
 
         # 卷积层用于特征变换
         self.conv1 = nn.Sequential(
-            nn.Conv2d(in_chans, 128, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(128),
+            nn.Conv2d(in_chans, 512, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(512),
             nn.ReLU()
         )
         self.conv2 = nn.Sequential(
-            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(512, 256, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(256),
             nn.ReLU()
         )
         self.conv3 = nn.Sequential(
-            nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(512),
+            nn.Conv2d(526, 128, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(128),
             nn.ReLU()
         )
-        self.conv4 = nn.Conv2d(512, num_classes, kernel_size=1)
+        self.conv4 = nn.Conv2d(128, num_classes, kernel_size=1)
 
     def unpatchify(self, x):
         """
