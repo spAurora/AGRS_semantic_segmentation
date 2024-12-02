@@ -44,15 +44,15 @@ from networks.U_ConvNeXt import U_ConvNeXt
 from networks.MAE_Seg import MAEViTSegmentation
 
 '''参数设置'''
-trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_241111.txt'  # 训练样本列表
+trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_241111_0.2.txt'  # 训练样本列表
 save_model_path = r'D:\MAE_populus\3-weights'  # 训练模型保存路径
 model = MAEViTSegmentation  # 选择的训练模型
-save_model_name = 'MAE_340_241129.pth'  # 训练模型保存名
+save_model_name = 'MAE_340_241119.pth'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 2  # 样本类别数
 batch_size = 16  # 计算批次大小
-init_lr = 0.0005  # 初始学习率
+init_lr = 0.0001  # 初始学习率
 total_epoch = 300  # 训练次数
 band_num = 4  # 影像的波段数
 if_norm_label = True  # 是否对标签进行归一化 0/255二分类应设置为True

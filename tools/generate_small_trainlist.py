@@ -26,8 +26,8 @@ def retain_lines(input_file, output_file, retain_percentage):
     with open(output_file, 'w') as f:
         f.writelines(retained_lines)
 
-retain_percentage = 0.05 # retain percentage (e.g., 0.8 for 80% retention)
+retain_percentage = 0.2 # retain percentage (e.g., 0.8 for 80% retention)
 input_file_path = r'D:\MAE_populus\2-train_list\trainlist_241111.txt'
-output_file_path = r'D:\MAE_populus\2-train_list\trainlist_241111_0.05.txt'
+output_file_path = r'D:\MAE_populus\2-train_list\trainlist_241111_' + str(retain_percentage) + '.txt'
 
 retain_lines(input_file_path, output_file_path, retain_percentage)
