@@ -13,21 +13,21 @@ class MAESSDecoderNaive(nn.Module):
 
         # 卷积层用于特征变换
         self.conv1 = nn.Sequential(
-            nn.Conv2d(in_chans, 512, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(512),
+            nn.Conv2d(in_chans, 128, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(128),
             nn.ReLU()
         )
         self.conv2 = nn.Sequential(
-            nn.Conv2d(512, 256, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(256),
             nn.ReLU()
         )
         self.conv3 = nn.Sequential(
-            nn.Conv2d(256, 128, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(128),
+            nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(512),
             nn.ReLU()
         )
-        self.conv4 = nn.Conv2d(128, num_classes, kernel_size=1)
+        self.conv4 = nn.Conv2d(512, num_classes, kernel_size=1)
 
     def unpatchify(self, x):
         """
@@ -37,7 +37,6 @@ class MAESSDecoderNaive(nn.Module):
         p = self.patch_size
         batch_size, num_patches, _ = x.shape
         pn_h = pn_w = int(num_patches ** 0.5)  # 假设图像是方形的
-        assert num_patches == (pn_h // p) * (pn_w // p), "Patch数不匹配"
 
         x = x.reshape(batch_size, pn_h, pn_w, p, p, self.in_chans)
         x = x.permute(0, 5, 1, 3, 2, 4).contiguous() # -> (batch_size, in_chans, pn_h, p, pn_w, p)

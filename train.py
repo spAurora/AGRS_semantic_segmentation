@@ -44,15 +44,15 @@ from networks.U_ConvNeXt import U_ConvNeXt
 from networks.MAE_Seg import MAEViTSegmentation
 
 '''参数设置'''
-trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_241111_0.2.txt'  # 训练样本列表
+trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_241202.txt'  # 训练样本列表
 save_model_path = r'D:\MAE_populus\3-weights'  # 训练模型保存路径
 model = MAEViTSegmentation  # 选择的训练模型
-save_model_name = 'MAE_340_241119.pth'  # 训练模型保存名
+save_model_name = 'checkpoint-340-241202.pth'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 2  # 样本类别数
 batch_size = 16  # 计算批次大小
-init_lr = 0.0001  # 初始学习率
+init_lr = 0.00001  # 初始学习率
 total_epoch = 300  # 训练次数
 band_num = 4  # 影像的波段数
 if_norm_label = True  # 是否对标签进行归一化 0/255二分类应设置为True
@@ -225,7 +225,7 @@ with torch.autograd.profiler.profile(enabled=if_open_profile, use_cuda=True, rec
             if no_optim > max_no_optim_num:  # 多轮epoch后loss不下降则更新学习率
                 if solver.old_lr < min_lr:  # 当前学习率过低终止训练
                     break
-                solver.load(save_model_full_path)  # 读取保存的loss最低的模型
+                solver.load(save_model_full_path, if_MAE_finetune)  # 读取保存的loss最低的模型
                 solver.update_lr_geometric_decline(
                     lr_update_rate, factor=True, mylog=mylog)  # 更新学习率
                 no_optim = 0  # loss未降低轮数归0
