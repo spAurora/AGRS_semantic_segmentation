@@ -11,10 +11,23 @@ class MAESSDecoderNaive(nn.Module):
         # 将编码器的输出还原为每个 patch 的空间分布
         self.linear_proj = nn.Linear(embed_dim, patch_size * patch_size * in_chans)
 
-        # 卷积层用于逐步上采样到原始分辨率
-        self.conv1 = nn.Conv2d(in_chans, 64, kernel_size=3, stride=1, padding=1)
-        self.conv2 = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1)
-        self.conv3 = nn.Conv2d(128, num_classes, kernel_size=1)
+        # 卷积层用于特征变换
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(in_chans, 512, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU()
+        )
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(512, 256, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU()
+        )
+        self.conv3 = nn.Sequential(
+            nn.Conv2d(256, 128, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU()
+        )
+        self.conv4 = nn.Conv2d(128, num_classes, kernel_size=1)
 
     def unpatchify(self, x):
         """
@@ -23,11 +36,12 @@ class MAESSDecoderNaive(nn.Module):
         """
         p = self.patch_size
         batch_size, num_patches, _ = x.shape
-        h = w = int(num_patches ** 0.5)  # 假设图像是方形的
+        pn_h = pn_w = int(num_patches ** 0.5)  # 假设图像是方形的
+        assert num_patches == (pn_h // p) * (pn_w // p), "Patch数不匹配"
 
-        x = x.reshape(batch_size, h, w, p, p, self.in_chans)
-        x = x.permute(0, 5, 1, 3, 2, 4).contiguous()
-        x = x.reshape(batch_size, self.in_chans, h * p, w * p)
+        x = x.reshape(batch_size, pn_h, pn_w, p, p, self.in_chans)
+        x = x.permute(0, 5, 1, 3, 2, 4).contiguous() # -> (batch_size, in_chans, pn_h, p, pn_w, p)
+        x = x.reshape(batch_size, self.in_chans, pn_h * p, pn_w * p) # -> (batch_size, in_chans, h, w)
         return x
 
     def forward(self, x):
@@ -39,9 +53,10 @@ class MAESSDecoderNaive(nn.Module):
         x = self.linear_proj(x)
         x = self.unpatchify(x)
 
-        # 卷积解码
-        x = F.relu(self.conv1(x))
-        x = F.relu(self.conv2(x))
-        x = self.conv3(x)  # 输出类别概率
+        # 卷积特征变换
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        x = self.conv4(x)
 
         return x
