@@ -42,7 +42,7 @@ class MyFrame():
                 pred, _ = self.net(self.img) # 前向传递计算输出
             else:
                 pred = self.net(self.img) # 前向传递计算输出
-            label = self.mask # label维度规整可能会引发异常
+            label = self.mask.squeeze() # 注意此处label维度规整可能会引发异常
             loss = self.loss(output=pred, target=label) # 计算loss
         
         self.scaler.scale(loss).backward()  # Scaling the loss before backward pass
@@ -60,7 +60,7 @@ class MyFrame():
     def load(self, path, if_MAE_finetune):
         if if_MAE_finetune:
             self.net.module.load_state_dict(torch.load(path), strict=False) # MAE微调仅读取编码器
-            # self.net.module.freeze_encoder() # 冻结编码器权重
+            self.net.module.freeze_encoder() # 冻结编码器权重
         else:
             self.net.load_state_dict(torch.load(path)) # 模型读取
 
