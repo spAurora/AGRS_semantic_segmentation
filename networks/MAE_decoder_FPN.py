@@ -197,10 +197,10 @@ class MAESSDecoderFPN(nn.Module):
         x = self.change_shape(x)
 
         m = {}
-        m[0] = self.conv0(x)  # 256,128,128
-        m[1] = self.conv1(x)  # 512,64,64
-        m[2] = self.conv2(x)  # 1024,32,32
-        m[3] = self.conv3(x)  # 2048,16,16
+        m[0] = self.conv0(x)  # 256, pn_h*16, pn_w*16
+        m[1] = self.conv1(x)  # 512, pn_h*8, pn_w*8
+        m[2] = self.conv2(x)  # 1024, pn_h*4, pn_w*4
+        m[3] = self.conv3(x)  # 2048, pn_h*2, pn_w*2
 
         m = list(m.values())
         x = self.decoder(m)
