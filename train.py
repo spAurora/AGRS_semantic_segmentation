@@ -38,6 +38,7 @@ from networks.FCN import FCN_ResNet50, FCN_ResNet101
 from networks.U_MobileNet import U_MobileNet
 from networks.SegNet import SegNet
 from networks.U_ConvNeXt import U_ConvNeXt
+from networks.ViT import ViTSegmentation
 # from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD
 # from networks.U_ConvNeXt_HWD_DS import U_ConvNeXt_HWD_DS
 
@@ -46,13 +47,13 @@ from networks.MAE_Seg import MAEViTSegmentation
 '''参数设置'''
 trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_241202.txt'  # 训练样本列表
 save_model_path = r'D:\MAE_populus\3-weights'  # 训练模型保存路径
-model = MAEViTSegmentation  # 选择的训练模型
-save_model_name = 'checkpoint-340-241202.pth'  # 训练模型保存名
+model = ViTSegmentation  # 选择的训练模型
+save_model_name = 'Vit-241203.pth'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 2  # 样本类别数
-batch_size = 8  # 计算批次大小
-init_lr = 0.0001  # 初始学习率
+batch_size = 16  # 计算批次大小
+init_lr = 0.001  # 初始学习率
 total_epoch = 300  # 训练次数
 band_num = 4  # 影像的波段数
 if_norm_label = True  # 是否对标签进行归一化 0/255二分类应设置为True
@@ -79,7 +80,7 @@ test_output_path = r'D:\MAE_populus\4-predict_result\0-test_output'
 target_size = 256  # 模型预测窗口大小，与训练模型一致
 test_img_type = '*.tif'  # 测试集影像数据类型
 
-if_MAE_finetune = True # 是否为MAE微调模式 
+if_MAE_finetune = False # 是否为MAE微调模式 
 
 if_print_model_summary = True
 if model.__name__ in ['HRNet', 'FCN_ResNet50', 'FCN_ResNet101', 'SegNet', 'U_ConvNeXt_HWD', 'U_ConvNeXt_HWD_DS', 'MAEViTSegmentation']:  # 是否输出模型参数信息 部分模型不可用
