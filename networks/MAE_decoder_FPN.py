@@ -145,7 +145,7 @@ class MAESSDecoderFPN(nn.Module):
             nn.Conv2d(embed_dim, 512, 1, 1),
             nn.GroupNorm(32, 512),
             nn.GELU(),
-            nn.ConvTranspose2d(512, 256, 8, 8),  # 2048, 16, 16
+            nn.ConvTranspose2d(512, 256, 16, 16),
             nn.Dropout(0.5)
         )
 
@@ -153,7 +153,7 @@ class MAESSDecoderFPN(nn.Module):
             nn.Conv2d(embed_dim, 512, 1, 1),
             nn.GroupNorm(32, 512),
             nn.GELU(),
-            nn.ConvTranspose2d(512, 512, 4, 4),  # 2048, 16, 16
+            nn.ConvTranspose2d(512, 512, 8, 8),
             nn.Dropout(0.5)
         )
 
@@ -161,7 +161,7 @@ class MAESSDecoderFPN(nn.Module):
             nn.Conv2d(embed_dim, 1024, 1, 1),
             nn.GroupNorm(32, 1024),
             nn.GELU(),
-            nn.ConvTranspose2d(1024, 1024, 2, 2),  # 2048, 16, 16
+            nn.ConvTranspose2d(1024, 1024, 4, 4),
             nn.Dropout(0.5)
         )
 
@@ -169,8 +169,8 @@ class MAESSDecoderFPN(nn.Module):
             nn.Conv2d(embed_dim, 2048, 1, 1),
             nn.GroupNorm(32, 2048),
             nn.GELU(),
+            nn.ConvTranspose2d(2048, 2048, 2, 2),
             nn.Dropout(0.5)
-            # 2048, 16, 16
         )
 
         self.decoder = FPNHEAD()
@@ -185,7 +185,6 @@ class MAESSDecoderFPN(nn.Module):
         input x: [batch_size, num_patches, embed_dim]
         output x: [batch_size, embed_dim, pn_h, pn_w]
         """
-        p = self.patch_size
         batch_size, num_patches, _ = x.shape
         pn_h = pn_w = int(num_patches ** 0.5)
 
@@ -193,6 +192,8 @@ class MAESSDecoderFPN(nn.Module):
         return x
 
     def forward(self, x):
+        x = x[0]
+        x = x[:, 1:, :]
         x = self.change_shape(x)
 
         m = {}
@@ -204,5 +205,4 @@ class MAESSDecoderFPN(nn.Module):
         m = list(m.values())
         x = self.decoder(m)
         x = self.cls_seg(x)
-
         return x
