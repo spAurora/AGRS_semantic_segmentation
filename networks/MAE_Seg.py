@@ -10,9 +10,9 @@ from networks.MAE_decoder_FPN import MAESSDecoderFPN
 class MAEViTSegmentation(nn.Module):
     def __init__(self, 
                  img_size=256, 
-                 patch_size=16, 
+                 patch_size=16,   # 16
                  band_num=4, 
-                 embed_dim=1280, 
+                 embed_dim=1280,  # 1280
                  depth=32, 
                  num_heads=16, 
                  decoder_embed_dim=512, 
