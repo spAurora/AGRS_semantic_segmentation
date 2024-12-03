@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from networks.MAE_encoder import MaskedAutoencoderViT
 from networks.MAE_decoder_Naive import MAESSDecoderNaive
+from networks.MAE_decoder_FPN import MAESSDecoderFPN
 
 
 
@@ -34,7 +35,7 @@ class MAEViTSegmentation(nn.Module):
         )
 
         # 解码器：用于语义分割
-        self.decoder = MAESSDecoderNaive(
+        self.decoder = MAESSDecoderFPN(
             embed_dim=embed_dim,
             patch_size=patch_size,
             in_chans=band_num,
