@@ -47,13 +47,13 @@ from networks.MAE_Seg import MAEViTSegmentation
 '''参数设置'''
 trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_241202.txt'  # 训练样本列表
 save_model_path = r'D:\MAE_populus\3-weights'  # 训练模型保存路径
-model = MAEViTSegmentation  # 选择的训练模型
-save_model_name = 'MAESS.pth'  # 训练模型保存名
+model = ViTSegmentation  # 选择的训练模型
+save_model_name = 'Vit_small_1_256.pth'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 2  # 样本类别数
-batch_size = 8  # 计算批次大小
-init_lr = 0.00001  # 初始学习率
+batch_size = 16  # 计算批次大小
+init_lr = 0.0001  # 初始学习率
 total_epoch = 300  # 训练次数
 band_num = 4  # 影像的波段数
 if_norm_label = True  # 是否对标签进行归一化 0/255二分类应设置为True
