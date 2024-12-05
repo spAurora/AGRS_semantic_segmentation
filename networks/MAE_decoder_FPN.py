@@ -188,7 +188,8 @@ class MAESSDecoderFPN(nn.Module):
         batch_size, num_patches, _ = x.shape
         pn_h = pn_w = int(num_patches ** 0.5)
 
-        x = x.reshape(batch_size, self.embed_dim, pn_h, pn_w).contiguous()
+        x = x.permute(0, 2, 1).contiguous()
+        x = x.reshape(batch_size, self.embed_dim, pn_h, pn_w)
         return x
 
     def forward(self, x):

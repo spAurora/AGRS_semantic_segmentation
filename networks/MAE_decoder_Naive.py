@@ -44,8 +44,8 @@ class MAESSDecoderNaive(nn.Module):
         batch_size, num_patches, _ = x.shape
         pn_h = pn_w = int(num_patches ** 0.5)  # 假设图像是方形的
 
-        # x = x.reshape(batch_size, pn_h, pn_w, p, p, self.in_chans)
-        # x = x.permute(0, 5, 1, 3, 2, 4).contiguous() # -> (batch_size, in_chans, pn_h, p, pn_w, p)
+        x = x.reshape(batch_size, pn_h, pn_w, p, p, self.in_chans)
+        x = x.permute(0, 5, 1, 3, 2, 4).contiguous() # -> (batch_size, in_chans, pn_h, p, pn_w, p)
         x = x.reshape(batch_size, self.in_chans, pn_h * p, pn_w * p) # -> (batch_size, in_chans, h/dwon_scale_factor, w/down_scale_factor)
         return x
 
