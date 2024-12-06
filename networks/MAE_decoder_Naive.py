@@ -23,7 +23,6 @@ class MAESSDecoderNaive(nn.Module):
             nn.BatchNorm2d(128),
             nn.ReLU()
         )
-
         self.conv3 = nn.Sequential(
             nn.Conv2d(128, 64, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(64),
