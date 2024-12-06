@@ -31,7 +31,7 @@ class TransformerEncoder(nn.Module):
         return self.norm(x)
 
 class ViTSegmentation(nn.Module):
-    def __init__(self, num_classes=21, band_num=3, img_size=256, patch_size=16, embed_dim=256, num_heads=1, num_layers=1):
+    def __init__(self, num_classes=21, band_num=3, img_size=256, patch_size=16, embed_dim=768, num_heads=16, num_layers=16):
         super(ViTSegmentation, self).__init__()
         self.patch_embed = PatchEmbedding(img_size, patch_size, band_num, embed_dim)
         self.transformer_encoder = TransformerEncoder(embed_dim, num_heads, num_layers)
