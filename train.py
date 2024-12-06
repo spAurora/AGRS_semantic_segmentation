@@ -47,8 +47,8 @@ from networks.MAE_Seg import MAEViTSegmentation
 '''参数设置'''
 trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_241202.txt'  # 训练样本列表
 save_model_path = r'D:\MAE_populus\3-weights'  # 训练模型保存路径
-model = DUNet  # 选择的训练模型
-save_model_name = 'Vit_small_p16_16_16_768.pth'  # 训练模型保存名
+model = ViTSegmentation  # 选择的训练模型
+save_model_name = 'Vit_small_p16_1_1_256.pth'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-3]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 2  # 样本类别数

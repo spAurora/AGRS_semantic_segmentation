@@ -12,9 +12,9 @@ import matplotlib.pyplot as plt
 import scienceplots
 
 # %%
-log_path = r'C:\Users\75198\Desktop\log'
+log_path = r'D:\github\AGRS_semantic_segmentation\logs'
 # matplotlib.rcParams['text.usetex'] = False
-plt.style.use(["science"])
+# plt.style.use(["science"])
 for log in os.listdir(log_path):
     file = os.path.join(log_path, log)
     print(file)
@@ -50,4 +50,4 @@ for log in os.listdir(log_path):
     plt.tight_layout()
     # 图片保存为同名的jpg
     plt.savefig(log[:-3] + "jpg", dpi=300)
-    plt.show()
+    # plt.show()
