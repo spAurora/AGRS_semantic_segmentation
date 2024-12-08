@@ -10,11 +10,14 @@ import os
 import matplotlib
 import matplotlib.pyplot as plt
 import scienceplots
+import fnmatch
 
-# %%
-log_path = r'D:\github\AGRS_semantic_segmentation\logs'
+
+log_path = r'D:\github_respository\AGRS_semantic_segmentation\logs'
+output_path = r'D:\github_respository\AGRS_semantic_segmentation\logs'
 # matplotlib.rcParams['text.usetex'] = False
 # plt.style.use(["science"])
+listpic = fnmatch.filter(os.listdir(log_path), '*.log')
 for log in os.listdir(log_path):
     file = os.path.join(log_path, log)
     print(file)
@@ -49,5 +52,5 @@ for log in os.listdir(log_path):
     ax2.set_ylabel('Test-p', color='#FF6D60', fontsize=labelFont)
     plt.tight_layout()
     # 图片保存为同名的jpg
-    plt.savefig(log[:-3] + "jpg", dpi=300)
+    plt.savefig(output_path + '/' + log[:-3] + "png", dpi=300)
     # plt.show()

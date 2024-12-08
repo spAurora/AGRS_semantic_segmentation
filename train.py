@@ -49,7 +49,7 @@ trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_241202.txt'  # 训练样
 save_model_path = r'D:\MAE_populus\3-weights'  # 训练模型保存路径
 model = ViTSegmentation  # 选择的训练模型
 save_model_name = 'Vit_small_p16_1_1_256.pth'  # 训练模型保存名
-mylog = open('logs/'+save_model_name[:-3]+'.log', 'w')  # 日志文件
+mylog = open('logs/'+save_model_name[:-4]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 2  # 样本类别数
 batch_size = 16  # 计算批次大小
@@ -68,8 +68,7 @@ lr_update_rate = 3.0  # 学习率等比下降更新率
 min_lr = 1e-6  # 最低学习率
 
 simulate_batch_size = False  # 是否模拟大batchsize；除非显存太小一般不开启
-# 模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
-simulate_batch_size_num = 4
+simulate_batch_size_num = 4 # 模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
 
 full_cpu_mode = True  # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
