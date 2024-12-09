@@ -50,7 +50,6 @@ class MAESSDecoderNaive(nn.Module):
 
     def forward(self, x):
         # 去掉 cls_token
-        x = x[0]
         x = x[:, 1:, :]
 
         # 线性变换 + unpatchify

@@ -48,7 +48,7 @@ from networks.MAE_Seg import MAEViTSegmentation
 trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_241202.txt'  # 训练样本列表
 save_model_path = r'D:\MAE_populus\3-weights'  # 训练模型保存路径
 model = MAEViTSegmentation  # 选择的训练模型
-save_model_name = 'base-ExNaive-241209_256_8_8.pth'  # 训练模型保存名
+save_model_name = 'MAE-base-FPN-241209.pth'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-4]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 2  # 样本类别数
@@ -79,7 +79,7 @@ test_output_path = r'D:\MAE_populus\4-predict_result\0-test_output'
 target_size = 256  # 模型预测窗口大小，与训练模型一致
 test_img_type = '*.tif'  # 测试集影像数据类型
 
-if_MAE_finetune = False # 是否为MAE微调模式 
+if_MAE_finetune = True # 是否为MAE微调模式 
 
 if_print_model_summary = True
 if model.__name__ in ['HRNet', 'FCN_ResNet50', 'FCN_ResNet101', 'SegNet', 'U_ConvNeXt_HWD', 'U_ConvNeXt_HWD_DS', 'MAEViTSegmentation', 'ViTSegmentation']:  # 是否输出模型参数信息 部分模型不可用

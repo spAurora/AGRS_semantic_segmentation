@@ -193,7 +193,6 @@ class MAESSDecoderFPN(nn.Module):
         return x
 
     def forward(self, x):
-        x = x[0]
         x = x[:, 1:, :]
         x = self.change_shape(x)
 
