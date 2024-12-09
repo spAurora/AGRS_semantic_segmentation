@@ -45,7 +45,7 @@ class MAEViTSegmentation(nn.Module):
 
     def forward(self, x):
         # 编码器：提取特征
-        latent = self.encoder.forward_encoder(x) # latent[0] 16 x 257 x embed_dim
+        latent = self.encoder.forward_encoder(x) # latent[0] batch_size x patch_num+1 x embed_dim
 
         # 解码器：生成语义分割结果
         segmentation_output = self.decoder(latent)
