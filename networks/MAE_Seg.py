@@ -1,44 +1,35 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from networks.MAE_encoder import MaskedAutoencoderViT
+from networks.MAE_encoder import mae_vit_base_patch16_dec512d8b_populus, mae_vit_huge_patch16_populus, mae_vit_base_patch16_dec512d8b_populus_small
 from networks.MAE_decoder_Naive import MAESSDecoderNaive
 from networks.MAE_decoder_FPN import MAESSDecoderFPN
 
-
+def get_pretrained_mae_model(model_type, **kwargs):
+    if model_type == "mae_vit_base_patch16_dec512d8b_populus":
+        return mae_vit_base_patch16_dec512d8b_populus(**kwargs)
+    elif model_type == "mae_vit_huge_patch16_populus":
+        return mae_vit_huge_patch16_populus(**kwargs)
+    elif model_type == "mae_vit_base_patch16_dec512d8b_populus_small":
+        return mae_vit_base_patch16_dec512d8b_populus_small(**kwargs)
+    else:
+        raise ValueError("Unsupported model type")
 
 class MAEViTSegmentation(nn.Module):
-    def __init__(self, 
-                 img_size=256, 
-                 patch_size=16,   # 16
-                 band_num=4, 
-                 embed_dim=1280,  # 1280
-                 depth=32, 
-                 num_heads=16, 
-                 decoder_embed_dim=512, 
+    def __init__(self,
+                 band_num=4,
+                 model_type="mae_vit_base_patch16_dec512d8b_populus_small", # 更换不同encoder
                  num_classes=2):
         super(MAEViTSegmentation, self).__init__()
         
         # 编码器：MAE 的 ViT 部分
-        self.encoder = MaskedAutoencoderViT(
-            img_size=img_size,
-            patch_size=patch_size,
-            in_chans=band_num,
-            embed_dim=embed_dim,
-            depth=depth,
-            num_heads=num_heads,
-            decoder_embed_dim=decoder_embed_dim,
-            decoder_depth=0,  # 解码器部分不需要 MAE 自带的解码器
-            decoder_num_heads=0,
-            mlp_ratio=4,
-            norm_layer=nn.LayerNorm
-        )
+        self.encoder = get_pretrained_mae_model(model_type)
 
         # 解码器：用于语义分割
-        self.decoder = MAESSDecoderFPN(
-            embed_dim=embed_dim,
-            patch_size=patch_size,
-            in_chans=band_num,
+        self.decoder = MAESSDecoderNaive(
+            embed_dim=self.encoder.embed_dim,
+            patch_size=self.encoder.patch_size,
+            in_chans=self.encoder.in_chans,
             num_classes=num_classes
         )
 
@@ -54,7 +45,7 @@ class MAEViTSegmentation(nn.Module):
 
     def forward(self, x):
         # 编码器：提取特征
-        latent = self.encoder.forward_encoder(x) # latent[0] 16 x 257 x 1280
+        latent = self.encoder.forward_encoder(x) # latent[0] 16 x 257 x embed_dim
 
         # 解码器：生成语义分割结果
         segmentation_output = self.decoder(latent)

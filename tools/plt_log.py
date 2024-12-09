@@ -13,12 +13,12 @@ import scienceplots
 import fnmatch
 
 
-log_path = r'D:\github_respository\AGRS_semantic_segmentation\logs'
-output_path = r'D:\github_respository\AGRS_semantic_segmentation\logs'
+log_path = r'logs'
+output_path = r'logs'
 # matplotlib.rcParams['text.usetex'] = False
 # plt.style.use(["science"])
-listpic = fnmatch.filter(os.listdir(log_path), '*.log')
-for log in os.listdir(log_path):
+listlog = fnmatch.filter(os.listdir(log_path), '*.log')
+for log in listlog:
     file = os.path.join(log_path, log)
     print(file)
     with open(file) as f:
