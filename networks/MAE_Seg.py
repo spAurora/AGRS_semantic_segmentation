@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from networks.MAE_encoder import mae_vit_base_patch16_dec512d8b_populus, mae_vit_huge_patch16_populus, mae_vit_base_patch16_dec512d8b_populus_small
 from networks.MAE_decoder_Naive import MAESSDecoderNaive
 from networks.MAE_decoder_FPN import MAESSDecoderFPN
+from networks.MAE_decoder_ExNaive import MAESSDecoderExNaive
 
 def get_pretrained_mae_model(model_type, **kwargs):
     if model_type == "mae_vit_base_patch16_dec512d8b_populus":
@@ -26,7 +27,7 @@ class MAEViTSegmentation(nn.Module):
         self.encoder = get_pretrained_mae_model(model_type)
 
         # 解码器：用于语义分割
-        self.decoder = MAESSDecoderNaive(
+        self.decoder = MAESSDecoderExNaive(
             embed_dim=self.encoder.embed_dim,
             patch_size=self.encoder.patch_size,
             in_chans=self.encoder.in_chans,

@@ -13,11 +13,11 @@ class MAESSDecoderExNaive(nn.Module):
 
     def forward(self, x):
         # 去掉 cls_token
-        batch_size, _ = x.shape
         x = x[0]
         x = x[:, 1:, :] # B, PN, embed_dim
+        batch_size, num_patches, _ = x.shape
 
-        x = x.transpose(1, 2).reshape(batch_size, -1, 256, 256)
+        x = x.transpose(1, 2).reshape(batch_size, -1, int(num_patches ** 0.5), int(num_patches ** 0.5))
         x = self.head(x)
         
         return x

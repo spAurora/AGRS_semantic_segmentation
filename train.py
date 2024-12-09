@@ -48,7 +48,7 @@ from networks.MAE_Seg import MAEViTSegmentation
 trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_241202.txt'  # 训练样本列表
 save_model_path = r'D:\MAE_populus\3-weights'  # 训练模型保存路径
 model = MAEViTSegmentation  # 选择的训练模型
-save_model_name = 'base-Naive-241209-small_256_1_1.pth'  # 训练模型保存名
+save_model_name = 'base-ExNaive-241209_256_8_8.pth'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-4]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 2  # 样本类别数
