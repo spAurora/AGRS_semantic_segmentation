@@ -19,7 +19,7 @@ def get_pretrained_mae_model(model_type, **kwargs):
 class MAEViTSegmentation(nn.Module):
     def __init__(self,
                  band_num=4,
-                 model_type="mae_vit_base_patch16_dec512d8b_populus", # 更换不同encoder
+                 model_type="mae_vit_huge_patch16_populus", # 更换不同encoder
                  num_classes=2):
         super(MAEViTSegmentation, self).__init__()
         
@@ -27,7 +27,7 @@ class MAEViTSegmentation(nn.Module):
         self.encoder = get_pretrained_mae_model(model_type)
 
         # 解码器：用于语义分割
-        self.decoder = MAESSDecoderFPN(
+        self.decoder = MAESSDecoderNaive( # 更换不同decoder
             embed_dim=self.encoder.embed_dim,
             patch_size=self.encoder.patch_size,
             in_chans=self.encoder.in_chans,

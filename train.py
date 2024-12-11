@@ -45,14 +45,14 @@ from networks.ViT import ViTSegmentation
 from networks.MAE_Seg import MAEViTSegmentation
 
 '''参数设置'''
-trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_241202.txt'  # 训练样本列表
+trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_full_241211.txt'  # 训练样本列表
 save_model_path = r'D:\MAE_populus\3-weights'  # 训练模型保存路径
 model = MAEViTSegmentation  # 选择的训练模型
-save_model_name = 'MAE-base-FPN-241209.pth'  # 训练模型保存名
+save_model_name = 'MAE-VIT-pretrain-huge-Naive-full-241211.pth'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-4]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 2  # 样本类别数
-batch_size = 16  # 计算批次大小
+batch_size = 24  # 计算批次大小
 init_lr = 0.0001  # 初始学习率
 total_epoch = 300  # 训练次数
 band_num = 4  # 影像的波段数
@@ -65,7 +65,7 @@ if_open_profile = False  # 是否启用性能分析，启用后计算2个eopch�
 lr_mode = 0  # 学习率更新模式，0为等比下降，1为标准下降
 max_no_optim_num = 1  # 最大loss无优化次数
 lr_update_rate = 3.0  # 学习率等比下降更新率
-min_lr = 1e-6  # 最低学习率
+min_lr = 1e-7  # 最低学习率
 
 simulate_batch_size = False  # 是否模拟大batchsize；除非显存太小一般不开启
 simulate_batch_size_num = 4 # 模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
@@ -118,10 +118,10 @@ dataCollect = DataTrainInform(classes_num=classes_num, trainlistPath=trainListRo
 data_dict = dataCollect.collectDataAndSave()  # 数据集信息存储于字典中
 # '''手动设置data_dict'''
 # data_dict = {}
-# data_dict['mean'] = [117.280266, 128.70387, 136.86803]
-# data_dict['std'] = [43.33161, 39.06087, 34.673794]
-# data_dict['classWeights'] = np.array([2.5911248, 3.8909917, 9.9005165, 9.21661, 7.058571, 10.126685, 3.4428556, 10.29797, 5.424672, 8.990792], dtype=np.float32)
-# data_dict['img_shape'] = [1024, 1024, 3]
+# data_dict['mean'] = [49.017967 49.88055  50.7376   64.34752]
+# data_dict['std'] = [5.3343625 7.126632  8.821242  8.598516]
+# data_dict['classWeights'] = np.array([1.4093286 6.478462], dtype=np.float32)
+# data_dict['img_shape'] = [256, 256, 4]
 
 if data_dict is None:
     print("error while pickling data. Please check.")
