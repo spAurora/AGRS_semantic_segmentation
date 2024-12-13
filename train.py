@@ -48,11 +48,11 @@ from networks.MAE_Seg import MAEViTSegmentation
 trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_full_241211.txt'  # 训练样本列表
 save_model_path = r'D:\MAE_populus\3-weights'  # 训练模型保存路径
 model = MAEViTSegmentation  # 选择的训练模型
-save_model_name = 'MAE-VIT-pretrain-huge-Naive-full-241211.pth'  # 训练模型保存名
+save_model_name = 'MAE-VIT-pretrain-huge-FPN-full-241212.pth'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-4]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 2  # 样本类别数
-batch_size = 24  # 计算批次大小
+batch_size = 8  # 计算批次大小
 init_lr = 0.0001  # 初始学习率
 total_epoch = 300  # 训练次数
 band_num = 4  # 影像的波段数
@@ -67,8 +67,8 @@ max_no_optim_num = 1  # 最大loss无优化次数
 lr_update_rate = 3.0  # 学习率等比下降更新率
 min_lr = 1e-7  # 最低学习率
 
-simulate_batch_size = False  # 是否模拟大batchsize；除非显存太小一般不开启
-simulate_batch_size_num = 4 # 模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
+simulate_batch_size = True  # 是否模拟大batchsize；除非显存太小一般不开启
+simulate_batch_size_num = 8 # 模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
 
 full_cpu_mode = True  # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 

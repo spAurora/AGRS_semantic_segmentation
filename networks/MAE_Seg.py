@@ -27,7 +27,7 @@ class MAEViTSegmentation(nn.Module):
         self.encoder = get_pretrained_mae_model(model_type)
 
         # 解码器：用于语义分割
-        self.decoder = MAESSDecoderNaive( # 更换不同decoder
+        self.decoder = MAESSDecoderFPN( # 更换不同decoder
             embed_dim=self.encoder.embed_dim,
             patch_size=self.encoder.patch_size,
             in_chans=self.encoder.in_chans,
