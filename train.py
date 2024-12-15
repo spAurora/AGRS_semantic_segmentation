@@ -45,10 +45,10 @@ from networks.ViT import ViTSegmentation
 from networks.MAE_Seg import MAEViTSegmentation
 
 '''参数设置'''
-trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_full_241211.txt'  # 训练样本列表
+trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_positive_and_negative_241211.txt'  # 训练样本列表
 save_model_path = r'D:\MAE_populus\3-weights'  # 训练模型保存路径
 model = MAEViTSegmentation  # 选择的训练模型
-save_model_name = 'MAE-VIT-pretrain-huge-FPN-full-241212.pth'  # 训练模型保存名
+save_model_name = 'MAE-VIT-pretrain-huge-FPN-PandN-241212.pth'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-4]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 2  # 样本类别数
@@ -118,9 +118,9 @@ dataCollect = DataTrainInform(classes_num=classes_num, trainlistPath=trainListRo
 data_dict = dataCollect.collectDataAndSave()  # 数据集信息存储于字典中
 # '''手动设置data_dict'''
 # data_dict = {}
-# data_dict['mean'] = [49.017967 49.88055  50.7376   64.34752]
-# data_dict['std'] = [5.3343625 7.126632  8.821242  8.598516]
-# data_dict['classWeights'] = np.array([1.4093286 6.478462], dtype=np.float32)
+# data_dict['mean'] = [49.017967, 49.88055, 50.7376, 64.34752]
+# data_dict['std'] = [5.3343625, 7.126632, 8.821242, 8.598516]
+# data_dict['classWeights'] = np.array([1.4093286, 6.478462], dtype=np.float32)
 # data_dict['img_shape'] = [256, 256, 4]
 
 if data_dict is None:

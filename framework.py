@@ -17,8 +17,8 @@ class MyFrame():
     def __init__(self, net, loss, lr=2e-4, evalmode = False):
         self.net = net.cuda() # 启动模型GPU计算
         self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count())) # 启动多卡并行训练
-        self.optimizer = torch.optim.Adam(params=self.net.parameters(), lr=lr) # 采用Adam优化器
-
+        # self.optimizer = torch.optim.Adam(params=self.net.parameters(), lr=lr) # 采用Adam优化器
+        self.optimizer = torch.optim.AdamW(params=self.net.parameters(), lr=lr, weight_decay=0.001)
         self.loss = loss # 初始化损失函数
         self.old_lr = lr # 初始化学习率
         self.scaler = amp.GradScaler()  # Initializing GradScaler for mixed precision training
