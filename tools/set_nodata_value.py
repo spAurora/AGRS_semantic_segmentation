@@ -2,21 +2,25 @@
 # -*- coding: utf-8 -*-
 
 """
-批量抽取影像指定通道
+设置图像的nodata值
+这个写法不好，需要遍历所有波段；张驰说用rasterio效率可以更高
 ~~~~~~~~~~~~~~~~
 code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
 wanghaoyu191@mails.ucas.ac.cn
 """
-
+from pathlib import Path
 import gdal
-import ogr
-import fnmatch
 import os
+import ogr
+import osr
 import sys
-import numpy as np
 import math
-import time
+from osgeo.ogr import Geometry, Layer
+from tqdm import tqdm
+import numpy as np
+import fnmatch
+import copy
 
 def write_img(out_path, im_proj, im_geotrans, im_data):
     """output img
@@ -49,7 +53,7 @@ def write_img(out_path, im_proj, im_geotrans, im_data):
     new_dataset.SetGeoTransform(im_geotrans)
     new_dataset.SetProjection(im_proj)
     if im_bands == 1:
-        new_dataset.GetRasterBand(1).WriteArray(im_data.squeeze())
+        new_dataset.GetRasterBand(1).WriteArray(im_data)
     else:
         for i in range(im_bands):
             new_dataset.GetRasterBand(i + 1).WriteArray(im_data[i])
@@ -72,36 +76,32 @@ def read_img(sr_img):
     im_width = im_dataset.RasterXSize
     im_height = im_dataset.RasterYSize
     im_data = im_dataset.ReadAsArray(0, 0, im_width, im_height)
-    del im_dataset
 
-    return im_data, im_proj, im_geotrans
+    return im_dataset, im_data, im_proj, im_geotrans, im_width, im_height
 
-# os.environ['GDAL_DATA'] = r'C:\Users\75198\anaconda3\envs\learn\Lib\site-packages\osgeo\data\gdal' # To prevent ERROR4
 
-img_path = r'E:\project_UAV_GF2_2\1-clip_img_UAV_remove_nodata'
-output_path = r'E:\project_UAV_GF2_2\2-clip_img_UAV_321'
-save_channels = [3, 2, 1] # 顺序抽取的通道
-# save_channels = [1] # 顺序抽取的通道
 
-listpic = fnmatch.filter(os.listdir(img_path), '*.tif')
+input_folder = r'E:\project_UAV_GF2_2\1-clip_img_UAV'  # 输入文件夹路径
+output_folder = r'E:\project_UAV_GF2_2\1-clip_img_UAV_remove_nodata'  # 输出文件夹路径
+
+img_type = '*.tif'
+
+# 确保输出文件夹存在
+if not os.path.exists(output_folder):
+    os.makedirs(output_folder)
+
+listpic = fnmatch.filter(os.listdir(input_folder), img_type)
 
 '''逐个读取影像'''
 for img in listpic:
-    img_full_path = img_path + '/' + img
-    data, proj_temp, geotrans_temp = read_img(img_full_path)
+    img_full_path = input_folder + '/' + img
+    im_dataset, data, proj_temp, geotrans_temp, width, height = read_img(img_full_path)
     img_shape = data.shape
-    data_temp = np.array(data[save_channels[0]-1, :, :]).reshape(1, img_shape[1], img_shape[2]) # (H, W) -> (1, H, W)
+    for i in range(img_shape[0]): # 读取每个波段
+        nodatavalue = im_dataset.GetRasterBand(1).GetNoDataValue()
+        print(nodatavalue)
+        output_data = im_dataset.ReadAsArray(0, 0, width, height)
+        output_data[np.where(output_data == nodatavalue)] = 0 # 修改后的nodatavalue
 
-    '''抽取指定波段'''
-    for i in range(1, len(save_channels)):
-        temp = np.array(data[save_channels[i]-1, :, :]) # (H, W)
-        data_temp = np.concatenate((data_temp, temp[None, :, :]))
-        
-    '''输出影像'''
-    out_full_path = output_path + '/' + img
-    write_img(out_full_path, proj_temp, geotrans_temp, data_temp)
-
-    time.sleep(1)
-    
-
-
+    output_full_path = output_folder + '/' + img
+    write_img(output_full_path, proj_temp, geotrans_temp, output_data)

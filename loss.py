@@ -65,3 +65,71 @@ class FocalLoss2d(nn.Module):
             return loss.mean()
         else:
             return loss.sum()
+
+# class DiceLoss2d(nn.Module):
+#     """
+#     Dice Loss for 2D segmentation tasks
+#     """
+#     def __init__(self, smooth=1e-6, weight =None):
+#         super(DiceLoss2d, self).__init__()
+#         self.smooth = smooth
+
+#     def forward(self, output, target):
+#         """
+#         Forward pass
+#         :param output: torch.tensor (NxCxHxW) - model logits
+#         :param target: torch.tensor (NxHxW) - ground truth labels
+#         :return: scalar Dice loss
+#         """
+
+#         # Flatten the output and target
+#         output = torch.softmax(output, dim=1)
+#         output_flat = output.view(-1)
+#         target_flat = target.view(-1)
+
+#         # Calculate intersection and union
+#         intersection = (output_flat * target_flat).sum()
+#         dice_score = (2. * intersection + self.smooth) / (output_flat.sum() + target_flat.sum() + self.smooth)
+
+#         # Return Dice Loss
+#         return 1 - dice_score
+
+class DiceLoss2d(nn.Module):
+    """
+    Dice Loss for 2D segmentation tasks
+    """
+    def __init__(self, smooth=1e-6, weight=None):
+        super(DiceLoss2d, self).__init__()
+        self.smooth = smooth
+
+    def forward(self, output, target):
+        """
+        Forward pass
+        :param output: torch.tensor (NxCxHxW) - model logits
+        :param target: torch.tensor (NxHxW) - ground truth labels
+        :return: scalar Dice loss
+        """
+        # Ensure the target is of the same shape as output
+        if target.size(1) != output.size(1):
+            target = target.unsqueeze(1)  # Adding channel dimension to target if necessary
+
+        # Apply softmax to output to get probabilities
+        # output = torch.softmax(output, dim=1)  # Output shape: (NxCxHxW)
+
+        # Flatten the output and target
+        output_flat = output.view(-1)
+        target_flat = target.view(-1)
+
+        # Convert target to one-hot encoding
+        num_classes = output.size(1)
+        target_one_hot = torch.zeros_like(output).view(-1, num_classes)  # Shape: (N*H*W, num_classes)
+        target_one_hot.scatter_(1, target_flat.unsqueeze(1), 1)  # Fill target_one_hot with correct class indices
+        target_one_hot = target_one_hot.view(-1)
+
+        # Calculate intersection and union
+        intersection = (output_flat * target_one_hot).sum(dim=0)
+        union = (output_flat + target_one_hot).sum(dim=0)
+        dice_score = (2. * intersection + self.smooth) / (union + self.smooth)
+
+        # Return Dice Loss
+        return 1 - dice_score.mean()  # Take mean of dice scores over all classes

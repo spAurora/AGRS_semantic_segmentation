@@ -38,19 +38,22 @@ from networks.FCN import FCN_ResNet50, FCN_ResNet101
 from networks.U_MobileNet import U_MobileNet
 from networks.SegNet import SegNet
 from networks.U_ConvNeXt import U_ConvNeXt
-from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD
-from networks.U_ConvNeXt_HWD_DS import U_ConvNeXt_HWD_DS
+from networks.ViT import ViTSegmentation
+# from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD
+# from networks.U_ConvNeXt_HWD_DS import U_ConvNeXt_HWD_DS
+
+from networks.MAE_Seg import MAEViTSegmentation
 
 '''参数设置'''
-trainListRoot = r'E:\project_hami_limuceng\2-trainlist\train_list_240617.txt'  # 训练样本列表
-save_model_path = r'E:\project_hami_limuceng\3-weights'  # 训练模型保存路径
-model = U_ConvNeXt_HWD_DS  # 选择的训练模型
-save_model_name = 'U_ConvNeXt_HWD_DS_240617.th'  # 训练模型保存名
-mylog = open('logs/'+save_model_name[:-3]+'.log', 'w')  # 日志文件
+trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_positive_and_negative_241211.txt'  # 训练样本列表
+save_model_path = r'D:\MAE_populus\3-weights'  # 训练模型保存路径
+model = MAEViTSegmentation  # 选择的训练模型
+save_model_name = 'MAE-VIT-pretrain-huge-FPN-PandN-241212.pth'  # 训练模型保存名
+mylog = open('logs/'+save_model_name[:-4]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 2  # 样本类别数
 batch_size = 8  # 计算批次大小
-init_lr = 0.001  # 初始学习率
+init_lr = 0.0001  # 初始学习率
 total_epoch = 300  # 训练次数
 band_num = 4  # 影像的波段数
 if_norm_label = True  # 是否对标签进行归一化 0/255二分类应设置为True
@@ -62,29 +65,31 @@ if_open_profile = False  # 是否启用性能分析，启用后计算2个eopch�
 lr_mode = 0  # 学习率更新模式，0为等比下降，1为标准下降
 max_no_optim_num = 1  # 最大loss无优化次数
 lr_update_rate = 3.0  # 学习率等比下降更新率
-min_lr = 1e-6  # 最低学习率
+min_lr = 1e-7  # 最低学习率
 
-simulate_batch_size = False  # 是否模拟大batchsize；除非显存太小一般不开启
-# 模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
-simulate_batch_size_num = 4
+simulate_batch_size = True  # 是否模拟大batchsize；除非显存太小一般不开启
+simulate_batch_size_num = 8 # 模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
 
 full_cpu_mode = True  # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
 if_open_test = True  # 是否开启测试模式
-test_img_path = r'E:\project_hami_limuceng\1-clip_img'  # 测试集影像文件夹
-test_label_path = r'E:\project_hami_limuceng\1-raster_label'  # 测试集真值标签文件夹
-test_output_path = r'E:\project_hami_limuceng\4-predict_result\0-test_temp'
-target_size = 192  # 模型预测窗口大小，与训练模型一致
+test_img_path = r'D:\MAE_populus\4-predict_result\0-test_img'  # 测试集影像文件夹
+test_label_path = r'D:\MAE_populus\4-predict_result\0-test_label'  # 测试集真值标签文件夹
+test_output_path = r'D:\MAE_populus\4-predict_result\0-test_output'
+target_size = 256  # 模型预测窗口大小，与训练模型一致
 test_img_type = '*.tif'  # 测试集影像数据类型
 
+if_MAE_finetune = True # 是否为MAE微调模式 
+
 if_print_model_summary = True
-if model.__name__ in ['HRNet', 'FCN_ResNet50', 'FCN_ResNet101', 'SegNet', 'U_ConvNeXt_HWD', 'U_ConvNeXt_HWD_DS']:  # 是否输出模型参数信息 部分模型不可用
+if model.__name__ in ['HRNet', 'FCN_ResNet50', 'FCN_ResNet101', 'SegNet', 'U_ConvNeXt_HWD', 'U_ConvNeXt_HWD_DS', 'MAEViTSegmentation', 'ViTSegmentation']:  # 是否输出模型参数信息 部分模型不可用
     if_print_model_summary = False
 else:
     pass
 
-if not os.path.exists(test_output_path):
-    os.mkdir(test_output_path)
+if if_open_test:
+    if not os.path.exists(test_output_path):
+        os.mkdir(test_output_path)
 
 '''全负荷使用CPU'''
 if full_cpu_mode:
@@ -113,10 +118,10 @@ dataCollect = DataTrainInform(classes_num=classes_num, trainlistPath=trainListRo
 data_dict = dataCollect.collectDataAndSave()  # 数据集信息存储于字典中
 # '''手动设置data_dict'''
 # data_dict = {}
-# data_dict['mean'] = [117.280266, 128.70387, 136.86803]
-# data_dict['std'] = [43.33161, 39.06087, 34.673794]
-# data_dict['classWeights'] = np.array([2.5911248, 3.8909917, 9.9005165, 9.21661, 7.058571, 10.126685, 3.4428556, 10.29797, 5.424672, 8.990792], dtype=np.float32)
-# data_dict['img_shape'] = [1024, 1024, 3]
+# data_dict['mean'] = [49.017967, 49.88055, 50.7376, 64.34752]
+# data_dict['std'] = [5.3343625, 7.126632, 8.821242, 8.598516]
+# data_dict['classWeights'] = np.array([1.4093286, 6.478462], dtype=np.float32)
+# data_dict['img_shape'] = [256, 256, 4]
 
 if data_dict is None:
     print("error while pickling data. Please check.")
@@ -141,7 +146,7 @@ else:
 
 save_model_full_path = save_model_path + '/' + save_model_name
 if os.path.exists(save_model_full_path):
-    solver.load(save_model_full_path)
+    solver.load(save_model_full_path, if_MAE_finetune)
     print('---------\n***Resume Training***\n---------')
 else:
     print('---------\n***New Training***\n---------')
@@ -220,7 +225,7 @@ with torch.autograd.profiler.profile(enabled=if_open_profile, use_cuda=True, rec
             if no_optim > max_no_optim_num:  # 多轮epoch后loss不下降则更新学习率
                 if solver.old_lr < min_lr:  # 当前学习率过低终止训练
                     break
-                solver.load(save_model_full_path)  # 读取保存的loss最低的模型
+                solver.load(save_model_full_path, if_MAE_finetune)  # 读取保存的loss最低的模型
                 solver.update_lr_geometric_decline(
                     lr_update_rate, factor=True, mylog=mylog)  # 更新学习率
                 no_optim = 0  # loss未降低轮数归0

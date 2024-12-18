@@ -11,16 +11,17 @@ wanghaoyu191@mails.ucas.ac.cn
 """
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
+import torch.amp as amp
 
 class MyFrame():
     def __init__(self, net, loss, lr=2e-4, evalmode = False):
         self.net = net.cuda() # 启动模型GPU计算
         self.net = torch.nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count())) # 启动多卡并行训练
-        self.optimizer = torch.optim.Adam(params=self.net.parameters(), lr=lr) # 采用Adam优化器
-
+        # self.optimizer = torch.optim.Adam(params=self.net.parameters(), lr=lr) # 采用Adam优化器
+        self.optimizer = torch.optim.AdamW(params=self.net.parameters(), lr=lr, weight_decay=0.001)
         self.loss = loss # 初始化损失函数
         self.old_lr = lr # 初始化学习率
+        self.scaler = amp.GradScaler()  # Initializing GradScaler for mixed precision training
 
         if evalmode: # 测试模式
             for i in self.net.modules(): # 返回网络所有的元素，包括不同级别的子元素
@@ -32,26 +33,36 @@ class MyFrame():
         self.mask = mask_batch
 
     def optimize(self, ifStep=True, ifVis = False):
-        self.img = self.img.cuda(non_blocking=True) # Variable 已经被弃用，Tensor类型已经实现了自动求导功能
+        self.img = self.img.cuda(non_blocking=True)
         if self.mask is not None:
             self.mask = self.mask.cuda(non_blocking=True).to(torch.int64)
-        if ifVis: # 带可视化输出
-            pred, _ = self.net(self.img) # 前向传递计算输出
-        else:
-            pred = self.net(self.img) # 前向传递计算输出
-        label = self.mask # label维度规整可能会引发异常
-        loss = self.loss(output = pred, target = label) # 计算loss
-        loss.backward() # 反向传播梯度
+        
+        with amp.autocast('cuda'):  # Autocasting for mixed precision
+            if ifVis: # 带可视化输出
+                pred, _ = self.net(self.img) # 前向传递计算输出
+            else:
+                pred = self.net(self.img) # 前向传递计算输出
+            label = self.mask.squeeze() # 注意此处label维度规整可能会引发异常
+            loss = self.loss(output=pred, target=label) # 计算loss
+        
+        self.scaler.scale(loss).backward()  # Scaling the loss before backward pass
+        
         if ifStep:
-            self.optimizer.step() # 更新所有参数
-            self.optimizer.zero_grad() # 清空梯度
+            self.scaler.step(self.optimizer)  # Scale optimizer step
+            self.scaler.update()  # Update the scaler for next iteration
+            self.optimizer.zero_grad()  # Clear gradients
+        
         return loss.item() # 返回loss张量的值
         
     def save(self, path):
         torch.save(self.net.state_dict(), path) # 模型保存
         
-    def load(self, path):
-        self.net.load_state_dict(torch.load(path)) # 模型读取
+    def load(self, path, if_MAE_finetune):
+        if if_MAE_finetune:
+            self.net.module.load_state_dict(torch.load(path), strict=False) # MAE微调仅读取编码器
+            self.net.module.freeze_encoder() # 冻结编码器权重
+        else:
+            self.net.load_state_dict(torch.load(path)) # 模型读取
 
     def update_lr_geometric_decline(self, rate, mylog, factor=False, log_print = False): # 学习率等比下降更新
         if factor:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-基于接缝线生成对应的mask掩膜
+基于矢量多边形生成mask掩膜
 强烈建议使用GDAL3.X版本，可极大提高生成速度
 ~~~~~~~~~~~~~~~~
 code by wHy
@@ -37,19 +37,15 @@ def read_img(sr_img):
     return im_data, im_proj, im_geotrans, im_width, im_height
 
 
-image_path = r'H:\PROJECT_GLOBAL_POPULUS_DATA_03\FQ-China_qinghai_gansu_neimenggu\IMAGE-FUSE'
-image_type = '*.img'
-mosaic_line_full_path = r'H:\PROJECT_GLOBAL_POPULUS_DATA_03\FQ-China_qinghai_gansu_neimenggu\MOSAIC-LINE\GF7-MOSAIC-LINE.shp' # 镶嵌线文件绝对路径，注意镶嵌线文件其实是个polygon
-ouput_path = r'H:\PROJECT_GLOBAL_POPULUS_DATA_03\FQ-China_qinghai_gansu_neimenggu\MASK_New'
+image_path = r''
+image_type = '*.dat'
+mask_shp_path = r'' # 掩膜shp的文件夹路径，注意掩膜文件名和影像名要完全一致
+ouput_path = r''
 
 if not os.path.exists(ouput_path):
     os.mkdir(ouput_path)
 
-# 读取镶嵌线文件
-vector = ogr.Open(mosaic_line_full_path)
-if vector == None:
-    print('读取镶嵌线文件失败')
-layer = vector.GetLayer()
+
 
 image_list = fnmatch.filter(os.listdir(image_path), image_type)
 
@@ -58,6 +54,7 @@ for image in image_list:
     print('processing ' + image)
 
     image_full_path = image_path + '/' + image
+    mask_shp_full_path = mask_shp_path + '/' + image[:-4] + '.shp'
     output_full_path = ouput_path + '/' + image[:-4] + '.tif'
 
     im_data, im_proj, im_geotrans, im_width, im_height = read_img(image_full_path)
@@ -67,21 +64,23 @@ for image in image_list:
     ds.SetGeoTransform(im_geotrans)
     ds.SetProjection(im_proj)
 
-    layer.SetAttributeFilter("LayerName = '{}'".format(image[:-4])) # 文件名必须与LayerName完全对应
+    # 读取polygon掩膜文件
+    vector = ogr.Open(mask_shp_full_path)
+    if vector == None:
+        print('读取掩膜矢量文件失败')
+    layer = vector.GetLayer()
 
-    # 检查是否有符合条件的要素
-    if layer.GetFeatureCount() == 0:
-        print(f"Skipping {image} - no matching features found in LayerName")
+    # 检查图层要素数目
+    print('图层要素数： ', layer.GetFeatureCount())
 
-    else:
-        gdal.RasterizeLayer(ds, [1], layer, burn_values=[1]) # 栅格化
+    gdal.RasterizeLayer(ds, [1], layer, burn_values=[1]) # 栅格化
 
-        raster_data = ds.GetRasterBand(1).ReadAsArray().astype(np.uint8)
-        np.savez_compressed(output_full_path[:-4] + '.npz', mask=raster_data)
+    raster_data = ds.GetRasterBand(1).ReadAsArray().astype(np.uint8)
+    np.savez_compressed(output_full_path[:-4] + '.npz', mask=raster_data)
 
     ds = None
     os.remove(output_full_path) # 如果要debug可以注释掉这句输出掩膜影像
 
-vector.Destroy()
+    vector.Destroy()
 
 print('done')

@@ -41,10 +41,8 @@ from networks.FCN import FCN_ResNet50, FCN_ResNet101
 from networks.U_MobileNet import U_MobileNet
 from networks.SegNet import SegNet
 from networks.U_ConvNeXt import U_ConvNeXt
-# from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD
-# from networks.U_ConvNeXt_HWD_DS import U_ConvNeXt_HWD_DS
-
-from networks.MAE_Seg import MAEViTSegmentation
+from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD
+from networks.U_ConvNeXt_HWD_DS import U_ConvNeXt_HWD_DS
 
 class SolverFrame():
     def __init__(self, net):
@@ -79,13 +77,13 @@ class Predict():
         predict_out = self.net.forward(img_block).squeeze().cpu().data.numpy() # 模型预测；删除b维度；转换为numpy
 
         predict_out = predict_out.transpose(1, 2, 0) # (c, h, w) -> (h, w, c)
-        predict_result = np.argmax(predict_out, axis=2) # 返回第三维度最大值的下标
+        predict_result = predict_out
         
         # dst_ds.GetRasterBand(1).WriteArray(predict_result[int(block_width*overlap_rate):int(block_width*(1-overlap_rate)), int(block_width*overlap_rate):int(block_width*(1-overlap_rate))], xoff+int(block_width*overlap_rate), yoff+int(block_width*overlap_rate)) # 预测结果写入gdal_dataset
 
         return predict_result
 
-    def Main(self, allpath, outpath, target_size=256, unify_read_img = False, overlap_rate = 0, if_mask=False, mask_path=''):  
+    def Main(self, allpath, outpath, target_size=256, unify_read_img = False, overlap_rate = 0, if_mask=False, mask_path='', num_class=0):  
         print('start predict...')
         for one_path in allpath:
 
@@ -141,15 +139,15 @@ class Predict():
 
             format = "GTiff"
             driver = gdal.GetDriverByName(format)  # 数据格式
-            name = n[:-4] + '.tif'
+            name = n[:-4] + '_prob.tif'
             # name = n[:-4] + '_result' + '.tif'  # 输出文件名
 
             dst_ds = driver.Create(
                 os.path.join(outpath, name),
                 dataset.RasterXSize,
                 dataset.RasterYSize,
-                1,
-                gdal.GDT_Byte,
+                num_class,
+                gdal.GDT_Float64,
                 options=[
                     "TILED=YES",  # 启用平铺
                     "BLOCKXSIZE=1024",  # 设置平铺的宽度
@@ -157,7 +155,8 @@ class Predict():
                     "COMPRESS=DEFLATE",  # 设置使用DEFLATE压缩算法
                 ],
             )  # 创建预测结果写入文件
-            dst_ds.GetRasterBand(1).SetNoDataValue(0)  # 将背景值设置为NODATA
+            # for i in range(num_class):
+            #     dst_ds.GetRasterBand(i+1).SetNoDataValue(0)  # 将背景值设置为NODATA
             dst_ds.SetGeoTransform(geotransform)  # 写入地理坐标
             dst_ds.SetProjection(projinfo)  # 写入投影
 
@@ -168,7 +167,7 @@ class Predict():
 
                 img_block = dataset.ReadAsArray() # 影像一次性读入内存
 
-                predict_result_all = np.zeros((img_height, img_width), dtype=np.uint8)
+                predict_result_all = np.zeros((img_height, img_width, num_class), dtype=np.float64)
 
                 # 上侧边缘
                 row_begin = 0
@@ -182,7 +181,7 @@ class Predict():
                             predict_patch = predict_patch * mask_patch # 掩膜处理
                             predict_result_all[row_begin:row_begin+target_size, i:i+target_size] = predict_patch.copy()
                     else: # 非掩膜模式
-                        predict_result_all[row_begin:row_begin+target_size, i:i+target_size] = self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=row_begin)
+                        predict_result_all[row_begin:row_begin+target_size, i:i+target_size, :] = self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=row_begin)
 
                 # 下侧边缘
                 row_begin = img_height - target_size
@@ -196,7 +195,7 @@ class Predict():
                             predict_patch = predict_patch * mask_patch # 掩膜处理
                             predict_result_all[row_begin:row_begin+target_size, i:i+target_size] = predict_patch.copy()
                     else: # 非掩膜模式
-                        predict_result_all[row_begin:row_begin+target_size, i:i+target_size] = self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=row_begin)
+                        predict_result_all[row_begin:row_begin+target_size, i:i+target_size, :] = self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=row_begin)
 
                 # 左侧边缘
                 col_begin = 0
@@ -210,7 +209,7 @@ class Predict():
                             predict_patch = predict_patch * mask_patch # 掩膜处理
                             predict_result_all[j:j+target_size, col_begin:col_begin+target_size] = predict_patch.copy()
                     else: # 非掩膜模式
-                        predict_result_all[j:j+target_size, col_begin:col_begin+target_size] = self.Predict_wHy(img_block[:, j:j+target_size, col_begin:col_begin+target_size].copy(), dst_ds, xoff=col_begin, yoff=j)
+                        predict_result_all[j:j+target_size, col_begin:col_begin+target_size, :] = self.Predict_wHy(img_block[:, j:j+target_size, col_begin:col_begin+target_size].copy(), dst_ds, xoff=col_begin, yoff=j)
                     
                 # 右侧边缘
                 col_begin = img_width - target_size
@@ -224,7 +223,7 @@ class Predict():
                             predict_patch = predict_patch * mask_patch # 掩膜处理
                             predict_result_all[j:j+target_size, col_begin:col_begin+target_size] = predict_patch.copy()
                     else: # 非掩膜模式
-                        predict_result_all[j:j+target_size, col_begin:col_begin+target_size] = self.Predict_wHy(img_block[:, j:j+target_size, col_begin:col_begin+target_size].copy(), dst_ds, xoff=col_begin, yoff=j)
+                        predict_result_all[j:j+target_size, col_begin:col_begin+target_size, :] = self.Predict_wHy(img_block[:, j:j+target_size, col_begin:col_begin+target_size].copy(), dst_ds, xoff=col_begin, yoff=j)
 
                 # 右下角
                 if if_mask: # 掩膜模式
@@ -233,7 +232,7 @@ class Predict():
                     predict_patch = predict_patch * mask_patch # 直接掩膜处理
                     predict_result_all[row_begin:row_begin+target_size, col_begin:col_begin+target_size] = predict_patch.copy()
                 else:
-                    predict_result_all[row_begin:row_begin+target_size, col_begin:col_begin+target_size] = self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, col_begin:col_begin+target_size].copy(), dst_ds, img_width-target_size, img_height-target_size)
+                    predict_result_all[row_begin:row_begin+target_size, col_begin:col_begin+target_size, :] = self.Predict_wHy(img_block[:, row_begin:row_begin+target_size, col_begin:col_begin+target_size].copy(), dst_ds, img_width-target_size, img_height-target_size)
                 
                 # 全局整体
                 for i in tqdm(range(0, img_width-target_size, step)):
@@ -248,9 +247,10 @@ class Predict():
                                 predict_result_all[j+int(target_size*overlap_rate):j+int(target_size*(1-overlap_rate)), i+int(target_size*overlap_rate):i+int(target_size*(1-overlap_rate))] = predict_patch[int(target_size*overlap_rate):int(target_size*(1-overlap_rate)), int(target_size*overlap_rate):int(target_size*(1-overlap_rate))]
                         else: # 非掩膜模式
                             predict_patch = self.Predict_wHy(img_block[:, j:j+target_size, i:i+target_size].copy(), dst_ds, xoff=i, yoff=j, overlap_rate=overlap_rate)
-                            predict_result_all[j+int(target_size*overlap_rate):j+int(target_size*(1-overlap_rate)), i+int(target_size*overlap_rate):i+int(target_size*(1-overlap_rate))] = predict_patch[int(target_size*overlap_rate):int(target_size*(1-overlap_rate)), int(target_size*overlap_rate):int(target_size*(1-overlap_rate))]
-                    
-                dst_ds.GetRasterBand(1).WriteArray(predict_result_all, 0, 0)
+                            predict_result_all[j+int(target_size*overlap_rate):j+int(target_size*(1-overlap_rate)), i+int(target_size*overlap_rate):i+int(target_size*(1-overlap_rate)), :] = predict_patch[int(target_size*overlap_rate):int(target_size*(1-overlap_rate)), int(target_size*overlap_rate):int(target_size*(1-overlap_rate))]
+                
+                for i in range(num_class):
+                    dst_ds.GetRasterBand(i+1).WriteArray(predict_result_all[:,:,i],0,0)   
                 dst_ds.FlushCache() # 全部预测完毕后统一刷新磁盘缓存
 
             else:
@@ -325,13 +325,13 @@ class Predict():
 
 if __name__ == '__main__':
 
-    predictImgPath = r'D:\MAE_populus\0-Nanjiang6_and_2_Clipimg' # 待预测影像的文件夹路径
+    predictImgPath = r'E:\project_global_populus\prob_test\0-test_image' # 待预测影像的文件夹路径
     Img_type = '*.img' # 待预测影像的类型
-    trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_positive_and_negative_241211.txt' #与模型训练相同的训练列表路径
+    trainListRoot = r'F:\PROJECT_GLOBAL_POPULUS_SS_02\2-train_list\GF2_populus_240903_total.txt' #与模型训练相同的训练列表路径
     num_class = 2 # 样本类别数
-    model = MAEViTSegmentation #模型
-    model_path = r'D:\MAE_populus\3-weights\MAE-VIT-pretrain-huge-FPN-PandN-241212.pth' # 模型文件完整路径
-    output_path = r'D:\MAE_populus\4-predict_result\FPN_positive_and_negative' # 输出的预测结果路径
+    model = UNet #模型
+    model_path = r'E:\project_global_populus\prob_test\1-test_weights\UNet_populus_241111.th' # 模型文件完整路径
+    output_path = r'E:\project_global_populus\prob_test\2-test_output' # 输出的预测结果路径
     band_num = 4 #影像的波段数 训练与预测应一致
     label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
     target_size = 256 # 预测滑窗大小，应与训练集应一致
@@ -341,17 +341,18 @@ if __name__ == '__main__':
     if_mask = False # 是否开启mask模式；mask模式仅在unify_read_img==True时有效
     mask_path = r'I:\PROJECT_GLOBAL_POPULUS_DATA_02\FQ-Africa\MASK' # mask路径 路径下需要有*.npz掩膜（./tools/generate_mask_by_moasic_line.py生成）
 
-    if_vismem = True # 是否开启虚拟文件系统; 开启后可大幅提高机械硬盘中的影像读取速度，但需要保证内存充足
+    if_vismem = False # 是否开启虚拟文件系统; 开启后可大幅提高机械硬盘中的影像读取速度，但需要保证内存充足
 
-    '''收集训练集信息'''
-    dataCollect = DataTrainInform(classes_num=num_class, trainlistPath=trainListRoot, band_num=band_num, label_norm=label_norm) #计算数据集信息
-    data_dict = dataCollect.collectDataAndSave()
-    # '''手动设置data_dict'''
-    # data_dict = {}
-    # data_dict['mean'] = [53.7393, 53.329227, 52.893757, 66.382904]
-    # data_dict['std'] = [12.786107, 14.0913315, 15.2901, 16.78296]
-    # data_dict['classWeights'] = np.array([2.5911248, 3.8909917, 9.9005165, 9.21661, 7.058571, 10.126685, 3.4428556, 10.29797, 5.424672, 8.990792], dtype=np.float32)
-    # data_dict['img_shape'] = [256, 256, 4]
+    # '''收集训练集信息'''
+    # dataCollect = DataTrainInform(classes_num=num_class, trainlistPath=trainListRoot, band_num=band_num, label_norm=label_norm) #计算数据集信息
+    # data_dict = dataCollect.collectDataAndSave()
+    '''手动设置data_dict'''
+    '''GF2 AND GF7  241111'''
+    data_dict = {}
+    data_dict['mean'] = [48.865658, 49.26119,  49.745434, 62.090973]
+    data_dict['std'] = [11.355238, 12.684796, 13.960326, 15.459307]
+    data_dict['classWeights'] = np.array([1.426366,  5.9187417], dtype=np.float32)
+    data_dict['img_shape'] = [256, 256, 4]
 
     print('data mean: ', data_dict['mean'])
     print('data std: ', data_dict['std'])
@@ -375,4 +376,4 @@ if __name__ == '__main__':
 
     '''执行预测'''
     predict_instantiation = Predict(net=solver.net, class_number=num_class, band_num=band_num) # 初始化预测
-    predict_instantiation.Main(listpic, output_path, target_size, unify_read_img=unify_read_img, overlap_rate=overlap_rate, if_mask=if_mask, mask_path=mask_path) # 预测主体
+    predict_instantiation.Main(listpic, output_path, target_size, unify_read_img=unify_read_img, overlap_rate=overlap_rate, if_mask=if_mask, mask_path=mask_path, num_class=num_class) # 预测主体

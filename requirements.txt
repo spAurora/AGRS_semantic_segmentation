@@ -1,0 +1,14 @@
+# pip install -r requirements.txt
+tqdm
+torchsummary
+scikit-image
+scikit-learn
+hiddenlayer
+matplotlib
+IPython
+einops
+timm
+numba
+pywavelets
+
+# conda install -c conda-forge gdal
