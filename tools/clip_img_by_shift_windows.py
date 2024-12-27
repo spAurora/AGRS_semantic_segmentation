@@ -58,7 +58,7 @@ def cut_img(
 
         out_img_data = src_data[:, i: i + block_size, j: j + block_size]
 
-        out_img_path = output_img_dir + '/' + output_file_name + '_' + str(k) + 'x2.png' # 制作超分数据集记得修改后缀x2
+        out_img_path = output_img_dir + '/' + output_file_name + '_' + str(k) + '.png' # 制作超分数据集记得修改后缀x2
         with rio.open(out_img_path, "w", **src_profile) as out_src:
             out_src.write(out_img_data)
 
@@ -67,10 +67,10 @@ def cut_img(
 
 if __name__ == "__main__":
 
-    input_img_dir = r"E:\project_populus_GF2_and_UAV\0-clip_polygon_img\03-GF2-3-band-LA"
-    output_img_dir = r"E:\project_populus_GF2_and_UAV\0-clip_polygon_img\04-GF2-3-band-LA-clip90px"
-    block_size = 90
-    overlap = 0.3
+    input_img_dir = r"F:\project_UAV_GF2_2\4-clip_img_UAV_321_8bit_enhanced-X2"
+    output_img_dir = r"D:\github_respository\ECDP\data\gupopulus_2\gupopulus_valid_LR_bicubic\X2"
+    block_size = 240
+    overlap = 0
 
     listpic = fnmatch.filter(os.listdir(input_img_dir), '*.tif')
 
