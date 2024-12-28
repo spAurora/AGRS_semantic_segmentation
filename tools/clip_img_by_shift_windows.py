@@ -68,7 +68,7 @@ def cut_img(
 if __name__ == "__main__":
 
     input_img_dir = r"F:\project_UAV_GF2_2\4-clip_img_UAV_321_8bit_enhanced-X2"
-    output_img_dir = r"D:\github_respository\ECDP\data\gupopulus_2\gupopulus_valid_LR_bicubic\X2"
+    output_img_dir = r"F:\project_UAV_GF2_2\5-clip_img_UAV_321_8bit_enhanced-X2_clip"
     block_size = 240
     overlap = 0
 
