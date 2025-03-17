@@ -45,10 +45,10 @@ from networks.ViT import ViTSegmentation
 from networks.MAE_Seg import MAEViTSegmentation
 
 '''参数设置'''
-trainListRoot = r'H:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\1-trainlist_clear_230401.txt'  # 训练样本列表
+trainListRoot = r'H:\xinjiang_huyang_hongliu\250316_SS_demo\2-train_list\1-trainlist_clear.txt'  # 训练样本列表
 save_model_path = r'H:\xinjiang_huyang_hongliu\250316_SS_demo\3-weights'  # 训练模型保存路径
 model = UNet  # 选择的训练模型
-save_model_name = 'UNet-250316.pth'  # 训练模型保存名
+save_model_name = 'UNet-250317.pth'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-4]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 3  # 样本类别数
@@ -73,8 +73,8 @@ simulate_batch_size_num = 8 # 模拟batchsize倍数 最终batchsize = simulate_b
 full_cpu_mode = True  # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
 if_open_test = True  # 是否开启测试模式
-test_img_path = r'H:\xinjiang_huyang_hongliu\Huyang_test_0808\1-clip_img\1-clip_img_clear_for_clear_Evaluation'  # 测试集影像文件夹
-test_label_path = r'H:\xinjiang_huyang_hongliu\Huyang_test_0808\1-raster_label\1-raster_label_clear_for_clear_Evaluation'  # 测试集真值标签文件夹
+test_img_path = r'H:\xinjiang_huyang_hongliu\250316_SS_demo\1-clip_img\1-clip_img_clear_for_clear_Evaluation'  # 测试集影像文件夹
+test_label_path = r'H:\xinjiang_huyang_hongliu\250316_SS_demo\1-raster_label\1-raster_label_clear_for_clear_Evaluation'  # 测试集真值标签文件夹
 test_output_path = r'H:\xinjiang_huyang_hongliu\250316_SS_demo\4-predict_result\0-test_output'
 target_size = 256  # 模型预测窗口大小，与训练模型一致
 test_img_type = '*.tif'  # 测试集影像数据类型
