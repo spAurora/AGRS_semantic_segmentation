@@ -325,15 +325,15 @@ class Predict():
 
 if __name__ == '__main__':
 
-    predictImgPath = r'D:\MAE_populus\0-Nanjiang6_and_2_Clipimg' # 待预测影像的文件夹路径
-    Img_type = '*.img' # 待预测影像的类型
-    trainListRoot = r'D:\MAE_populus\2-train_list\trainlist_positive_and_negative_241211.txt' #与模型训练相同的训练列表路径
-    num_class = 2 # 样本类别数
-    model = MAEViTSegmentation #模型
-    model_path = r'D:\MAE_populus\3-weights\MAE-VIT-pretrain-huge-FPN-PandN-241212.pth' # 模型文件完整路径
-    output_path = r'D:\MAE_populus\4-predict_result\FPN_positive_and_negative' # 输出的预测结果路径
-    band_num = 4 #影像的波段数 训练与预测应一致
-    label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
+    predictImgPath = r'H:\xinjiang_huyang_hongliu\WV_GF_Tarim\WV2_dealed\Talimu_dealed' # 待预测影像的文件夹路径
+    Img_type = '*.dat' # 待预测影像的类型
+    trainListRoot = r'H:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\1-trainlist_clear_230401.txt' #与模型训练相同的训练列表路径
+    num_class = 3 # 样本类别数
+    model = UNet #模型
+    model_path = r'H:\xinjiang_huyang_hongliu\250316_SS_demo\3-weights\UNet-250316.pth' # 模型文件完整路径
+    output_path = r'H:\xinjiang_huyang_hongliu\250316_SS_demo\4-predict_result' # 输出的预测结果路径
+    band_num = 8 #影像的波段数 训练与预测应一致
+    label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
     target_size = 256 # 预测滑窗大小，应与训练集应一致
     unify_read_img = True # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
     overlap_rate = 0.1 # 滑窗间的重叠率

@@ -5,7 +5,7 @@ toolbox
 __pycache__/
 *.py[cod]
 *$py.class
-logs
+logs/*
 # C extensions
 *.so
 
@@ -125,5 +125,4 @@ work_dirs/
 *.py~
 *.sh~
 
-test.py
 cache
