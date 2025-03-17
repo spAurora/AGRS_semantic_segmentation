@@ -124,4 +124,5 @@ work_dirs/
 *.py~
 *.sh~
 
+logs/*
 cache
