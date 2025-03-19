@@ -15,7 +15,10 @@ import os
 import math
 import fnmatch
 import numpy as np
+import mmap
 
+
+if_vismem = True
 
 FQ_NAME_LIST = ['HOTAN', 'KASHGAR','KLIYA','QARQAN','TARIM']
 
@@ -58,8 +61,34 @@ for fq_name in FQ_NAME_LIST:
             continue
 
         input_image_path = input_image_dir + '/' + img
-        # 打开影像
-        dataset = gdal.Open(input_image_path)
+
+        if if_vismem:
+            # 获取影像文件名前缀（不包括扩展名）
+            filename_prefix = os.path.splitext(os.path.basename(input_image_path))[0]
+
+            input_dir = os.path.dirname(input_image_path)
+            # 搜索配套文件（除主影像文件外其他相同前缀的文件）
+            auxiliary_files = [
+                f for f in os.listdir(input_dir)
+                if f.startswith(filename_prefix) and f != os.path.basename(input_image_path)
+            ]
+
+            # 将主影像文件映射到内存
+            with open(input_image_path, "rb") as f:
+                mmapped_main_file = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+                gdal.FileFromMemBuffer("/vsimem/" + os.path.basename(input_image_path), mmapped_main_file[:])
+
+            # 将配套文件映射到内存
+            for aux_file in auxiliary_files:
+                aux_path = os.path.join(input_dir, aux_file)
+                with open(aux_path, "rb") as f_aux:
+                    mmapped_aux_file = mmap.mmap(f_aux.fileno(), 0, access=mmap.ACCESS_READ)
+                    gdal.FileFromMemBuffer(f"/vsimem/{aux_file}", mmapped_aux_file[:])
+
+            dataset = gdal.Open("/vsimem/" + os.path.basename(input_image_path), gdal.GA_ReadOnly) # GDAL打开待切分影像
+        else:
+            dataset = gdal.Open(input_image_path, gdal.GA_ReadOnly) # GDAL打开待切分影像
+
         if not dataset:
             raise FileNotFoundError(f"Cannot open the file: {input_image_path}")
 
@@ -126,3 +155,8 @@ for fq_name in FQ_NAME_LIST:
                     break
 
             print(f"Saved {actual_tiles} tiles to {output_dir}.")
+                    # 清理内存文件
+        if if_vismem:
+            gdal.Unlink("/vsimem/" + os.path.basename(input_image_path))
+            for aux_file in auxiliary_files:
+                gdal.Unlink(f"/vsimem/{aux_file}")
