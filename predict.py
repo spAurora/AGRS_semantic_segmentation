@@ -85,8 +85,16 @@ class Predict():
 
         return predict_result
 
-    def Main(self, allpath, outpath, target_size=256, unify_read_img = False, overlap_rate = 0, if_mask=False, mask_path=''):  
+    def Main(self, allpath, outpath, target_size=256, unify_read_img = False, overlap_rate = 0, if_mask=False, mask_path='', img_data_type=gdal.GDT_Byte):  
         print('start predict...')
+
+        if img_data_type == gdal.GDT_Byte:
+            dtype = np.uint8
+        elif img_data_type == gdal.GDT_UInt16:
+            dtype = np.uint16
+        else:
+            raise ValueError("Unsupported data type")
+
         for one_path in allpath:
 
             if if_mask: # 读取掩膜
@@ -149,7 +157,7 @@ class Predict():
                 dataset.RasterXSize,
                 dataset.RasterYSize,
                 1,
-                gdal.GDT_Byte,
+                img_data_type,
                 options=[
                     "TILED=YES",  # 启用平铺
                     "BLOCKXSIZE=1024",  # 设置平铺的宽度
@@ -168,7 +176,7 @@ class Predict():
 
                 img_block = dataset.ReadAsArray() # 影像一次性读入内存
 
-                predict_result_all = np.zeros((img_height, img_width), dtype=np.uint8)
+                predict_result_all = np.zeros((img_height, img_width), dtype=dtype)
 
                 # 上侧边缘
                 row_begin = 0
@@ -256,8 +264,8 @@ class Predict():
             else:
                 '''分块读取影像并预测'''
                 '''设备内存过小或者影像过大时应用该模式'''
-                predict_result_col = np.zeros((img_height, target_size), dtype=np.uint8)
-                predict_result_row = np.zeros((target_size, img_width), dtype=np.uint8)
+                predict_result_col = np.zeros((img_height, target_size), dtype=dtype)
+                predict_result_row = np.zeros((target_size, img_width), dtype=dtype)
 
                 # 上侧边缘
                 row_begin = 0
@@ -338,6 +346,8 @@ if __name__ == '__main__':
     unify_read_img = True # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
     overlap_rate = 0.1 # 滑窗间的重叠率
 
+    img_data_type = gdal.GDT_UInt16 # only support gdal.GDT_Byte or gdal.GDT_UInt16
+
     if_mask = False # 是否开启mask模式；mask模式仅在unify_read_img==True时有效
     mask_path = r'I:\PROJECT_GLOBAL_POPULUS_DATA_02\FQ-Africa\MASK' # mask路径 路径下需要有*.npz掩膜（./tools/generate_mask_by_moasic_line.py生成）
 
@@ -375,4 +385,4 @@ if __name__ == '__main__':
 
     '''执行预测'''
     predict_instantiation = Predict(net=solver.net, class_number=num_class, band_num=band_num) # 初始化预测
-    predict_instantiation.Main(listpic, output_path, target_size, unify_read_img=unify_read_img, overlap_rate=overlap_rate, if_mask=if_mask, mask_path=mask_path) # 预测主体
+    predict_instantiation.Main(listpic, output_path, target_size, unify_read_img=unify_read_img, overlap_rate=overlap_rate, if_mask=if_mask, mask_path=mask_path, img_data_type=img_data_type) # 预测主体
