@@ -50,7 +50,7 @@ class PPMHEAD(nn.Module):
 
 
 class FPNHEAD(nn.Module):
-    def __init__(self, channels=2048, out_channels=256):
+    def __init__(self, channels=1024, out_channels=256):  # channels 2048 -> 1024 wHy250325
         super(FPNHEAD, self).__init__()
         self.PPMHead = PPMHEAD(in_channels=channels, out_channels=out_channels)
 
@@ -99,7 +99,7 @@ class FPNHEAD(nn.Module):
         )
 
         self.fuse_all = nn.Sequential(
-            nn.Conv2d(out_channels * 4, out_channels, 1),
+            nn.Conv2d(out_channels * 3, out_channels, 1), # out_channels *4 -> *3 wHy250325
             # nn.BatchNorm2d(out_channels),
             nn.GroupNorm(16, out_channels),
             nn.GELU(),
@@ -112,23 +112,18 @@ class FPNHEAD(nn.Module):
         # b, 512, 7, 7
         x1 = self.PPMHead(input_fpn[-1])
 
-        x = nn.functional.interpolate(x1, size=(x1.size(2) * 2, x1.size(3) * 2), mode='bilinear', align_corners=True)
+        x = nn.functional.interpolate(x1, size=(input_fpn[-2].size(2), input_fpn[-2].size(3)), mode='bilinear', align_corners=True)
         x = self.conv_x1(x) + self.Conv_fuse1(input_fpn[-2])
         x2 = self.Conv_fuse1_(x)
 
-        x = nn.functional.interpolate(x2, size=(x2.size(2) * 2, x2.size(3) * 2), mode='bilinear', align_corners=True)
+        x = nn.functional.interpolate(x2, size=(input_fpn[-3].size(2), input_fpn[-3].size(3)), mode='bilinear', align_corners=True)
         x = x + self.Conv_fuse2(input_fpn[-3])
         x3 = self.Conv_fuse2_(x)
 
-        x = nn.functional.interpolate(x3, size=(x3.size(2) * 2, x3.size(3) * 2), mode='bilinear', align_corners=True)
-        x = x + self.Conv_fuse3(input_fpn[-4])
-        x4 = self.Conv_fuse3_(x)
+        x1 = F.interpolate(x1, x3.size()[-2:], mode='bilinear', align_corners=True)
+        x2 = F.interpolate(x2, x3.size()[-2:], mode='bilinear', align_corners=True)
 
-        x1 = F.interpolate(x1, x4.size()[-2:], mode='bilinear', align_corners=True)
-        x2 = F.interpolate(x2, x4.size()[-2:], mode='bilinear', align_corners=True)
-        x3 = F.interpolate(x3, x4.size()[-2:], mode='bilinear', align_corners=True)
-
-        x = self.fuse_all(torch.cat([x1, x2, x3, x4], 1))
+        x = self.fuse_all(torch.cat([x1, x2, x3], 1))
 
         return x
 
@@ -145,7 +140,7 @@ class MAESSDecoderFPN(nn.Module):
             nn.Conv2d(embed_dim, 512, 1, 1),
             nn.GroupNorm(32, 512),
             nn.GELU(),
-            nn.ConvTranspose2d(512, 256, 16, 16),
+            nn.ConvTranspose2d(512, 256, self.patch_size, self.patch_size),
             nn.Dropout(0.5)
         )
 
@@ -153,7 +148,7 @@ class MAESSDecoderFPN(nn.Module):
             nn.Conv2d(embed_dim, 512, 1, 1),
             nn.GroupNorm(32, 512),
             nn.GELU(),
-            nn.ConvTranspose2d(512, 512, 8, 8),
+            nn.ConvTranspose2d(512, 512, self.patch_size//2, self.patch_size//2),
             nn.Dropout(0.5)
         )
 
@@ -161,15 +156,7 @@ class MAESSDecoderFPN(nn.Module):
             nn.Conv2d(embed_dim, 1024, 1, 1),
             nn.GroupNorm(32, 1024),
             nn.GELU(),
-            nn.ConvTranspose2d(1024, 1024, 4, 4),
-            nn.Dropout(0.5)
-        )
-
-        self.conv3 = nn.Sequential(
-            nn.Conv2d(embed_dim, 2048, 1, 1),
-            nn.GroupNorm(32, 2048),
-            nn.GELU(),
-            nn.ConvTranspose2d(2048, 2048, 2, 2),
+            nn.ConvTranspose2d(1024, 1024, self.patch_size//4, self.patch_size//4),
             nn.Dropout(0.5)
         )
 
@@ -196,13 +183,11 @@ class MAESSDecoderFPN(nn.Module):
         x = x[:, 1:, :]
         x = self.change_shape(x)
 
-        m = {}
-        m[0] = self.conv0(x)  # 256, pn_h*16, pn_w*16
-        m[1] = self.conv1(x)  # 512, pn_h*8, pn_w*8
-        m[2] = self.conv2(x)  # 1024, pn_h*4, pn_w*4
-        m[3] = self.conv3(x)  # 2048, pn_h*2, pn_w*2
-
-        m = list(m.values())
+        m = []
+        m.append(self.conv0(x))  # 256, pn_h*p_size, pn_w*p_size
+        m.append(self.conv1(x))  # 512, pn_h*p_size//2, pn_w*p_size//2
+        m.append(self.conv2(x))  # 1024, pn_h*p_size//4, pn_w*p_size//4
+        
         x = self.decoder(m)
         x = self.cls_seg(x)
         return x

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from networks.MAE_encoder import mae_vit_base_patch16_dec512d8b_populus, mae_vit_huge_patch16_populus, mae_vit_base_patch16_dec512d8b_populus_small
+from networks.MAE_encoder import mae_vit_base_patch16_dec512d8b_populus, mae_vit_huge_patch16_populus, mae_vit_base_patch16_dec512d8b_populus_small,mae_vit_huge_patch7_populus
 from networks.MAE_decoder_Naive import MAESSDecoderNaive
 from networks.MAE_decoder_FPN import MAESSDecoderFPN
 from networks.MAE_decoder_ExNaive import MAESSDecoderExNaive
@@ -13,13 +13,15 @@ def get_pretrained_mae_model(model_type, **kwargs):
         return mae_vit_huge_patch16_populus(**kwargs)
     elif model_type == "mae_vit_base_patch16_dec512d8b_populus_small":
         return mae_vit_base_patch16_dec512d8b_populus_small(**kwargs)
+    elif model_type == "mae_vit_huge_patch7_populus":
+        return mae_vit_huge_patch7_populus(**kwargs)
     else:
         raise ValueError("Unsupported model type")
 
 class MAEViTSegmentation(nn.Module):
     def __init__(self,
                  band_num=4,
-                 model_type="mae_vit_huge_patch16_populus", # 更换不同encoder
+                 model_type="mae_vit_huge_patch7_populus", # 更换不同encoder
                  num_classes=2):
         super(MAEViTSegmentation, self).__init__()
         

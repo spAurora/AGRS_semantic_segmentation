@@ -380,6 +380,23 @@ def mae_vit_huge_patch16_populus(**kwargs):
     )
     return model
 
+def mae_vit_huge_patch7_populus(**kwargs):
+    model = MaskedAutoencoderViT(
+        img_size=224,
+        in_chans=4,
+        patch_size=7,
+        embed_dim=1280,
+        depth=32,
+        num_heads=16,
+        decoder_embed_dim=512,
+        decoder_depth=8,
+        decoder_num_heads=16,
+        mlp_ratio=4,
+        norm_layer=partial(nn.LayerNorm, eps=1e-6),
+        **kwargs,
+    )
+    return model
+
 
 # set recommended archs
 mae_vit_base_patch16 = mae_vit_base_patch16_dec512d8b  # decoder: 512 dim, 8 blocks

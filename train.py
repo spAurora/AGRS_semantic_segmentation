@@ -45,18 +45,18 @@ from networks.ViT import ViTSegmentation
 from networks.MAE_Seg import MAEViTSegmentation
 
 '''参数设置'''
-trainListRoot = r'H:\xinjiang_huyang_hongliu\250316_SS_demo\2-train_list\1-trainlist_clear.txt'  # 训练样本列表
-save_model_path = r'H:\xinjiang_huyang_hongliu\250316_SS_demo\3-weights'  # 训练模型保存路径
-model = UNet  # 选择的训练模型
-save_model_name = 'UNet-250317.pth'  # 训练模型保存名
+trainListRoot = r'E:\project_global_populus\MAE_test_250324\2-train_list\trainlist-250324_0.2.txt'  # 训练样本列表
+save_model_path = r'E:\project_global_populus\MAE_test_250324\3-weights'  # 训练模型保存路径
+model = MAEViTSegmentation  # 选择的训练模型
+save_model_name = 'MAE_TF_test_FPN.pth'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-4]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
-classes_num = 3  # 样本类别数
+classes_num = 2  # 样本类别数
 batch_size = 8  # 计算批次大小
-init_lr = 0.001  # 初始学习率
+init_lr = 0.0001  # 初始学习率
 total_epoch = 300  # 训练次数
-band_num = 8  # 影像的波段数
-if_norm_label = False  # 是否对标签进行归一化 0/255二分类应设置为True
+band_num = 4  # 影像的波段数
+if_norm_label = True  # 是否对标签进行归一化 0/255二分类应设置为True
 label_weight_scale_factor = 1  # 标签权重的指数缩放系数 1为不缩放
 
 if_vis = False  # 是否输出中间可视化信息 一般设置为False，设置为True需要模型支持
@@ -67,19 +67,19 @@ max_no_optim_num = 1  # 最大loss无优化次数
 lr_update_rate = 3.0  # 学习率等比下降更新率
 min_lr = 1e-6  # 最低学习率
 
-simulate_batch_size = False  # 是否模拟大batchsize；除非显存太小一般不开启
+simulate_batch_size = True  # 是否模拟大batchsize；除非显存太小一般不开启
 simulate_batch_size_num = 8 # 模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
 
 full_cpu_mode = True  # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
 if_open_test = True  # 是否开启测试模式
-test_img_path = r'H:\xinjiang_huyang_hongliu\250316_SS_demo\1-clip_img\1-clip_img_clear_for_clear_Evaluation'  # 测试集影像文件夹
-test_label_path = r'H:\xinjiang_huyang_hongliu\250316_SS_demo\1-raster_label\1-raster_label_clear_for_clear_Evaluation'  # 测试集真值标签文件夹
-test_output_path = r'H:\xinjiang_huyang_hongliu\250316_SS_demo\4-predict_result\0-test_output'
-target_size = 256  # 模型预测窗口大小，与训练模型一致
+test_img_path = r'E:\project_global_populus\MAE_test_250324\4-predict_result\test_img'  # 测试集影像文件夹
+test_label_path = r'E:\project_global_populus\MAE_test_250324\4-predict_result\test_label'  # 测试集真值标签文件夹
+test_output_path = r'E:\project_global_populus\MAE_test_250324\4-predict_result\temp'
+target_size = 224  # 模型预测窗口大小，与训练模型一致
 test_img_type = '*.tif'  # 测试集影像数据类型
 
-if_MAE_finetune = False # 是否为MAE微调模式 
+if_MAE_finetune = True # 是否为MAE微调模式 
 
 if_print_model_summary = True
 if model.__name__ in ['HRNet', 'FCN_ResNet50', 'FCN_ResNet101', 'SegNet', 'U_ConvNeXt_HWD', 'U_ConvNeXt_HWD_DS', 'MAEViTSegmentation', 'ViTSegmentation']:  # 是否输出模型参数信息 部分模型不可用
