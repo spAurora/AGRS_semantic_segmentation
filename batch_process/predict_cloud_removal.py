@@ -36,7 +36,7 @@ from networks.Segformer import Segformer
 from networks.RS_Segformer import RS_Segformer
 from networks.DE_Segformer import DE_Segformer
 from networks.HRNet import HRNet
-from networks.UNetPlusPlus import UNetPlusPlus
+from networks.backup.UNetPlusPlus import UNetPlusPlus
 from networks.UNetFormer import UNetFormer
 
 class SolverFrame():

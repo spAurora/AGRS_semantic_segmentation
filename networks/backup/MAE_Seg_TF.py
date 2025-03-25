@@ -1,5 +1,5 @@
 """
-ref: https://blog.csdn.net/Gu_NN/article/details/125350058
+适配第二轮MAE实验
 """
 import torch
 import torch.nn as nn
