@@ -2,9 +2,9 @@ import os
 import cv2
 
 # 定义文件夹路径
-folder_A = r'D:\BaiduNetdiskDownload\MHdataset\MHparcel\xinjiang-sentinel2-10m-xzy\images-123'  # 替换为文件夹A的实际路径
-folder_B = r'D:\BaiduNetdiskDownload\MHdataset\MHparcel\xinjiang-sentinel2-10m-xzy\labels'  # 替换为文件夹B的实际路径
-output_folder = r'D:\BaiduNetdiskDownload\MHdataset\MHparcel\xinjiang-sentinel2-10m-xzy\images-covered'  # 替换为输出文件夹的实际路径
+folder_A = r'D:\BaiduNetdiskDownload\MHdataset\MHparcel\xinjiang_yanqi-GoogleEarth-0.6m\images-256'  # 替换为文件夹A的实际路径
+folder_B = r'D:\BaiduNetdiskDownload\MHdataset\MHparcel\xinjiang_yanqi-GoogleEarth-0.6m\labels-raster-256'  # 替换为文件夹B的实际路径
+output_folder = r'D:\BaiduNetdiskDownload\MHdataset\MHparcel\xinjiang_yanqi-GoogleEarth-0.6m\images-256-covered'  # 替换为输出文件夹的实际路径
 
 # 确保输出文件夹存在
 os.makedirs(output_folder, exist_ok=True)

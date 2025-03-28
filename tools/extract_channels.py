@@ -9,8 +9,8 @@ Aerospace Information Research Institute, Chinese Academy of Sciences
 wanghaoyu191@mails.ucas.ac.cn
 """
 
-import gdal
-import ogr
+from osgeo import gdal
+from osgeo import ogr
 import fnmatch
 import os
 import sys
@@ -78,8 +78,8 @@ def read_img(sr_img):
 
 # os.environ['GDAL_DATA'] = r'C:\Users\75198\anaconda3\envs\learn\Lib\site-packages\osgeo\data\gdal' # To prevent ERROR4
 
-img_path = r'D:\BaiduNetdiskDownload\MHdataset\MHparcel\xinjiang-sentinel2-10m-xzy\images'
-output_path = r'D:\BaiduNetdiskDownload\MHdataset\MHparcel\xinjiang-sentinel2-10m-xzy\images-432'
+img_path = r'D:\BaiduNetdiskDownload\MHdataset\MHparcel\xinjiang-sentinel2-10m-xzy\images-256'
+output_path = r'D:\BaiduNetdiskDownload\MHdataset\MHparcel\xinjiang-sentinel2-10m-xzy\images-256-432'
 save_channels = [4, 3, 2] # 顺序抽取的通道
 # save_channels = [1] # 顺序抽取的通道
 
