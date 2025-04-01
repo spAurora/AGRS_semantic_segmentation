@@ -104,8 +104,8 @@ def process_single_image(img, img_path, output_path, save_channels):
 def main():
     # os.environ['GDAL_DATA'] = r'C:\Users\75198\anaconda3\envs\learn\Lib\site-packages\osgeo\data\gdal' # To prevent ERROR4
 
-    img_path = r'D:\BaiduNetdiskDownload\MHdataset\MHparcel\xinjiang-sentinel2-10m-xzy\images-256'
-    output_path = r'D:\BaiduNetdiskDownload\MHdataset\MHparcel\xinjiang-sentinel2-10m-xzy\images-256-432'
+    img_path = r'D:\BaiduNetdiskDownload\MHdataset\MHparcel\hetian-GF2\1-tif_field'
+    output_path = r'D:\BaiduNetdiskDownload\MHdataset\MHparcel\hetian-GF2\image-432'
     save_channels = [4, 3, 2] # 顺序抽取的通道
     # save_channels = [1] # 顺序抽取的通道
 
