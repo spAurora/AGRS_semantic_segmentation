@@ -71,11 +71,11 @@ def crop_image_by_pixel(input_path, output_path, x_offset, y_offset, width, heig
 
 # 示例用法
 if __name__ == "__main__":
-    input_image = r"D:\BaiduNetdiskDownload\MHdataset\MHparcel\hetian-GF2\test_img\uint8-432\test.tif"  # 输入影像路径
-    output_image = r"D:\BaiduNetdiskDownload\MHdataset\MHparcel\hetian-GF2\test_img\uint8-432\test_cropped.tif"  # 输出影像路径
-    x_offset = 200  # 左上角X像素坐标(从0开始)
-    y_offset = 200  # 左上角Y像素坐标(从0开始)
-    crop_width = 1500  # 裁剪宽度(像素)
-    crop_height = 1500  # 裁剪高度(像素)
+    input_image = r"G:\project_UAV_GF2_2\3-clip_img_GF2_432_enhanced\0.tif"  # 输入影像路径
+    output_image = r"D:\OneDrive\paper\SCI-6-populus_GF2_UAV\0-pic\流程图中的区域\0x2_未匹配.png"  # 输出影像路径
+    x_offset = 365  # 左上角X像素坐标(从0开始)
+    y_offset = 170  # 左上角Y像素坐标(从0开始)
+    crop_width = 75  # 裁剪宽度(像素)
+    crop_height = 75  # 裁剪高度(像素)
     
     crop_image_by_pixel(input_image, output_image, x_offset, y_offset, crop_width, crop_height)
