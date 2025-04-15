@@ -78,20 +78,14 @@ def read_img(sr_img):
 
     return im_data, im_proj, im_geotrans
 
-def process_single_image(img, img_path, output_path, save_channels):
+def process_single_image(img, img_path, output_path, T_value):
     """处理单个图像的函数，用于并行处理"""
     try:
         img_full_path = os.path.join(img_path, img)
         data, proj_temp, geotrans_temp = read_img(img_full_path)
         img_shape = data.shape
-        
-        # 处理第一个通道
-        data_temp = np.array(data[save_channels[0]-1, :, :]).reshape(1, img_shape[1], img_shape[2])
-        
-        # 处理剩余通道
-        for i in range(1, len(save_channels)):
-            temp = np.array(data[save_channels[i]-1, :, :])
-            data_temp = np.concatenate((data_temp, temp[None, :, :]))
+                
+        data_temp = np.where(data < T_value, 0, 255)
         
         # 输出影像
         out_full_path = os.path.join(output_path, img)
@@ -104,10 +98,11 @@ def process_single_image(img, img_path, output_path, save_channels):
 def main():
     # os.environ['GDAL_DATA'] = r'C:\Users\75198\anaconda3\envs\learn\Lib\site-packages\osgeo\data\gdal' # To prevent ERROR4
 
-    img_path = r'D:\github_respository\Populus_SR_GF2_UAV\data\gupopulus_2\gupopulus_train_LR'
-    output_path = r'D:\github_respository\Populus_SR_GF2_UAV\data\gupopulus_2\gupopulus_train_LR_shadow\BAND_NIR'
-    save_channels = [1] # 顺序抽取的通道
-    # save_channels = [1] # 顺序抽取的通道
+    img_path = r'D:\github_respository\Populus_SR_GF2_UAV\data\gupopulus_2\gupopulus_train_LR_shadow\BAND_NIR'
+    output_path = r'D:\github_respository\Populus_SR_GF2_UAV\data\gupopulus_2\gupopulus_train_LR_shadow\MASK'
+    
+    T_value = 50 # 二值化阈值  
+    
 
     # 确保输出目录存在
     os.makedirs(output_path, exist_ok=True)
@@ -126,7 +121,7 @@ def main():
         process_single_image,
         img_path=img_path,
         output_path=output_path,
-        save_channels=save_channels
+        T_value=T_value
     )
     
     # 创建进程池并并行处理

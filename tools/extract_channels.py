@@ -78,12 +78,12 @@ def read_img(sr_img):
 
 # os.environ['GDAL_DATA'] = r'C:\Users\75198\anaconda3\envs\learn\Lib\site-packages\osgeo\data\gdal' # To prevent ERROR4
 
-img_path = r'E:\project_global_populus\000-populus-sample\0-selected-sample-241111\0-image'
-output_path = r'E:\project_global_populus\000-populus-sample\0-selected-sample-241111\3-image-432'
-save_channels = [4, 3, 2] # 顺序抽取的通道
+img_path = r'D:\github_respository\Populus_SR_GF2_UAV\data\gupopulus_2\gupopulus_train_HR'
+output_path = r'D:\github_respository\Populus_SR_GF2_UAV\data\gupopulus_2\gupopulus_train_HR_shadow'
+save_channels = [1] # 顺序抽取的通道
 # save_channels = [1] # 顺序抽取的通道
 
-listpic = fnmatch.filter(os.listdir(img_path), '*.tif')
+listpic = fnmatch.filter(os.listdir(img_path), '*.png')
 
 '''逐个读取影像'''
 for img in listpic:
