@@ -3,6 +3,7 @@
 
 """
 均匀滑窗裁剪,仅图像
+该代码亦用于制作超分重建数据集
 ~~~~~~~~~~~~~~~~
 code by ZC
 Aerospace Information Research Institute, Chinese Academy of Sciences
@@ -67,9 +68,9 @@ def cut_img(
 
 if __name__ == "__main__":
 
-    input_img_dir = r"F:\project_UAV_GF2_2\4-clip_img_UAV_321_8bit_enhanced-X2"
-    output_img_dir = r"F:\project_UAV_GF2_2\5-clip_img_UAV_321_8bit_enhanced-X2_clip"
-    block_size = 240
+    input_img_dir = r"F:\project_populus_GF2_and_UAV\0-clip_polygon_img\05-GF2-3-band-LA"
+    output_img_dir = r"F:\project_populus_GF2_and_UAV\0-clip_polygon_img\06-GF2-3-band-LA-120px"
+    block_size = 120
     overlap = 0
 
     listpic = fnmatch.filter(os.listdir(input_img_dir), '*.tif')

@@ -79,9 +79,9 @@ def batch_process_images(low_res_folder, high_res_folder, output_folder):
             print(f"高分辨率影像 {high_res_path} 不存在，跳过该文件。")
 
 # 设置文件夹路径
-low_res_folder = r'F:\project_UAV_GF2_2\3-clip_img_GF2_432_enhanced'  # 低分辨率影像文件夹路径
-high_res_folder = r'F:\project_UAV_GF2_2\4-clip_img_UAV_321_8bit_enhanced-X2'  # 高分辨率影像文件夹路径
-output_folder = r'F:\project_UAV_GF2_2\5-clip_img_GF2_432_enhanced_match'  # 输出影像文件夹路径
+low_res_folder = r'F:\project_populus_GF2_and_UAV\0-clip_polygon_img\02-GF2-3-band'  # 低分辨率影像文件夹路径
+high_res_folder = r'F:\project_populus_GF2_and_UAV\0-clip_polygon_img\16-UAV-321-resample-2-brightness_adjust'  # 高分辨率影像文件夹路径
+output_folder = r'F:\project_populus_GF2_and_UAV\0-clip_polygon_img\05-GF2-3-band-LA'  # 输出影像文件夹路径
 
 # 执行批量处理
 batch_process_images(low_res_folder, high_res_folder, output_folder)

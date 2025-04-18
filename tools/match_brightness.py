@@ -3,6 +3,7 @@
 
 """
 图片亮度批量参考调整
+修改B_img_path = os.path.join(B_folder, file_name)可以更改参考影像（比如仅参考一张）
 ~~~~~~~~~~~~~~~~
 code by wHy
 Aerospace Information Research Institute, Chinese Academy of Sciences
@@ -17,7 +18,7 @@ def calculate_brightness(image_data):
     # 计算每个波段的平均值，并取所有波段的平均作为亮度
     return np.mean(image_data)
 
-def adjust_brightness(source_image, target_brightness):
+def adjust_brightness(source_image, target_brightness, max_val=255):
     # 计算源图像的亮度
     source_brightness = calculate_brightness(source_image)
     
@@ -25,7 +26,7 @@ def adjust_brightness(source_image, target_brightness):
     brightness_factor = target_brightness / source_brightness
     
     # 调整亮度
-    adjusted_image = source_image * brightness_factor
+    adjusted_image = np.clip(source_image * brightness_factor, 0, max_val) # 加入截断
     return adjusted_image
 
 def match_images_brightness(A_folder, B_folder, C_folder):
@@ -67,9 +68,9 @@ def match_images_brightness(A_folder, B_folder, C_folder):
             print(f"Adjusted brightness for {file_name} and saved to {C_img_path}")
 
 # 设置 A、B 和 C 文件夹路径
-A_folder = r'E:\project_UAV_GF2_2\2-clip_img_GF2_432'
-B_folder = r'E:\project_UAV_GF2_2\3-clip_img_UAV_321_8bit_enhanced'
-C_folder = r'E:\project_UAV_GF2_2\3-clip_img_GF2_432_enhanced'
+A_folder = r'F:\project_populus_GF2_and_UAV\0-clip_polygon_img\14-UAV-321-resample-2'
+B_folder = r'F:\project_populus_GF2_and_UAV\0-clip_polygon_img\14-UAV-321-resample-2'
+C_folder = r'F:\project_populus_GF2_and_UAV\0-clip_polygon_img\16-UAV-321-resample-2-brightness_adjust'
 
 # 调用函数
 match_images_brightness(A_folder, B_folder, C_folder)
