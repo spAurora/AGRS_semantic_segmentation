@@ -67,7 +67,7 @@ def batch_process_images(low_res_folder, high_res_folder, output_folder):
     for file_name in low_res_files:
         # 构造低分辨率和高分辨率影像的文件路径
         low_res_path = os.path.join(low_res_folder, file_name)
-        high_res_path = os.path.join(high_res_folder, file_name)
+        high_res_path = os.path.join(high_res_folder, file_name) # 修改这里替换参考图像
 
         # 检查高分辨率影像是否存在
         if os.path.exists(high_res_path):
@@ -79,9 +79,9 @@ def batch_process_images(low_res_folder, high_res_folder, output_folder):
             print(f"高分辨率影像 {high_res_path} 不存在，跳过该文件。")
 
 # 设置文件夹路径
-low_res_folder = r'F:\project_populus_GF2_and_UAV\0-clip_polygon_img\02-GF2-3-band'  # 低分辨率影像文件夹路径
-high_res_folder = r'F:\project_populus_GF2_and_UAV\0-clip_polygon_img\16-UAV-321-resample-2-brightness_adjust'  # 高分辨率影像文件夹路径
-output_folder = r'F:\project_populus_GF2_and_UAV\0-clip_polygon_img\05-GF2-3-band-LA'  # 输出影像文件夹路径
+low_res_folder = r'F:\project_populus_GF2_and_UAV\0-clip_polygon_img\16-UAV-321-resample-2-brightness_adjust'  # 低分辨率影像文件夹路径
+high_res_folder = r'D:\github_respository\Populus_SR_GF2_UAV\data\gupopulus_2\gupopulus_valid_LR\阴影不对齐预测的高分影像-未校正'  # 高分辨率影像文件夹路径
+output_folder = r'D:\github_respository\Populus_SR_GF2_UAV\data\gupopulus_2\gupopulus_valid_LR\阴影不对齐高分影像-反向校正'  # 输出影像文件夹路径
 
 # 执行批量处理
 batch_process_images(low_res_folder, high_res_folder, output_folder)
