@@ -25,7 +25,7 @@ from test import GetTestIndicator
 from networks.DLinknet import DLinkNet34, DLinkNet50, DLinkNet101
 from networks.UNet_Light import UNet_Light
 from networks.UNet import UNet
-from networks.DUNet import DUNet
+from networks.DUNet_Plus import DUNet_Plus
 from networks.Deeplab_v3_plus import DeepLabv3_plus
 from networks.FCN8S import FCN8S
 from networks.DABNet import DABNet
