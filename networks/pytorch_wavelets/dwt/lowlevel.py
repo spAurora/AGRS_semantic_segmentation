@@ -144,7 +144,7 @@ def afb1d(x, h0, h1, mode="zero", dim=-1):
             N += 1
         x = roll(x, -L2, dim=d)
         pad = (L - 1, 0) if d == 2 else (0, L - 1)
-        lohi = F.conv2d(x, h, padding=pad, stride=s, groups=C)
+        lohi = F.conv2d(x, h, padding=pad, stride=s, groups=C) # wHy 250527 卷积下采样
         N2 = N // 2
         if d == 2:
             lohi[:, :, :L2] = lohi[:, :, :L2] + lohi[:, :, N2 : N2 + L2]
