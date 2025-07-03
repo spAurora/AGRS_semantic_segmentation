@@ -308,6 +308,10 @@ class Predict():
                 # 一次性将GPU结果转回CPU
                 predict_result_all = predict_result_all_tensor.cpu().numpy()
                 
+                del img_block_gpu, predict_result_all_tensor
+                if if_mask:
+                    del mask_gpu
+
                 dst_ds.GetRasterBand(1).WriteArray(predict_result_all, 0, 0)
                 dst_ds.FlushCache()
 
