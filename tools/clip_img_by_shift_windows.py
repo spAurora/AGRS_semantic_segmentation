@@ -59,7 +59,7 @@ def cut_img(
 
         out_img_data = src_data[:, i: i + block_size, j: j + block_size]
 
-        out_img_path = output_img_dir + '/' + output_file_name + '_' + str(k) + 'x2.png' # 制作超分数据集记得修改后缀x2,仅针对低分数据
+        out_img_path = output_img_dir + '/' + output_file_name + '_' + str(k) + '.png' # 制作超分数据集记得修改后缀x2,仅针对低分数据
         with rio.open(out_img_path, "w", **src_profile) as out_src:
             out_src.write(out_img_data)
 
@@ -68,10 +68,12 @@ def cut_img(
 
 if __name__ == "__main__":
 
-    input_img_dir = r"G:\project_UAV_GF2_2\3-clip_img_GF2_432_enhanced"
-    output_img_dir = r"G:\project_UAV_GF2_2\5-clip_img_GF2_432_enhanced_clip"
+    input_img_dir = r"G:\project_UAV_GF2_2\5-clip_img_GF2_432_enhanced_match"
+    output_img_dir = r"G:\project_UAV_GF2_2\5-clip_img_GF2_432_enhanced_match_clip"
     block_size = 120
     overlap = 0
+
+    os.makedirs(output_img_dir, exist_ok=True)
 
     listpic = fnmatch.filter(os.listdir(input_img_dir), '*.tif')
 

@@ -39,50 +39,54 @@ from networks.U_MobileNet import U_MobileNet
 from networks.SegNet import SegNet
 from networks.U_ConvNeXt import U_ConvNeXt
 from networks.ViT import ViTSegmentation
+from networks.UNet_Geo import GeoUNet
+from networks.GeoAwareUNet import GeoAwareUNet
 # from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD
 # from networks.U_ConvNeXt_HWD_DS import U_ConvNeXt_HWD_DS
 
 from networks.MAE_Seg import MAEViTSegmentation
 
 '''参数设置'''
-trainListRoot = r'E:\project_global_populus\MAE_test_250324\2-train_list\trainlist-250324_0.2.txt'  # 训练样本列表
-save_model_path = r'E:\project_global_populus\MAE_test_250324\3-weights'  # 训练模型保存路径
-model = MAEViTSegmentation  # 选择的训练模型
-save_model_name = 'MAE_TF_test_FPN.pth'  # 训练模型保存名
+trainListRoot = r'E:\0-benchmark\2-PTD_coord_aware\0-train\trainlist-250920.txt'  # 训练样本列表
+save_model_path = r'E:\1-result\2-PTD_coord_aware\3-weights'  # 训练模型保存路径
+model = GeoUNet  # 选择的训练模型
+save_model_name = 'GeoUNet.pth'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-4]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
-classes_num = 2  # 样本类别数
+classes_num = 3  # 样本类别数
 batch_size = 8  # 计算批次大小
-init_lr = 0.0001  # 初始学习率
+init_lr = 0.001  # 初始学习率
 total_epoch = 300  # 训练次数
-band_num = 4  # 影像的波段数
-if_norm_label = True  # 是否对标签进行归一化 0/255二分类应设置为True
+band_num = 9  # 影像的波段数
+if_norm_label = False  # 是否对标签进行归一化 0/255二分类应设置为True
 label_weight_scale_factor = 1  # 标签权重的指数缩放系数 1为不缩放
+
+ignore_bandnum = 1 # 图像归一化忽视的波段数，倒数计数,一般设置为0
 
 if_vis = False  # 是否输出中间可视化信息 一般设置为False，设置为True需要模型支持
 if_open_profile = False  # 是否启用性能分析，启用后计算2个eopch即终止训练并打印报告，仅供硬件负载分析和性能优化使用
 
 lr_mode = 0  # 学习率更新模式，0为等比下降，1为标准下降
-max_no_optim_num = 1  # 最大loss无优化次数
+max_no_optim_num = 5  # 最大loss无优化次数
 lr_update_rate = 3.0  # 学习率等比下降更新率
 min_lr = 1e-6  # 最低学习率
 
-simulate_batch_size = True  # 是否模拟大batchsize；除非显存太小一般不开启
+simulate_batch_size = False  # 是否模拟大batchsize；除非显存太小一般不开启
 simulate_batch_size_num = 8 # 模拟batchsize倍数 最终batchsize = simulate_batch_size_num * batch_size
 
 full_cpu_mode = True  # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
 if_open_test = True  # 是否开启测试模式
-test_img_path = r'E:\project_global_populus\MAE_test_250324\4-predict_result\test_img'  # 测试集影像文件夹
-test_label_path = r'E:\project_global_populus\MAE_test_250324\4-predict_result\test_label'  # 测试集真值标签文件夹
-test_output_path = r'E:\project_global_populus\MAE_test_250324\4-predict_result\temp'
-target_size = 224  # 模型预测窗口大小，与训练模型一致
+test_img_path = r'E:\0-benchmark\2-PTD_coord_aware\1-test\0-image'  # 测试集影像文件夹
+test_label_path = r'E:\0-benchmark\2-PTD_coord_aware\1-test\1-label'  # 测试集真值标签文件夹
+test_output_path = r'E:\1-result\2-PTD_coord_aware\4-test_output'
+target_size = 256  # 模型预测窗口大小，与训练模型一致
 test_img_type = '*.tif'  # 测试集影像数据类型
 
-if_MAE_finetune = True # 是否为MAE微调模式 
+if_MAE_finetune = False # 是否为MAE微调模式 
 
 if_print_model_summary = True
-if model.__name__ in ['HRNet', 'FCN_ResNet50', 'FCN_ResNet101', 'SegNet', 'U_ConvNeXt_HWD', 'U_ConvNeXt_HWD_DS', 'MAEViTSegmentation', 'ViTSegmentation']:  # 是否输出模型参数信息 部分模型不可用
+if model.__name__ in ['HRNet', 'FCN_ResNet50', 'FCN_ResNet101', 'SegNet', 'U_ConvNeXt_HWD', 'U_ConvNeXt_HWD_DS', 'MAEViTSegmentation', 'ViTSegmentation', 'GeoAwareUNet']:  # 是否输出模型参数信息 部分模型不可用
     if_print_model_summary = False
 else:
     pass
@@ -160,7 +164,7 @@ if if_print_model_summary is True:
 
 '''初始化dataloader'''
 dataset = MyDataLoader(root=trainListRoot, normalized_Label=if_norm_label,
-                       data_dict=data_dict, band_num=band_num)  # 读取训练数据集
+                       data_dict=data_dict, band_num=band_num, ignore_bandnum=ignore_bandnum)  # 读取训练数据集
 data_loader = torch.utils.data.DataLoader(
     dataset, batch_size=batch_size, shuffle=True, num_workers=0, pin_memory=True)  # 定义训练数据装载器 开启锁页内存
 print('Number of Iterations: ', int(len(dataset)/batch_size))
@@ -193,7 +197,7 @@ with torch.autograd.profiler.profile(enabled=if_open_profile, use_cuda=True, rec
 
         if if_open_test:  # 如果开启测试模型就在测试集上计算精度指标
             p, r, f = GetTestIndicator(net=solver.net, data_dict=data_dict, target_size=target_size, band_num=band_num, img_type=test_img_type,
-                                       test_img_path=test_img_path, test_label_path=test_label_path, if_norm_label=if_norm_label, test_output_path=test_output_path)
+                                       test_img_path=test_img_path, test_label_path=test_label_path, if_norm_label=if_norm_label, test_output_path=test_output_path, ignore_bandnum=ignore_bandnum)
 
         print('\nepoch:', epoch, '  training time:', int(time.time()-tic), 's')
         print('epoch average train loss:', train_epoch_loss)

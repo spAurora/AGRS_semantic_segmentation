@@ -68,12 +68,13 @@ def cal_cm_score(cm):
     return macro_precision, macro_recall, macro_f1_score
 
 class TestFrame():
-    def __init__(self, net, data_dict, band_num, if_norm_label):
+    def __init__(self, net, data_dict, band_num, if_norm_label, ignore_bandnum=0):
         self.img_mean = data_dict['mean'] # 数据集均值
         self.std = data_dict['std'] # 数据集方差
         self.net = net # 模型
         self.band_num = band_num # 影像波段数
         self.if_norm_label = if_norm_label
+        self.ignore_bandnum = ignore_bandnum
     
     def Predict_wHy(self, img_block, dst_ds, xoff, yoff):
         img_block = img_block.transpose(1, 2, 0) # (c, h, w) -> (h, w ,c)
@@ -81,9 +82,10 @@ class TestFrame():
 
         self.net.eval() # 启动预测模式
 
-        for i in range(self.band_num): # 数据标准化
-            img_block[:, :, i] -= self.img_mean[i] 
-        img_block = img_block / self.std
+        for i in range(self.band_num-self.ignore_bandnum): # 数据标准化
+            img_block[:, :, i] -= self.img_mean[i]
+            if self.std[i] != 0:
+                img_block[:, :, i] = img_block[:, :, i] / self.std[i]
 
         img_block = np.expand_dims(img_block, 0) # 扩展数据维度 (h, w, c) -> (b, h, w, c) 
         img_block = img_block.transpose(0, 3, 1, 2) # (b, h, w, c) -> (b, c, h, w)
@@ -204,9 +206,9 @@ class TestFrame():
         return p/len(listpic), r/len(listpic), f/len(listpic)
 
 
-def GetTestIndicator(net, data_dict, target_size, band_num, img_type, test_img_path, test_label_path, if_norm_label, test_output_path):        
+def GetTestIndicator(net, data_dict, target_size, band_num, img_type, test_img_path, test_label_path, if_norm_label, test_output_path,ignore_bandnum):        
     '''执行预测'''
-    test_instantiation = TestFrame(net=net, data_dict=data_dict, band_num=band_num, if_norm_label=if_norm_label) # 初始化预测
+    test_instantiation = TestFrame(net=net, data_dict=data_dict, band_num=band_num, if_norm_label=if_norm_label,ignore_bandnum=ignore_bandnum) # 初始化预测
     p, r, f = test_instantiation.Test_Main(target_size=target_size, img_type=img_type, test_img_path=test_img_path, test_label_path=test_label_path, test_output_path=test_output_path)
 
     return p, r, f

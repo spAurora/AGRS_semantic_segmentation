@@ -17,12 +17,13 @@ from tqdm import tqdm
 from numba import njit
 
 class MyDataLoader(data.Dataset):
-    def __init__(self,data_dict, root='', normalized_Label = False, band_num = 3):
+    def __init__(self,data_dict, root='', normalized_Label = False, band_num = 3, ignore_bandnum=1):
         self.root = root # 训练列表路径
         self.normalized_Label = normalized_Label # 是否执行数据归一化
         self.img_mean = data_dict['mean'] # 数据集均值
         self.std = data_dict['std'] # 数据集标准差
         self.band_num = band_num # 波段数
+        self.ignore_bandnum = ignore_bandnum # 归一化忽视波段数
 
         with open(self.root, 'r', encoding='utf-8') as f:
             self.filelist = f.readlines() # 返回一个列表，其中包含文件中的每一行作为列表项
@@ -41,9 +42,11 @@ class MyDataLoader(data.Dataset):
 
         label = np.expand_dims(label, axis=2) # 标签增加一个维度 (H W C)
         
-        for i in range(self.band_num): # 图像标准化
+        for i in range(self.band_num-self.ignore_bandnum): # 图像标准化
             img[:,:,i] -= self.img_mean[i]
-        img = img / self.std
+            if self.std[i]!=0:
+                 img[:,:,i]=img[:,:,i]/self.std[i]
+
 
         img = img.transpose(2,0,1) # (H W C)->(C H W)
         if (self.normalized_Label == True): # 标签归一化

@@ -1,4 +1,5 @@
-# pip install -r requirements.txt
+# (1) install pytorch first !!!
+# (2) pip install -r requirements.txt
 tqdm
 torchsummary
 scikit-image
@@ -11,4 +12,4 @@ timm
 numba
 pywavelets
 
-# conda install -c conda-forge gdal
+# (3) conda install -c conda-forge gdal
