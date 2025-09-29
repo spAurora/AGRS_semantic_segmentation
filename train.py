@@ -39,6 +39,7 @@ from networks.U_MobileNet import U_MobileNet
 from networks.SegNet import SegNet
 from networks.U_ConvNeXt import U_ConvNeXt
 from networks.ViT import ViTSegmentation
+from networks.UNet_E import UNetWithElevationAttention
 from networks.UNet_Geo import GeoUNet
 from networks.GeoAwareUNet import GeoAwareUNet
 # from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD

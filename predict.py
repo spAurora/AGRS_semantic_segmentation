@@ -41,6 +41,9 @@ from networks.FCN import FCN_ResNet50, FCN_ResNet101
 from networks.U_MobileNet import U_MobileNet
 from networks.SegNet import SegNet
 from networks.U_ConvNeXt import U_ConvNeXt
+from networks.GeoAwareUNet import GeoAwareUNet
+from networks.UNet_Geo import GeoUNet
+from networks.UNet_E import UNetWithElevationAttention
 # from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD
 # from networks.U_ConvNeXt_HWD_DS import U_ConvNeXt_HWD_DS
 
@@ -55,35 +58,35 @@ class SolverFrame():
         self.net.load_state_dict(torch.load(path)) # 模型读取
 
 class Predict():
-    def __init__(self, net, class_number, band_num):
+    def __init__(self, net, class_number, band_num, ignore_bandnum):
         self.class_number = class_number # 类别数
         self.img_mean = data_dict['mean'] # 数据集均值
         self.std = data_dict['std'] # 数据集方差
         self.net = net # 模型
         self.band_num = band_num # 影像波段数
-    
-    def Predict_wHy(self, img_block, dst_ds, xoff, yoff, overlap_rate = 0):
-        img_block = img_block.transpose(1, 2, 0) # (c, h, w) -> (h, w ,c)
-        img_block = img_block.astype(np.float32) # 数据类型转换
-        block_width = np.size(img_block, 0)
+        self.ignore_bandnum = ignore_bandnum
 
         self.net.eval() # 启动预测模式
+    
+    def Predict_wHy(self, img_block, dst_ds, xoff, yoff, overlap_rate = 0):
 
-        for i in range(self.band_num): # 数据标准化
-            img_block[:, :, i] -= self.img_mean[i] 
-        img_block = img_block / self.std
+        img_block = torch.from_numpy(img_block.astype(np.float32)).to('cuda')
 
-        img_block = np.expand_dims(img_block, 0) # 扩展数据维度 (h, w, c) -> (b, h, w, c) 
-        img_block = img_block.transpose(0, 3, 1, 2) # (b, h, w, c) -> (b, c, h, w)
-        img_block = Variable(torch.Tensor(img_block).cuda()) # Variable容器装载
-        predict_out = self.net.forward(img_block).squeeze().cpu().data.numpy() # 模型预测；删除b维度；转换为numpy
+        for i in range(self.band_num-self.ignore_bandnum): # 数据标准化
+            img_block[i, :, :] -= self.img_mean[i] 
+            if self.std[i] != 0:
+                 img_block[i,:,:]=img_block[i,:,:]/self.std[i]
 
-        predict_out = predict_out.transpose(1, 2, 0) # (c, h, w) -> (h, w, c)
-        predict_result = np.argmax(predict_out, axis=2) # 返回第三维度最大值的下标
+        # 添加批次维度并保持通道优先
+        img_block = img_block.unsqueeze(0)  # (1, c, h, w)
         
-        # dst_ds.GetRasterBand(1).WriteArray(predict_result[int(block_width*overlap_rate):int(block_width*(1-overlap_rate)), int(block_width*overlap_rate):int(block_width*(1-overlap_rate))], xoff+int(block_width*overlap_rate), yoff+int(block_width*overlap_rate)) # 预测结果写入gdal_dataset
-
-        return predict_result
+        # 模型推理
+        predict_out = self.net(img_block)  # (1, c, h, w)
+        
+        # GPU上执行argmax
+        predict_result = torch.argmax(predict_out.squeeze(0), dim=0)  # (h, w)
+        
+        return predict_result.cpu().numpy()
 
     def Main(self, allpath, outpath, target_size=256, unify_read_img = False, overlap_rate = 0, if_mask=False, mask_path='', img_data_type=gdal.GDT_Byte):  
         print('start predict...')
@@ -333,20 +336,22 @@ class Predict():
 
 if __name__ == '__main__':
 
-    predictImgPath = r'H:\xinjiang_huyang_hongliu\250316_SS_demo\0-srimg' # 待预测影像的文件夹路径
+    predictImgPath = r'E:\0-benchmark\2-PTD_coord_aware\1-test\0-image' # 待预测影像的文件夹路径
     Img_type = '*.tif' # 待预测影像的类型
-    trainListRoot = r'H:\xinjiang_huyang_hongliu\250316_SS_demo\2-train_list\1-trainlist_clear.txt' #与模型训练相同的训练列表路径
+    trainListRoot = r'E:\0-benchmark\2-PTD_coord_aware\0-train\trainlist-250920.txt' #与模型训练相同的训练列表路径
     num_class = 3 # 样本类别数
-    model = UNet #模型
-    model_path = r'H:\xinjiang_huyang_hongliu\250316_SS_demo\3-weights\UNet-250317.pth' # 模型文件完整路径
-    output_path = r'H:\xinjiang_huyang_hongliu\250316_SS_demo\4-predict_result' # 输出的预测结果路径
-    band_num = 8 #影像的波段数 训练与预测应一致
+    model = GeoUNet #模型
+    model_path = r'E:\1-result\2-PTD_coord_aware\3-weights\GeoUNet.pth' # 模型文件完整路径
+    output_path = r'E:\1-result\2-PTD_coord_aware\5-predict_output' # 输出的预测结果路径
+    band_num = 9 #影像的波段数 训练与预测应一致
     label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
     target_size = 256 # 预测滑窗大小，应与训练集应一致
     unify_read_img = True # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
     overlap_rate = 0.1 # 滑窗间的重叠率
 
-    img_data_type = gdal.GDT_UInt16 # only support gdal.GDT_Byte or gdal.GDT_UInt16
+    ignore_bandnum = 1 # 图像归一化忽视的波段数，倒数计数,一般设置为0
+
+    img_data_type = gdal.GDT_Byte # only support gdal.GDT_Byte or gdal.GDT_UInt16
 
     if_mask = False # 是否开启mask模式；mask模式仅在unify_read_img==True时有效
     mask_path = r'I:\PROJECT_GLOBAL_POPULUS_DATA_02\FQ-Africa\MASK' # mask路径 路径下需要有*.npz掩膜（./tools/generate_mask_by_moasic_line.py生成）
@@ -384,5 +389,5 @@ if __name__ == '__main__':
         print(listpic)
 
     '''执行预测'''
-    predict_instantiation = Predict(net=solver.net, class_number=num_class, band_num=band_num) # 初始化预测
+    predict_instantiation = Predict(net=solver.net, class_number=num_class, band_num=band_num, ignore_bandnum=ignore_bandnum) # 初始化预测
     predict_instantiation.Main(listpic, output_path, target_size, unify_read_img=unify_read_img, overlap_rate=overlap_rate, if_mask=if_mask, mask_path=mask_path, img_data_type=img_data_type) # 预测主体

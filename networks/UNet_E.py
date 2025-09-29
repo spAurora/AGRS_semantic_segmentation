@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class DoubleConv(nn.Module):
+class DoubleConv(nn.Module):                       ## 基础特征提取单元 
     """(convolution => [BN] => ReLU) * 2"""
 
     def __init__(self, in_channels, out_channels, mid_channels=None):
@@ -22,7 +22,8 @@ class DoubleConv(nn.Module):
     def forward(self, x):
         return self.double_conv(x)
 
-class Down(nn.Module):
+
+class Down(nn.Module):                     ## 下采样模块（编码器），这是UNet的左侧部分，负责逐步提取和压缩特征​：
     """Downscaling with maxpool then double conv"""
 
     def __init__(self, in_channels, out_channels):
@@ -35,7 +36,8 @@ class Down(nn.Module):
     def forward(self, x):
         return self.maxpool_conv(x)
 
-class Up(nn.Module):
+
+class Up(nn.Module):                    ##  上采样模块（解码器），这是UNet的右侧部分，负责逐步恢复特征图尺寸并进行精确定位​：
     """Upscaling then double conv"""
 
     def __init__(self, in_channels, out_channels, bilinear=True):
@@ -71,7 +73,10 @@ class OutConv(nn.Module):
     def forward(self, x):
         return self.conv(x)
 
-'''高程引导的注意力模块'''
+
+
+'''高程引导的注意力模块'''      # 这是本模型最创新的部分，它让模型能够关注高程信息重要的区域
+
 class ElevationGuidedAttention(nn.Module):
     def __init__(self, in_channels, reduction_ratio=16):
         super().__init__()
@@ -98,13 +103,14 @@ class ElevationGuidedAttention(nn.Module):
         )
 
     def forward(self, x, elevation_map):
-        # 通道注意力
+
+        # 通道注意力，关注哪些特征通道对当前任务更重要
         ca = self.channel_attention(x)
         
-        # 空间注意力（基于高程）
+        # 空间注意力（基于高程），基于高程图，关注哪些空间位置更重要
         sa = self.spatial_attention(elevation_map)
         
-        # 高程值权重（全局调节）
+        # 高程值权重（全局调节），根据平均高程值生成全局权重
         avg_elevation = elevation_map.mean(dim=[2, 3], keepdim=True)
         elevation_weight = self.elevation_weight_mapper(avg_elevation.permute(0, 2, 3, 1))
         elevation_weight = elevation_weight.permute(0, 3, 1, 2)
@@ -114,10 +120,12 @@ class ElevationGuidedAttention(nn.Module):
         # print(ca.shape, sa.shape, elevation_map.shape, x.shape, attention.shape)
         return x * attention
 
-'''高程特征提取器'''
+
+'''高程特征提取器'''       #专门用于提取高程数据的多尺度特征：
 class EnhancedElevationExtractor(nn.Module):
     def __init__(self):
         super().__init__()
+        
         # 多尺度高程特征提取
         self.conv_layers = nn.ModuleList([
             nn.Sequential(

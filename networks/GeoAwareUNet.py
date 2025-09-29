@@ -184,15 +184,3 @@ class GeoAwareUNet(nn.Module):
         # 解码
         output = self.decoder(modulated_bottleneck, enc3, enc2, enc1)
         return output
-
-# 测试用例
-def test_model():
-    model = GeoAwareUNet(band_num=9, num_classes=1)
-    input_tensor = torch.randn(2, 9, 256, 256)  # batch_size=2, channels=9 (8图像+1地理)
-    output = model(input_tensor)
-    print(f"输入尺寸: {input_tensor.shape}")
-    print(f"输出尺寸: {output.shape}")
-    assert output.shape == (2, 1, 256, 256), f"输出尺寸错误: {output.shape}"
-
-if __name__ == "__main__":
-    test_model()
