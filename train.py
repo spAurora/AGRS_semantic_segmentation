@@ -42,27 +42,28 @@ from networks.ViT import ViTSegmentation
 from networks.UNet_E import UNetWithElevationAttention
 from networks.UNet_Geo import GeoUNet
 from networks.GeoAwareUNet import GeoAwareUNet
+from networks.UNet_DA import UNetWithDualAttention
 # from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD
 # from networks.U_ConvNeXt_HWD_DS import U_ConvNeXt_HWD_DS
 
 from networks.MAE_Seg import MAEViTSegmentation
 
 '''参数设置'''
-trainListRoot = r'E:\0-benchmark\2-PTD_coord_aware\0-train\trainlist-250920.txt'  # 训练样本列表
-save_model_path = r'E:\1-result\2-PTD_coord_aware\3-weights'  # 训练模型保存路径
-model = GeoUNet  # 选择的训练模型
-save_model_name = 'GeoUNet.pth'  # 训练模型保存名
+trainListRoot = r'E:\project_ruonan\trainlist-251005.txt'  # 训练样本列表
+save_model_path = r'E:\project_ruonan\3-weights'  # 训练模型保存路径
+model = UNetWithDualAttention  # 选择的训练模型
+save_model_name = 'UNetWithDualAttention.pth'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-4]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 3  # 样本类别数
 batch_size = 8  # 计算批次大小
 init_lr = 0.001  # 初始学习率
 total_epoch = 300  # 训练次数
-band_num = 9  # 影像的波段数
+band_num = 10  # 影像的波段数
 if_norm_label = False  # 是否对标签进行归一化 0/255二分类应设置为True
 label_weight_scale_factor = 1  # 标签权重的指数缩放系数 1为不缩放
 
-ignore_bandnum = 1 # 图像归一化忽视的波段数，倒数计数,一般设置为0
+ignore_bandnum = 2 # 图像归一化忽视的波段数，倒数计数,一般设置为0
 
 if_vis = False  # 是否输出中间可视化信息 一般设置为False，设置为True需要模型支持
 if_open_profile = False  # 是否启用性能分析，启用后计算2个eopch即终止训练并打印报告，仅供硬件负载分析和性能优化使用
@@ -78,9 +79,9 @@ simulate_batch_size_num = 8 # 模拟batchsize倍数 最终batchsize = simulate_b
 full_cpu_mode = True  # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
 if_open_test = True  # 是否开启测试模式
-test_img_path = r'E:\0-benchmark\2-PTD_coord_aware\1-test\0-image'  # 测试集影像文件夹
-test_label_path = r'E:\0-benchmark\2-PTD_coord_aware\1-test\1-label'  # 测试集真值标签文件夹
-test_output_path = r'E:\1-result\2-PTD_coord_aware\4-test_output'
+test_img_path = r'E:\project_ruonan\4-predict_result\0-test_img'  # 测试集影像文件夹
+test_label_path = r'E:\project_ruonan\4-predict_result\0-test_label'  # 测试集真值标签文件夹
+test_output_path = r'E:\project_ruonan\4-predict_result\0-test_output'
 target_size = 256  # 模型预测窗口大小，与训练模型一致
 test_img_type = '*.tif'  # 测试集影像数据类型
 
