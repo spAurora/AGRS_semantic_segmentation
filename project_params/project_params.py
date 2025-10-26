@@ -8,17 +8,17 @@
 WV-2胡杨红柳分割 清晰数据集
 '''
 '''参数设置'''
-trainListRoot = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\2-trainlist\8-trainlist_clear_240401.txt'  # 训练样本列表
-save_model_path = r'E:\xinjiang_huyang_hongliu\Huyang_test_0808\3-weights'  # 训练模型保存路径
-model = U_ConvNeXt  # 选择的训练模型
-save_model_name = '8-U_ConvNeXt-huyang_clear_240513.th'  # 训练模型保存名
-mylog = open('logs/'+save_model_name[:-3]+'.log', 'w')  # 日志文件
+trainListRoot = r'F:\temp\0-PTD\0-train\trainlist-250923.txt'  # 训练样本列表
+save_model_path = r'F:\temp\1023\weights_1023'  # 训练模型保存路径
+model = DABNet  # 选择的训练模型
+save_model_name = 'train_DABNet_251023_PTD.pth'  # 训练模型保存名
+mylog = open('logs/'+save_model_name[:-4]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
 classes_num = 3  # 样本类别数
-batch_size = 4  # 计算批次大小
-init_lr = 0.001  # 初始学习率
-total_epoch = 300  # 训练次数
-band_num = 3  # 影像的波段数
+batch_size = 24  # 计算批次大小
+init_lr = 0.0001  # 初始学习率
+total_epoch = 100  # 训练次数
+band_num = 8  # 影像的波段数
 if_norm_label = False  # 是否对标签进行归一化 0/255二分类应设置为True
 label_weight_scale_factor = 1  # 标签权重的指数缩放系数 1为不缩放
 
