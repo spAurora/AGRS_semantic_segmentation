@@ -43,24 +43,25 @@ from networks.UNet_E import UNetWithElevationAttention
 from networks.UNet_Geo import GeoUNet
 from networks.GeoAwareUNet import GeoAwareUNet
 from networks.UNet_DA import UNetWithDualAttention
+from networks.TSE_Unet import U_ConvNeXt_HWD_DS
 # from networks.U_ConvNeXt_HWD import U_ConvNeXt_HWD
 # from networks.U_ConvNeXt_HWD_DS import U_ConvNeXt_HWD_DS
 
 from networks.MAE_Seg import MAEViTSegmentation
 
 '''参数设置'''
-trainListRoot = r'E:\0-benchmark\0-PTD\0-train\trainlist-250923.txt'  # 训练样本列表
-save_model_path = r'E:\1-result\4-251026_PTD_test\model'  # 训练模型保存路径
+trainListRoot = r'C:\Users\ASUS\Desktop\kuang-image\2-train_list\trainlist-251218.txt'  # 训练样本列表
+save_model_path = r'C:\Users\ASUS\Desktop\kuang-image\3-weights'  # 训练模型保存路径
 model = UNet  # 选择的训练模型
-save_model_name = 'train_UNet_PTD.pth'  # 训练模型保存名
+save_model_name = 'train_UNet_1218.pth'  # 训练模型保存名
 mylog = open('logs/'+save_model_name[:-4]+'.log', 'w')  # 日志文件
 loss = FocalLoss2d  # 损失函数
-classes_num = 3  # 样本类别数
+classes_num = 2  # 样本类别数
 batch_size = 8  # 计算批次大小
 init_lr = 0.001  # 初始学习率
 total_epoch = 100  # 训练次数
-band_num = 8  # 影像的波段数
-if_norm_label = False  # 是否对标签进行归一化 0/255二分类应设置为True
+band_num = 3  # 影像的波段数
+if_norm_label = True  # 是否对标签进行归一化 0/255二分类应设置为True
 label_weight_scale_factor = 1  # 标签权重的指数缩放系数 1为不缩放
 
 ignore_bandnum = 0 # 图像归一化忽视的波段数，倒数计数,一般设置为0
@@ -69,7 +70,7 @@ if_vis = False  # 是否输出中间可视化信息 一般设置为False，设�
 if_open_profile = False  # 是否启用性能分析，启用后计算2个eopch即终止训练并打印报告，仅供硬件负载分析和性能优化使用
 
 lr_mode = 0  # 学习率更新模式，0为等比下降，1为标准下降
-max_no_optim_num = 2  # 最大loss无优化次数
+max_no_optim_num = 1  # 最大loss无优化次数
 lr_update_rate = 3.0  # 学习率等比下降更新率
 min_lr = 1e-6  # 最低学习率
 
@@ -79,9 +80,9 @@ simulate_batch_size_num = 8 # 模拟batchsize倍数 最终batchsize = simulate_b
 full_cpu_mode = True  # 是否全负荷使用CPU，默认pytroch使用cpu一半核心
 
 if_open_test = True  # 是否开启测试模式
-test_img_path = r'E:\0-benchmark\0-PTD\1-test\0-image'  # 测试集影像文件夹
-test_label_path = r'E:\0-benchmark\0-PTD\1-test\1-label'  # 测试集真值标签文件夹
-test_output_path = r'E:\1-result\4-251026_PTD_test'
+test_img_path = r'C:\Users\ASUS\Desktop\kuang-image\1-clip_image'  # 测试集影像文件夹
+test_label_path = r'C:\Users\ASUS\Desktop\kuang-image\1-raster_label'  # 测试集真值标签文件夹
+test_output_path = r'C:\Users\ASUS\Desktop\kuang-image\4-predict_result'
 target_size = 256  # 模型预测窗口大小，与训练模型一致
 test_img_type = '*.tif'  # 测试集影像数据类型
 

@@ -336,27 +336,27 @@ class Predict():
 
 if __name__ == '__main__':
 
-    predictImgPath = r'E:\0-benchmark\2-PTD_coord_aware\1-test\0-image' # 待预测影像的文件夹路径
-    Img_type = '*.tif' # 待预测影像的类型
-    trainListRoot = r'E:\0-benchmark\2-PTD_coord_aware\0-train\trainlist-250920.txt' #与模型训练相同的训练列表路径
-    num_class = 3 # 样本类别数
-    model = GeoUNet #模型
-    model_path = r'E:\1-result\2-PTD_coord_aware\3-weights\GeoUNet.pth' # 模型文件完整路径
-    output_path = r'E:\1-result\2-PTD_coord_aware\5-predict_output' # 输出的预测结果路径
-    band_num = 9 #影像的波段数 训练与预测应一致
-    label_norm = False # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
+    predictImgPath = r'C:\Users\ASUS\Desktop\kuang-image\0-image' # 待预测影像的文件夹路径
+    Img_type = '*.dat' # 待预测影像的类型
+    trainListRoot = r'C:\Users\ASUS\Desktop\kuang-image\2-train_list\trainlist-251218.txt' #与模型训练相同的训练列表路径
+    num_class = 2 # 样本类别数
+    model = UNet #模型
+    model_path = r'C:\Users\ASUS\Desktop\kuang-image\3-weights\train_UNet_1218.pth' # 模型文件完整路径
+    output_path = r'C:\Users\ASUS\Desktop\kuang-image\4-predict_result' # 输出的预测结果路径
+    band_num = 3 #影像的波段数 训练与预测应一致
+    label_norm = True # 是否对标签进行归一化 针对0/255二分类标签 训练与预测应一致
     target_size = 256 # 预测滑窗大小，应与训练集应一致
     unify_read_img = True # 是否集中读取影像并预测 内存充足的情况下尽量设置为True
     overlap_rate = 0.1 # 滑窗间的重叠率
 
-    ignore_bandnum = 1 # 图像归一化忽视的波段数，倒数计数,一般设置为0
+    ignore_bandnum = 0 # 图像归一化忽视的波段数，倒数计数,一般设置为0
 
     img_data_type = gdal.GDT_Byte # only support gdal.GDT_Byte or gdal.GDT_UInt16
 
     if_mask = False # 是否开启mask模式；mask模式仅在unify_read_img==True时有效
     mask_path = r'I:\PROJECT_GLOBAL_POPULUS_DATA_02\FQ-Africa\MASK' # mask路径 路径下需要有*.npz掩膜（./tools/generate_mask_by_moasic_line.py生成）
 
-    if_vismem = True # 是否开启虚拟文件系统; 开启后可大幅提高机械硬盘中的影像读取速度，但需要保证内存充足
+    if_vismem = False # 是否开启虚拟文件系统; 开启后可大幅提高机械硬盘中的影像读取速度，但需要保证内存充足
 
     '''收集训练集信息'''
     dataCollect = DataTrainInform(classes_num=num_class, trainlistPath=trainListRoot, band_num=band_num, label_norm=label_norm) #计算数据集信息
