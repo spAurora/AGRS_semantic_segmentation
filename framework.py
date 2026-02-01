@@ -32,25 +32,26 @@ class MyFrame():
         self.img = img_batch
         self.mask = mask_batch
 
+    @amp.autocast('cuda')  # Autocasting for mixed precision
     def optimize(self, ifStep=True, ifVis = False):
         self.img = self.img.cuda(non_blocking=True)
         if self.mask is not None:
             self.mask = self.mask.cuda(non_blocking=True).to(torch.int64)
-        
-        with amp.autocast('cuda'):  # Autocasting for mixed precision
-            if ifVis: # 带可视化输出
-                pred, _ = self.net(self.img) # 前向传递计算输出
-            else:
-                pred = self.net(self.img) # 前向传递计算输出
-            label = self.mask.squeeze() # 注意此处label维度规整可能会引发异常
-            loss = self.loss(output=pred, target=label) # 计算loss
-        
+
+        # ifVis在这里没有任何用处，前向传递计算输出
+        if ifVis: # 带可视化输出
+            pred, _ = self.net(self.img)
+        else:
+            pred = self.net(self.img) 
+
+        label = self.mask.squeeze() # 注意此处label维度规整可能会引发异常
+        loss = self.loss(output=pred, target=label) # 计算loss
         self.scaler.scale(loss).backward()  # Scaling the loss before backward pass
         
         if ifStep:
             self.scaler.step(self.optimizer)  # Scale optimizer step
             self.scaler.update()  # Update the scaler for next iteration
-            self.optimizer.zero_grad()  # Clear gradients
+            self.optimizer.zero_grad(set_to_none=True)  # Clear gradients
         
         return loss.item() # 返回loss张量的值
         

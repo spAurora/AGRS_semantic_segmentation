@@ -13,7 +13,7 @@ import torch
 import os
 import time
 import numpy as np
-from tqdm import tqdm
+from tqdm import tqdm, trange
 from multiprocessing import cpu_count
 from torchsummary import summary
 
@@ -178,21 +178,19 @@ train_epoch_best_loss = 100
 no_optim = 0
 print('-------------------------------------------')
 with torch.autograd.profiler.profile(enabled=if_open_profile, use_cuda=True, record_shapes=False, profile_memory=False) as prof:
-    for epoch in tqdm(range(1, total_epoch + 1)):
+    for epoch in trange(1, total_epoch + 1):
         data_loader_iter = iter(data_loader)  # 初始化迭代器
         train_epoch_loss = 0
         cnt = 0
         for img, mask in tqdm(data_loader_iter):
             cnt = cnt + 1  # 计数累加
             solver.set_input(img, mask)  # 设置batch的影像和标签输入
-            if simulate_batch_size:
-                if (cnt % simulate_batch_size_num == 0):  # 模拟大batchsize
-                    train_loss = solver.optimize(ifStep=True, ifVis=if_vis)
-                else:
-                    train_loss = solver.optimize(ifStep=False, ifVis=if_vis)
+            if simulate_batch_size and not (cnt % simulate_batch_size_num == 0):
+                train_loss = solver.optimize(ifStep=False, ifVis=if_vis)
             else:
-                train_loss = solver.optimize(
-                    ifStep=True, ifVis=if_vis)  # 非模拟大batchsize，每次迭代都更新参数
+                # 不模拟大batchsize，每次迭代都更新参数
+                train_loss = solver.optimize(ifStep=True, ifVis=if_vis)  
+            
             train_epoch_loss += train_loss
             mylog.write('epoch: %d iter: %d train_iter_loss: %f learn_rate: %f ' % (
                 epoch, cnt, train_loss, solver.old_lr) + '\n')  # 打印日志
