@@ -84,8 +84,8 @@ def raster2poly(raster, outshp):
 gdal.SetConfigOption("GDAL_FILENAME_IS_UTF8", "YES")
 gdal.SetConfigOption("SHAPE_ENCODING", "GBK")
 
-tif_img_path = r'E:\project_hami_limuceng\0-RF_result\clip_img'
-shp_img_path = r'E:\project_hami_limuceng\0-RF_result\clip_img_to_shp'
+tif_img_path = r'C:\Users\ASUS\Desktop\test'
+shp_img_path = r'C:\Users\ASUS\Desktop\test'
 
 listpic = fnmatch.filter(os.listdir(tif_img_path), '*.tif')
 for img in tqdm(listpic):
